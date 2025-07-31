@@ -34,6 +34,11 @@ export interface ExtraField {
   value: string;
 }
 
+export interface AdditionalLine {
+  text: string;
+  orientation: 'left' | 'center' | 'right';
+}
+
 interface Theme {
   id: string;
   state_name: string;
@@ -53,7 +58,8 @@ interface PDFPreviewProps {
   showStudentDetails?: boolean;
   studentDetailFields?: ExtraField[];
   generalInstructions?: string[];
-  pdfContentRef?: RefObject<HTMLDivElement>; // New prop for ref
+  pdfContentRef?: RefObject<HTMLDivElement>;
+  additionalLines?: AdditionalLine[];
 }
 
 const PDFPreview: React.FC<PDFPreviewProps> = ({ 
@@ -66,13 +72,13 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
   showStudentDetails = false,
   studentDetailFields = [],
   generalInstructions = [],
-  pdfContentRef // Destructure new prop
+  pdfContentRef,
+  additionalLines = []
 }) => {
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [showQuestionDialog, setShowQuestionDialog] = useState(false);
   const [theme, setTheme] = useState<Theme | null>(null);
 
-  // Debug logging for component initialization
   React.useEffect(() => {
     debugService.info('PDFPreview component mounted', 'PDFPreview', {
       title,
@@ -165,10 +171,8 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
       </CardHeader>
       
       <CardContent>
-        {/* PDF Preview Area */}
         <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg p-6 min-h-[500px]">
           <div ref={pdfContentRef} className="bg-white shadow-lg rounded-lg p-8 max-w-4xl mx-auto font-serif">
-            {/* Header with State Branding */}
             <div className="border-b pb-6 mb-8">
               <div className="flex items-center justify-between mb-4">
                 {theme?.logo_url ? (
@@ -194,14 +198,26 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
               </div>
             </div>
 
-            {/* Title Section */}
             <div className="text-center border-b-2 border-black pb-6 mb-6">
               <h1 className="text-xl font-bold uppercase tracking-wider mb-2">
                 {title}
               </h1>
+              {additionalLines.map((line, index) => (
+                line.text && (
+                  <p
+                    key={index}
+                    className={`text-sm text-gray-600 
+                      ${line.orientation === 'left' ? 'text-left' : ''}
+                      ${line.orientation === 'center' ? 'text-center' : ''}
+                      ${line.orientation === 'right' ? 'text-right' : ''}`
+                    }
+                  >
+                    {line.text}
+                  </p>
+                )
+              ))}
             </div>
 
-            {/* Time and Marks */}
             <div className="flex justify-between mb-6 text-sm font-semibold">
               <div>
                 <strong>Max. Time: 3 Hours</strong>
@@ -211,7 +227,6 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
               </div>
             </div>
 
-            {/* Student Details - positioned at the top */}
             {showStudentDetails && (
               <div className="mb-6 p-4 border border-gray-400">
                 <h4 className="font-bold mb-3">Student Details:</h4>
@@ -226,7 +241,6 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
               </div>
             )}
 
-            {/* General Instructions */}
             {generalInstructions && generalInstructions.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-bold text-base mb-3">General Instructions:</h3>
@@ -241,17 +255,14 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
               </div>
             )}
 
-            {/* Section Headers and Questions */}
             <ScrollArea className="h-96">
               <div className="space-y-6">
-                {/* Section A Header */}
                 <div className="mb-4">
                   <h3 className="font-bold text-base text-center uppercase tracking-wider">
                     SECTION A: OBJECTIVE TYPE QUESTIONS
                   </h3>
                 </div>
 
-                {/* Questions Table */}
                 <div className="border border-black">
                   <table className="w-full">
                     <thead>
@@ -288,7 +299,6 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
                               )}
                             </div>
                             
-                            {/* Action buttons - only visible on hover */}
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                               <div className="flex items-center space-x-1 bg-white border rounded shadow-sm p-1">
                                 <Button 
@@ -343,8 +353,6 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
           </div>
         </div>
 
-
-        {/* Question Action Dialog */}
         <Dialog open={showQuestionDialog} onOpenChange={setShowQuestionDialog}>
           <DialogContent className="max-w-md">
             <DialogHeader>

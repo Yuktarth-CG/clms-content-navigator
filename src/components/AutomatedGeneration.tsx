@@ -13,18 +13,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from '@/components/ui/pagination';
 import { Zap, FileText, Download, Send, AlertCircle, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Target, Info, CheckCircle, Search } from 'lucide-react';
-import PDFPreview, { ExtraField } from './PDFPreview';
+import PDFPreview, { ExtraField, AdditionalLine } from './PDFPreview';
 import ManualQuestionEntry from './ManualQuestionEntry';
 import StudentDetailsForm from './StudentDetailsForm';
 import GeneralInstructionsEditor from './GeneralInstructionsEditor';
+import AdditionalLinesEditor from './AdditionalLinesEditor';
 import { Blueprint, QuestionShortage, QuestionType, AssessmentMode, ManualQuestion } from '@/types/assessment';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import { debugService } from '@/services/debugService';
-import { exportElementToPdf } from '@/utils/pdfExport'; // Import the new utility
+import { exportElementToPdf } from '@/utils/pdfExport';
 
-// Mock data for chapters and learning outcomes with cross-references
 const mockChapters = [
   { 
     id: 'chapter1', 
@@ -102,7 +102,6 @@ const AutomatedGeneration = () => {
   const { user } = useUser();
   const { toast } = useToast();
   
-  // Debug log component initialization
   React.useEffect(() => {
     debugService.info('AutomatedGeneration component mounted', 'AutomatedGeneration', { 
       user: user?.name,
@@ -131,7 +130,6 @@ const AutomatedGeneration = () => {
   const [blueprintPage, setBlueprintPage] = useState(1);
   const blueprintsPerPage = 6;
 
-  // State for PDF Preview customization
   const [showStudentDetails, setShowStudentDetails] = useState(false);
   const [studentDetailFields, setStudentDetailFields] = useState<ExtraField[]>([
     { label: 'Name', value: '' }, { label: 'Roll No.', value: '' }, { label: 'Class', value: '' }, { label: 'Date', value: '' }
@@ -141,6 +139,10 @@ const AutomatedGeneration = () => {
     'This paper consists of multiple sections.',
     'All questions are compulsory.'
   ]);
+  const [additionalLines, setAdditionalLines] = useState<AdditionalLine[]>([
+    { text: '', orientation: 'center' }
+  ]);
+  const [isHeaderSectionOpen, setIsHeaderSectionOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -152,7 +154,7 @@ const AutomatedGeneration = () => {
     mode: 'FA' as AssessmentMode
   });
 
-  const pdfContentRef = useRef<HTMLDivElement>(null); // Create the ref
+  const pdfContentRef = useRef<HTMLDivElement>(null);
 
   const totalSteps = 3;
   const stepProgress = (currentStep / totalSteps) * 100;
@@ -164,8 +166,7 @@ const AutomatedGeneration = () => {
   const fetchBlueprints = async () => {
     setLoading(true);
     try {
-      // Add sample blueprints for mock flow
-  const sampleBlueprints = [
+      const sampleBlueprints = [
         {
           id: 'sample-1',
           name: 'Quick Assessment Blueprint',
@@ -235,10 +236,8 @@ const AutomatedGeneration = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        // If there's an error, use sample blueprints
         setBlueprints(sampleBlueprints);
       } else {
-        // Combine real data with sample blueprints (filter to only allowed question types)
         const filteredData = (data || []).map(bp => ({
           ...bp,
           allowed_question_types: bp.allowed_question_types.filter((type: string) => 
@@ -249,7 +248,6 @@ const AutomatedGeneration = () => {
       }
     } catch (error) {
       console.error('Error fetching blueprints:', error);
-      // Use sample blueprints as fallback
       setBlueprints([
         {
           id: 'sample-1',
@@ -278,7 +276,6 @@ const AutomatedGeneration = () => {
   };
 
   const handleGenerate = async () => {
-    // Check for question shortages and handle manual additions
     const blueprint = blueprints.find(b => b.id === selectedBlueprint);
     if (blueprint) {
       const shortages = checkQuestionShortage(blueprint);
@@ -293,7 +290,6 @@ const AutomatedGeneration = () => {
   };
 
   const proceedWithGeneration = async () => {
-    // Show success screen for mock flow
     setGenerating(true);
     
     try {
@@ -325,7 +321,6 @@ const AutomatedGeneration = () => {
     setShortage([]);
     setShowManualEntry(false);
     
-    // Proceed with generation including manual questions
     proceedWithGeneration();
   };
 
@@ -336,8 +331,6 @@ const AutomatedGeneration = () => {
   };
 
   const checkQuestionShortage = (blueprint: Blueprint): QuestionShortage[] => {
-    // Mock question counts available in the system for each question type
-    // Reduced counts for "Less questions on CLMS test" blueprint to trigger shortage
     const availableQuestions = blueprint.name === 'Less questions on CLMS test' ? {
       'MCQ': 8,
       'FITB': 5,
@@ -464,12 +457,10 @@ const AutomatedGeneration = () => {
     });
   };
 
-  // Generate mock questions for preview based on current form data and selected blueprint
   const mockQuestions = useMemo(() => {
     const questions = [];
     let questionNumber = 1;
     
-    // Only generate questions if we have the minimum required data
     if (!formData.title || !selectedBlueprint) {
       return [];
     }
@@ -477,7 +468,6 @@ const AutomatedGeneration = () => {
     const blueprint = blueprints.find(b => b.id === selectedBlueprint);
     if (!blueprint) return [];
     
-    // Generate questions based on blueprint's Bloom's levels
     const bloomLevels = [
       { level: 'L1', count: blueprint.bloom_l1, name: 'Remember' },
       { level: 'L2', count: blueprint.bloom_l2, name: 'Understand' },
@@ -515,7 +505,6 @@ const AutomatedGeneration = () => {
   }, [selectedBlueprint, blueprints, formData.title, formData.chapters]);
 
   const handleQuestionAction = (questionId: string, action: 'move-up' | 'move-down' | 'replace' | 'edit') => {
-    // Handle question actions in preview
     console.log('Question action:', { questionId, action });
   };
 
@@ -524,15 +513,12 @@ const AutomatedGeneration = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
-      {/* Left Panel - Form Steps */}
       <div className="space-y-6 overflow-y-auto">
-        {/* Progress Header */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <CardTitle className="text-xl">Quick Generation</CardTitle>
-                <p className="text-muted-foreground text-sm">Create assessments quickly using pre-built blueprints</p>
               </div>
               <Badge variant="outline" className="text-sm">
                 Step {currentStep} of {totalSteps}
@@ -549,7 +535,6 @@ const AutomatedGeneration = () => {
           </CardHeader>
         </Card>
 
-      {/* Step 1: Assessment Information & Blueprint Selection */}
       {currentStep === 1 && (
         <Card className="animate-fade-in">
           <CardHeader>
@@ -560,7 +545,6 @@ const AutomatedGeneration = () => {
             <p className="text-muted-foreground">Provide basic assessment details and choose a pre-configured template</p>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Assessment Information Section - Moved to top */}
             <div className="space-y-6">
               <div className="flex items-center space-x-2">
                 <BookOpen className="w-5 h-5 text-blue-600" />
@@ -645,9 +629,33 @@ const AutomatedGeneration = () => {
               </div>
             </div>
 
+            <AdditionalLinesEditor lines={additionalLines} onLinesChange={setAdditionalLines} />
+
+            <Collapsible open={isHeaderSectionOpen} onOpenChange={setIsHeaderSectionOpen}>
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+                  <Label className="text-base font-medium">Header & Instructions</Label>
+                  <Button variant="ghost" size="sm">
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="p-4 border border-t-0 rounded-b-lg space-y-4">
+                <StudentDetailsForm
+                  show={showStudentDetails}
+                  onToggle={setShowStudentDetails}
+                  fields={studentDetailFields}
+                  onFieldsChange={setStudentDetailFields}
+                />
+                <GeneralInstructionsEditor
+                  instructions={generalInstructions}
+                  onInstructionsChange={setGeneralInstructions}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+
             <Separator className="my-6" />
 
-            {/* Assessment Type Selection */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <Target className="w-5 h-5 text-primary" />
@@ -659,8 +667,8 @@ const AutomatedGeneration = () => {
                 value={formData.mode} 
                 onValueChange={(value: AssessmentMode) => {
                   setFormData(prev => ({ ...prev, mode: value }));
-                  setSelectedBlueprint(''); // Reset blueprint selection when mode changes
-                  setBlueprintPage(1); // Reset pagination when mode changes
+                  setSelectedBlueprint('');
+                  setBlueprintPage(1);
                 }}
                 className="grid grid-cols-1 md:grid-cols-2 gap-4"
               >
@@ -683,7 +691,6 @@ const AutomatedGeneration = () => {
 
             <Separator className="my-6" />
 
-            {/* Blueprint Selection Section */}
             <div className="space-y-4">
               <Label className="text-base font-medium">Available Blueprints</Label>
               {filteredBlueprints.length > 0 ? (
@@ -821,21 +828,6 @@ const AutomatedGeneration = () => {
               </div>
             )}
 
-            <Separator />
-
-            <div className="space-y-4">
-              <StudentDetailsForm
-                show={showStudentDetails}
-                onToggle={setShowStudentDetails}
-                fields={studentDetailFields}
-                onFieldsChange={setStudentDetailFields}
-              />
-              <GeneralInstructionsEditor
-                instructions={generalInstructions}
-                onInstructionsChange={setGeneralInstructions}
-              />
-            </div>
-
             <div className="flex justify-end pt-4">
               <Button 
                 onClick={nextStep}
@@ -850,7 +842,6 @@ const AutomatedGeneration = () => {
         </Card>
       )}
 
-      {/* Step 2: Content Selection */}
       {currentStep === 2 && (
         <Card className="animate-fade-in">
           <CardHeader>
@@ -951,7 +942,6 @@ const AutomatedGeneration = () => {
                             checked={formData.chapters.includes(chapter.id)}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                // Add chapter and all its related LOs
                                 const newChapters = [...formData.chapters, chapter.id];
                                 const newLOs = [...new Set([...formData.learningOutcomes, ...chapter.learningOutcomes])];
                                 setFormData(prev => ({ 
@@ -960,9 +950,7 @@ const AutomatedGeneration = () => {
                                   learningOutcomes: newLOs
                                 }));
                               } else {
-                                // Remove chapter and check if any LOs should be removed
                                 const newChapters = formData.chapters.filter(id => id !== chapter.id);
-                                // Keep LOs that are still referenced by remaining selected chapters
                                 const remainingLOs = new Set();
                                 newChapters.forEach(chId => {
                                   const ch = mockChapters.find(c => c.id === chId);
@@ -1083,7 +1071,6 @@ const AutomatedGeneration = () => {
                             checked={formData.learningOutcomes.includes(lo.id)}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                // Add LO and all its related chapters
                                 const newLOs = [...formData.learningOutcomes, lo.id];
                                 const newChapters = [...new Set([...formData.chapters, ...lo.chapters])];
                                 setFormData(prev => ({ 
@@ -1092,9 +1079,7 @@ const AutomatedGeneration = () => {
                                   chapters: newChapters
                                 }));
                               } else {
-                                // Remove LO and check if any chapters should be removed
                                 const newLOs = formData.learningOutcomes.filter(id => id !== lo.id);
-                                // Keep chapters that still have at least one selected LO
                                 const remainingChapters = new Set();
                                 newLOs.forEach(loId => {
                                   const learningOutcome = mockLearningOutcomes.find(l => l.id === loId);
@@ -1176,7 +1161,6 @@ const AutomatedGeneration = () => {
         </Card>
       )}
 
-      {/* Manual Question Entry Modal */}
       {showManualEntry && shortage.length > 0 && (
         <ManualQuestionEntry 
           shortages={shortage}
@@ -1185,7 +1169,6 @@ const AutomatedGeneration = () => {
         />
       )}
 
-      {/* Step 3: Generated Assessment with PDF Preview */}
       {currentStep === 3 && (
         <Card className="animate-fade-in">
           <CardHeader>
@@ -1284,7 +1267,6 @@ const AutomatedGeneration = () => {
       )}
       </div>
 
-      {/* Right Panel - Real-time Preview */}
       <div className="overflow-y-auto">
         <PDFPreview
           title={formData.title || 'Assessment Preview'}
@@ -1296,7 +1278,8 @@ const AutomatedGeneration = () => {
           showStudentDetails={showStudentDetails}
           studentDetailFields={studentDetailFields}
           generalInstructions={generalInstructions}
-          pdfContentRef={pdfContentRef} // Pass the ref here
+          pdfContentRef={pdfContentRef}
+          additionalLines={additionalLines}
         />
       </div>
     </div>
