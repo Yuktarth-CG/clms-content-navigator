@@ -206,7 +206,7 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
                 line.text && (
                   <p
                     key={index}
-                    className={`text-sm text-gray-600 
+                    className={`text-sm 
                       ${line.orientation === 'left' ? 'text-left' : ''}
                       ${line.orientation === 'center' ? 'text-center' : ''}
                       ${line.orientation === 'right' ? 'text-right' : ''}`
