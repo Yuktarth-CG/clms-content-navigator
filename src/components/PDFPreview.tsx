@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { debugService } from '@/services/debugService';
+import { Section } from './SectionEditor';
 
 interface Question {
   id: string;
@@ -60,6 +61,7 @@ interface PDFPreviewProps {
   generalInstructions?: string[];
   pdfContentRef?: RefObject<HTMLDivElement>;
   additionalLines?: AdditionalLine[];
+  sections?: Section[];
 }
 
 const PDFPreview: React.FC<PDFPreviewProps> = ({ 
@@ -73,7 +75,8 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
   studentDetailFields = [],
   generalInstructions = [],
   pdfContentRef,
-  additionalLines = []
+  additionalLines = [],
+  sections
 }) => {
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [showQuestionDialog, setShowQuestionDialog] = useState(false);
@@ -139,6 +142,10 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
       console.log('No theme found, using defaults');
     }
   };
+
+  const sectionsToRender = sections && sections.length > 0 
+    ? sections 
+    : [{ id: 'default', title: 'All Questions', label: '' }];
 
   return (
     <Card className="w-full">
@@ -257,97 +264,111 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
 
             <ScrollArea className="h-96">
               <div className="space-y-6">
-                <div className="mb-4">
-                  <h3 className="font-bold text-base text-center uppercase tracking-wider">
-                    SECTION A: OBJECTIVE TYPE QUESTIONS
-                  </h3>
-                </div>
+                {sectionsToRender.map((section, sectionIndex) => {
+                  const questionsPerSection = Math.ceil(questions.length / sectionsToRender.length);
+                  const sectionQuestions = questions.slice(
+                    sectionIndex * questionsPerSection,
+                    (sectionIndex + 1) * questionsPerSection
+                  );
 
-                <div className="border border-black">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border border-black p-2 text-center font-bold w-16">Q. No.</th>
-                        <th className="border border-black p-2 text-center font-bold">QUESTION</th>
-                        <th className="border border-black p-2 text-center font-bold w-20">Marks</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {questions.map((question, index) => (
-                        <tr 
-                          key={question.id}
-                          className="hover:bg-gray-50 cursor-pointer transition-colors group"
-                          onClick={() => handleQuestionSelect(question)}
-                        >
-                          <td className="border border-black p-3 text-center font-semibold align-top">
-                            Q.{question.questionNumber}
-                          </td>
-                          <td className="border border-black p-3 align-top relative">
-                            <div className="mb-2">
-                              <span className="font-medium">{question.questionStem}</span>
-                              {question.questionType === 'MCQ' && question.options && (
-                                <div className="mt-2 space-y-1">
-                                  {question.options.map((option, idx) => (
-                                    <div key={idx} className="ml-4">
-                                      <span className="font-medium">
-                                        {String.fromCharCode(97 + idx)}) 
-                                      </span>
-                                      <span className="ml-2">{option}</span>
+                  if (sectionQuestions.length === 0) return null;
+
+                  return (
+                    <div key={section.id}>
+                      <div className="mb-4">
+                        <h3 className="font-bold text-base text-center uppercase tracking-wider">
+                          {section.title}{section.label && `: ${section.label}`}
+                        </h3>
+                      </div>
+
+                      <div className="border border-black">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="border border-black p-2 text-center font-bold w-16">Q. No.</th>
+                              <th className="border border-black p-2 text-center font-bold">QUESTION</th>
+                              <th className="border border-black p-2 text-center font-bold w-20">Marks</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sectionQuestions.map((question, index) => (
+                              <tr 
+                                key={question.id}
+                                className="hover:bg-gray-50 cursor-pointer transition-colors group"
+                                onClick={() => handleQuestionSelect(question)}
+                              >
+                                <td className="border border-black p-3 text-center font-semibold align-top">
+                                  Q.{question.questionNumber}
+                                </td>
+                                <td className="border border-black p-3 align-top relative">
+                                  <div className="mb-2">
+                                    <span className="font-medium">{question.questionStem}</span>
+                                    {question.questionType === 'MCQ' && question.options && (
+                                      <div className="mt-2 space-y-1">
+                                        {question.options.map((option, idx) => (
+                                          <div key={idx} className="ml-4">
+                                            <span className="font-medium">
+                                              {String.fromCharCode(97 + idx)}) 
+                                            </span>
+                                            <span className="ml-2">{option}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center space-x-1 bg-white border rounded shadow-sm p-1">
+                                      <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        className="p-1 h-6 w-6"
+                                        onClick={(e) => handleDirectAction(e, question, 'move-up')}
+                                        title="Move Up"
+                                      >
+                                        <ArrowUpDown className="w-3 h-3 rotate-180" />
+                                      </Button>
+                                      <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        className="p-1 h-6 w-6"
+                                        onClick={(e) => handleDirectAction(e, question, 'move-down')}
+                                        title="Move Down"
+                                      >
+                                        <ArrowUpDown className="w-3 h-3" />
+                                      </Button>
+                                      <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        className="p-1 h-6 w-6"
+                                        onClick={(e) => handleDirectAction(e, question, 'replace')}
+                                        title="Replace Question"
+                                      >
+                                        <RefreshCw className="w-3 h-3" />
+                                      </Button>
+                                      <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        className="p-1 h-6 w-6"
+                                        onClick={(e) => handleDirectAction(e, question, 'edit')}
+                                        title="Edit Question"
+                                      >
+                                        <Edit className="w-3 h-3" />
+                                      </Button>
                                     </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="flex items-center space-x-1 bg-white border rounded shadow-sm p-1">
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="p-1 h-6 w-6"
-                                  onClick={(e) => handleDirectAction(e, question, 'move-up')}
-                                  title="Move Up"
-                                >
-                                  <ArrowUpDown className="w-3 h-3 rotate-180" />
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="p-1 h-6 w-6"
-                                  onClick={(e) => handleDirectAction(e, question, 'move-down')}
-                                  title="Move Down"
-                                >
-                                  <ArrowUpDown className="w-3 h-3" />
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="p-1 h-6 w-6"
-                                  onClick={(e) => handleDirectAction(e, question, 'replace')}
-                                  title="Replace Question"
-                                >
-                                  <RefreshCw className="w-3 h-3" />
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="p-1 h-6 w-6"
-                                  onClick={(e) => handleDirectAction(e, question, 'edit')}
-                                  title="Edit Question"
-                                >
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="border border-black p-3 text-center font-semibold align-top">
-                            {question.marks}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                                  </div>
+                                </td>
+                                <td className="border border-black p-3 text-center font-semibold align-top">
+                                  {question.marks}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </ScrollArea>
           </div>

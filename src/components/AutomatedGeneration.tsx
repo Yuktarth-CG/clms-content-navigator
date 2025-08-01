@@ -18,6 +18,7 @@ import ManualQuestionEntry from './ManualQuestionEntry';
 import StudentDetailsForm from './StudentDetailsForm';
 import GeneralInstructionsEditor from './GeneralInstructionsEditor';
 import AdditionalLinesEditor from './AdditionalLinesEditor';
+import SectionEditor, { Section } from './SectionEditor';
 import { Blueprint, QuestionShortage, QuestionType, AssessmentMode, ManualQuestion } from '@/types/assessment';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
@@ -143,6 +144,9 @@ const AutomatedGeneration = () => {
     { text: '', orientation: 'center' }
   ]);
   const [isHeaderSectionOpen, setIsHeaderSectionOpen] = useState(false);
+  const [sections, setSections] = useState<Section[]>([
+    { id: 'default-section', title: 'Section A', label: '' }
+  ]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -156,7 +160,7 @@ const AutomatedGeneration = () => {
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
-  const totalSteps = 3;
+  const totalSteps = 4;
   const stepProgress = (currentStep / totalSteps) * 100;
 
   useEffect(() => {
@@ -296,7 +300,7 @@ const AutomatedGeneration = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       setGeneratedPdf('/generated-assessments/mock-assessment.pdf');
       setShowPDFPreview(true);
-      setCurrentStep(3);
+      setCurrentStep(4);
       
       const hasManualQuestions = addedManualQuestions.length > 0;
       toast({
@@ -402,8 +406,12 @@ const AutomatedGeneration = () => {
            (contentType === 'learningOutcomes' && formData.learningOutcomes.length > 0);
   };
 
+  const canProceedToStep4 = () => {
+    return sections.length > 0 && sections.every(s => s.label.trim() !== '');
+  };
+
   const canGenerate = () => {
-    return selectedBlueprint && canProceedToStep2() && canProceedToStep3();
+    return selectedBlueprint && canProceedToStep2() && canProceedToStep3() && canProceedToStep4();
   };
 
   const nextStep = () => {
@@ -527,8 +535,9 @@ const AutomatedGeneration = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
                 <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>Blueprint & Info</span>
-                <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Content Selection</span>
-                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Generated</span>
+                <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
+                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Sections</span>
+                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Generated</span>
               </div>
               <Progress value={stepProgress} className="h-2" />
             </div>
@@ -1148,6 +1157,35 @@ const AutomatedGeneration = () => {
                 <span>Previous</span>
               </Button>
               <Button 
+                onClick={nextStep}
+                disabled={!canProceedToStep3()}
+                className="flex items-center space-x-2"
+              >
+                <span>Next: Manage Sections</span>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {currentStep === 3 && (
+        <Card className="animate-fade-in">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
+              <span>Section Management</span>
+            </CardTitle>
+            <p className="text-muted-foreground">Organize your assessment into labeled sections.</p>
+          </CardHeader>
+          <CardContent>
+            <SectionEditor sections={sections} onSectionsChange={setSections} />
+            <div className="flex justify-between pt-4 mt-4">
+              <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
+                <ChevronLeft className="w-4 h-4" />
+                <span>Previous</span>
+              </Button>
+              <Button 
                 onClick={handleGenerate}
                 disabled={!canGenerate() || generating}
                 className="flex items-center space-x-2"
@@ -1169,11 +1207,11 @@ const AutomatedGeneration = () => {
         />
       )}
 
-      {currentStep === 3 && (
+      {currentStep === 4 && (
         <Card className="animate-fade-in">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
+              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
               <span>Assessment Generated</span>
             </CardTitle>
             <p className="text-muted-foreground">Your assessment has been generated and is ready for download</p>
@@ -1189,40 +1227,7 @@ const AutomatedGeneration = () => {
 
             <PDFPreview
             title={formData.title}
-            questions={[
-              {
-                id: '1',
-                questionNumber: 1,
-                questionStem: 'What is the square root of 144?',
-                questionType: 'MCQ',
-                bloomLevel: 1,
-                marks: 1,
-                chapter: 'Number Systems',
-                topic: 'Square Roots',
-                options: ['10', '12', '14', '16'],
-                answer: '12'
-              },
-              {
-                id: '2',
-                questionNumber: 2,
-                questionStem: 'If x + 5 = 12, what is the value of x?',
-                questionType: 'FITB',
-                bloomLevel: 2,
-                marks: 2,
-                chapter: 'Linear Equations',
-                topic: 'Simple Equations'
-              },
-              {
-                id: '3',
-                questionNumber: 3,
-                questionStem: 'Explain the concept of photosynthesis and its importance in the ecosystem.',
-                questionType: 'Short-Answer',
-                bloomLevel: 3,
-                marks: 5,
-                chapter: 'Plant Biology',
-                topic: 'Photosynthesis'
-              }
-            ]}
+            questions={mockQuestions}
             onDownload={handleDownload}
             onQuestionAction={(questionId, action) => {
               const actionLabels = {
@@ -1236,6 +1241,7 @@ const AutomatedGeneration = () => {
                 description: `Question ${questionId} ${actionLabels[action]} successfully`,
               });
             }}
+            sections={sections}
             />
 
             <div className="flex justify-center">
@@ -1280,6 +1286,7 @@ const AutomatedGeneration = () => {
           generalInstructions={generalInstructions}
           pdfContentRef={pdfContentRef}
           additionalLines={additionalLines}
+          sections={sections}
         />
       </div>
     </div>
