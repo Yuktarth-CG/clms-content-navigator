@@ -118,6 +118,7 @@ const AutomatedGeneration = () => {
   const [selectedBlueprint, setSelectedBlueprint] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [isGenerated, setIsGenerated] = useState(false);
   const [generatedPdf, setGeneratedPdf] = useState<string | null>(null);
   const [shortage, setShortage] = useState<QuestionShortage[]>([]);
   const [contentType, setContentType] = useState<'chapters' | 'learningOutcomes'>('chapters');
@@ -162,7 +163,7 @@ const AutomatedGeneration = () => {
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
-  const totalSteps = 4;
+  const totalSteps = 3;
   const stepProgress = (currentStep / totalSteps) * 100;
 
   useEffect(() => {
@@ -302,7 +303,7 @@ const AutomatedGeneration = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       setGeneratedPdf('/generated-assessments/mock-assessment.pdf');
       setShowPDFPreview(true);
-      setCurrentStep(4);
+      setIsGenerated(true);
       
       const hasManualQuestions = addedManualQuestions.length > 0;
       toast({
@@ -538,8 +539,7 @@ const AutomatedGeneration = () => {
               <div className="flex justify-between text-xs">
                 <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>Blueprint & Info</span>
                 <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
-                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Sections</span>
-                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Generated</span>
+                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Sections & Generate</span>
               </div>
               <Progress value={stepProgress} className="h-2" />
             </div>
@@ -1132,9 +1132,9 @@ const AutomatedGeneration = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
-              <span>Section Management</span>
+              <span>Section Management & Generation</span>
             </CardTitle>
-            <p className="text-muted-foreground">Organize your assessment into labeled sections.</p>
+            <p className="text-muted-foreground">Organize your assessment into labeled sections and generate the final document.</p>
           </CardHeader>
           <CardContent>
             <SectionEditor sections={sections} onSectionsChange={setSections} />
@@ -1143,15 +1143,24 @@ const AutomatedGeneration = () => {
                 <ChevronLeft className="w-4 h-4" />
                 <span>Previous</span>
               </Button>
-              <Button 
-                onClick={handleGenerate}
-                disabled={!canGenerate() || generating}
-                className="flex items-center space-x-2"
-                size="lg"
-              >
-                <Zap className="w-4 h-4" />
-                <span>{generating ? 'Generating...' : 'Generate Assessment'}</span>
-              </Button>
+              {isGenerated ? (
+                  <Alert className="border-green-200 bg-green-50 max-w-xs">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      <strong>Generated!</strong> Download from the preview panel.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <Button 
+                    onClick={handleGenerate}
+                    disabled={!canGenerate() || generating}
+                    className="flex items-center space-x-2"
+                    size="lg"
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span>{generating ? 'Generating...' : 'Generate Assessment'}</span>
+                  </Button>
+                )}
             </div>
           </CardContent>
         </Card>
@@ -1164,71 +1173,6 @@ const AutomatedGeneration = () => {
           onCancel={handleManualQuestionsCancel}
         />
       )}
-
-      {currentStep === 4 && (
-        <Card className="animate-fade-in">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
-              <span>Assessment Generated</span>
-            </CardTitle>
-            <p className="text-muted-foreground">Your assessment has been generated and is ready for download</p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <Alert className="border-green-200 bg-green-50">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                <strong>Assessment Generated Successfully!</strong> Your assessment is ready for download. 
-                Click on any question to edit, move, or replace it. No review required.
-              </AlertDescription>
-            </Alert>
-
-            <PDFPreview
-            title={formData.title}
-            questions={mockQuestions}
-            onDownload={handleDownload}
-            onQuestionAction={(questionId, action) => {
-              const actionLabels = {
-                'move-up': 'moved up',
-                'move-down': 'moved down', 
-                'replace': 'replaced',
-                'edit': 'edited'
-              };
-              toast({
-                title: `Question ${actionLabels[action]}`,
-                description: `Question ${questionId} ${actionLabels[action]} successfully`,
-              });
-            }}
-            sections={sections}
-            />
-
-            <div className="flex justify-center">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setCurrentStep(1);
-                  setGeneratedPdf(null);
-                  setShowPDFPreview(false);
-                  setShortage([]);
-                  setAddedManualQuestions([]);
-                  setFormData({
-                    title: '',
-                    grade: '',
-                    medium: 'English',
-                    subject: '',
-                    chapters: [],
-                    learningOutcomes: [],
-                    mode: 'FA' as AssessmentMode
-                  });
-                  setSelectedBlueprint('');
-                }}
-              >
-                Create Another Assessment
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
       </div>
 
       <div className="overflow-y-auto">
@@ -1238,7 +1182,7 @@ const AutomatedGeneration = () => {
           onDownload={handleDownload}
           onQuestionAction={handleQuestionAction}
           documentType='assessment'
-          isReadyForDownload={canGenerate()}
+          isReadyForDownload={isGenerated}
           showStudentDetails={showStudentDetails}
           studentDetailFields={studentDetailFields}
           generalInstructions={generalInstructions}

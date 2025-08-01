@@ -33,6 +33,7 @@ const CustomisedGeneration = () => {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [generating, setGenerating] = useState(false);
+  const [isGenerated, setIsGenerated] = useState(false);
   const [contentType, setContentType] = useState<'chapters' | 'learningOutcomes'>('chapters');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
@@ -57,7 +58,7 @@ const CustomisedGeneration = () => {
     duration: ''
   });
 
-  const totalSteps = 5;
+  const totalSteps = 4;
   const stepProgress = (currentStep / totalSteps) * 100;
 
   // Fetch blueprints when component mounts
@@ -192,6 +193,7 @@ const CustomisedGeneration = () => {
     
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
+      setIsGenerated(true);
       toast({
         title: "Assessment Created Successfully!",
         description: "Your custom assessment has been created and is ready for download",
@@ -274,8 +276,7 @@ const CustomisedGeneration = () => {
                 <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>Configuration</span>
                 <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Basic Info</span>
                 <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
-                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Questions</span>
-                <span className={currentStep >= 5 ? "text-primary font-medium" : "text-muted-foreground"}>Review</span>
+                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Questions & Generate</span>
               </div>
               <Progress value={stepProgress} className="h-2" />
             </div>
@@ -522,7 +523,7 @@ const CustomisedGeneration = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
-                <span>Question Setup</span>
+                <span>Question Setup & Generate</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -571,47 +572,6 @@ const CustomisedGeneration = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between pt-4">
-                <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Back</span>
-                </Button>
-                <Button
-                  onClick={nextStep}
-                  disabled={!canProceedToStep5()}
-                  className="flex items-center space-x-2"
-                >
-                  <span>Next: Review</span>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Step 5: Review */}
-        {currentStep === 5 && (
-          <Card className="animate-fade-in">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">5</div>
-                <span>Review & Generate</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <Label className="text-base font-medium">Assessment Summary</Label>
-                <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                  <div><strong>Title:</strong> {formData.title}</div>
-                  <div><strong>Grade:</strong> {formData.grade}</div>
-                  <div><strong>Subject:</strong> {formData.subject}</div>
-                  <div><strong>Total Questions:</strong> {getTotalQuestions()}</div>
-                  <div><strong>Assessment Mode:</strong> {formData.mode}</div>
-                  {formData.totalMarks && <div><strong>Total Marks:</strong> {formData.totalMarks}</div>}
-                  {formData.duration && <div><strong>Duration:</strong> {formData.duration} minutes</div>}
-                </div>
-              </div>
-
               {hasQuestionCountExceeded() && (
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
@@ -626,14 +586,23 @@ const CustomisedGeneration = () => {
                   <ChevronLeft className="w-4 h-4" />
                   <span>Back</span>
                 </Button>
-                <Button
-                  onClick={handleCreate}
-                  disabled={!canGenerate() || generating}
-                  className="flex items-center space-x-2"
-                >
-                  <span>{generating ? 'Generating...' : 'Generate Assessment'}</span>
-                  <CheckCircle className="w-4 h-4" />
-                </Button>
+                {isGenerated ? (
+                  <Alert className="border-green-200 bg-green-50 max-w-xs">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <AlertDescription className="text-green-800">
+                      <strong>Generated!</strong> Download from the preview panel.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <Button
+                    onClick={handleCreate}
+                    disabled={!canGenerate() || generating}
+                    className="flex items-center space-x-2"
+                  >
+                    <span>{generating ? 'Generating...' : 'Generate Assessment'}</span>
+                    <CheckCircle className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -648,6 +617,7 @@ const CustomisedGeneration = () => {
           onDownload={handleDownload}
           onQuestionAction={handleQuestionAction}
           documentType='assessment'
+          isReadyForDownload={isGenerated}
         />
       </div>
     </div>
