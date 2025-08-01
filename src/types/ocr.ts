@@ -1,3 +1,5 @@
+import { QuestionType, QuestionTypeLabels as AssessmentQuestionTypeLabels } from './assessment'; // Import from assessment.ts
+
 export type OCRProcessType = 'test-paper-csv' | 'test-paper-blueprint' | 'content-digitization' | 'worksheet-creation';
 
 export interface CSVTemplate {
@@ -8,7 +10,7 @@ export interface CSVTemplate {
   sampleData: Record<string, any>;
   constraints?: {
     minQuestions?: number;
-    requiredQuestionTypes?: string[];
+    requiredQuestionTypes?: QuestionType[];
   };
   version: string;
   createdAt: string;
@@ -22,7 +24,7 @@ export interface PaperLayoutTemplate {
   preview: string;
   constraints?: {
     minQuestions?: number;
-    questionTypes?: string[];
+    questionTypes?: QuestionType[];
   };
   version: string;
   createdAt: string;
@@ -41,7 +43,7 @@ export interface WorksheetTemplate {
   constraints?: {
     minQuestions?: number;
     maxQuestions?: number;
-    questionTypes?: string[];
+    questionTypes?: QuestionType[];
   };
   version: string;
   createdAt: string;
@@ -98,7 +100,7 @@ export interface StructuredContent {
 export interface ExtractedQuestion {
   id: string;
   text: string;
-  type: 'mcq' | 'subjective' | 'fill-in-blank' | 'true-false';
+  type: QuestionType; // Use unified type
   options?: string[];
   correctAnswer?: string | number;
   explanation?: string;
@@ -191,8 +193,7 @@ export interface QuestionTypeDistribution {
 
 export type BloomsTaxonomyLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
-export type QuestionType = 'VSA' | 'SA' | 'ETA' | 'MCQ' | 'FIB' | 'TF' | 'RC';
-
+// Re-export QuestionTypeLabels from assessment.ts for consistency
 export const BloomsTaxonomyLabels: Record<BloomsTaxonomyLevel, string> = {
   1: 'Remembering',
   2: 'Understanding', 
@@ -202,12 +203,4 @@ export const BloomsTaxonomyLabels: Record<BloomsTaxonomyLevel, string> = {
   6: 'Creating'
 };
 
-export const QuestionTypeLabels: Record<QuestionType, string> = {
-  'VSA': 'Very Short Answer',
-  'SA': 'Short Answer',
-  'ETA': 'Essay Type Answer',
-  'MCQ': 'Multiple Choice Questions',
-  'FIB': 'Fill in the Blanks',
-  'TF': 'True/False',
-  'RC': 'Reading Comprehension'
-};
+export const QuestionTypeLabels = AssessmentQuestionTypeLabels;

@@ -16,6 +16,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { debugService } from '@/services/debugService';
 import { Section } from './SectionEditor';
+import { QuestionTypeLabels } from '@/types/assessment';
 
 interface Question {
   id: string;
@@ -145,7 +146,7 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
 
   const sectionsToRender = sections && sections.length > 0 
     ? sections 
-    : [{ id: 'default', title: 'All Questions', label: '' }];
+    : [{ id: 'default', title: 'All Questions', label: '', questionTypes: [] }];
 
   return (
     <Card className="w-full">
@@ -265,13 +266,10 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
             <ScrollArea className="h-96">
               <div className="space-y-6">
                 {sectionsToRender.map((section, sectionIndex) => {
-                  const questionsPerSection = Math.ceil(questions.length / sectionsToRender.length);
-                  const sectionQuestions = questions.slice(
-                    sectionIndex * questionsPerSection,
-                    (sectionIndex + 1) * questionsPerSection
-                  );
+                  // Filter questions based on section's allowed types
+                  const sectionQuestions = questions.filter(q => section.questionTypes.includes(q.questionType as any));
 
-                  if (sectionQuestions.length === 0) return null;
+                  if (sectionQuestions.length === 0 && section.id !== 'default') return null; // Only hide if it's not the default 'All Questions' section and has no questions
 
                   return (
                     <div key={section.id}>
@@ -279,6 +277,11 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
                         <h3 className="font-bold text-base text-center uppercase tracking-wider">
                           {section.title}{section.label && `: ${section.label}`}
                         </h3>
+                        {section.questionTypes.length > 0 && (
+                          <div className="text-center text-xs text-muted-foreground mt-1">
+                            ({section.questionTypes.map(type => QuestionTypeLabels[type]).join(', ')})
+                          </div>
+                        )}
                       </div>
 
                       <div className="border border-black">

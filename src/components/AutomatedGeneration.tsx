@@ -145,7 +145,9 @@ const AutomatedGeneration = () => {
   ]);
   const [isHeaderSectionOpen, setIsHeaderSectionOpen] = useState(false);
   const [sections, setSections] = useState<Section[]>([
-    { id: 'default-section', title: 'Section A', label: '' }
+    { id: 'section-a', title: 'Section A', label: 'Multiple Choice Questions', questionTypes: ['MCQ', 'FITB', 'Match'] },
+    { id: 'section-b', title: 'Section B', label: 'Short Answer Questions', questionTypes: ['Arrange', 'SA'] },
+    { id: 'section-c', title: 'Section C', label: 'Essay Type Questions', questionTypes: ['ETA'] }
   ]);
 
   const [formData, setFormData] = useState({
@@ -407,7 +409,7 @@ const AutomatedGeneration = () => {
   };
 
   const canProceedToStep4 = () => {
-    return sections.length > 0 && sections.every(s => s.label.trim() !== '');
+    return sections.length > 0 && sections.every(s => s.label.trim() !== '' && s.questionTypes.length > 0);
   };
 
   const canGenerate = () => {
@@ -792,50 +794,6 @@ const AutomatedGeneration = () => {
                 </div>
               )}
             </div>
-
-            {selectedBlueprintData && (
-              <div className="bg-muted/30 rounded-lg p-4 border border-border">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-medium text-sm">Selected: {selectedBlueprintData.name}</h4>
-                  <Badge variant={selectedBlueprintData.mode === 'SA' ? 'default' : 'secondary'}>
-                    {selectedBlueprintData.mode}
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Questions:</span>
-                    <span className="ml-1 font-medium">{selectedBlueprintData.total_questions}</span>
-                  </div>
-                  {selectedBlueprintData.mode === 'FA' && selectedBlueprintData.total_marks && (
-                    <div>
-                      <span className="text-muted-foreground">Marks:</span>
-                      <span className="ml-1 font-medium">{selectedBlueprintData.total_marks}</span>
-                    </div>
-                  )}
-                  {selectedBlueprintData.mode === 'FA' && selectedBlueprintData.duration && (
-                    <div>
-                      <span className="text-muted-foreground">Duration:</span>
-                      <span className="ml-1 font-medium">{selectedBlueprintData.duration}m</span>
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-muted-foreground">Types:</span>
-                    <span className="ml-1 font-medium text-xs">{selectedBlueprintData.allowed_question_types.join(', ')}</span>
-                  </div>
-                </div>
-                <div className="mt-3 pt-3 border-t border-border">
-                  <span className="text-xs text-muted-foreground">Bloom's Levels: </span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {selectedBlueprintData.bloom_l1 > 0 && <Badge variant="outline" className="text-xs px-1 py-0">L1:{selectedBlueprintData.bloom_l1}</Badge>}
-                    {selectedBlueprintData.bloom_l2 > 0 && <Badge variant="outline" className="text-xs px-1 py-0">L2:{selectedBlueprintData.bloom_l2}</Badge>}
-                    {selectedBlueprintData.bloom_l3 > 0 && <Badge variant="outline" className="text-xs px-1 py-0">L3:{selectedBlueprintData.bloom_l3}</Badge>}
-                    {selectedBlueprintData.bloom_l4 > 0 && <Badge variant="outline" className="text-xs px-1 py-0">L4:{selectedBlueprintData.bloom_l4}</Badge>}
-                    {selectedBlueprintData.bloom_l5 > 0 && <Badge variant="outline" className="text-xs px-1 py-0">L5:{selectedBlueprintData.bloom_l5}</Badge>}
-                    {selectedBlueprintData.bloom_l6 > 0 && <Badge variant="outline" className="text-xs px-1 py-0">L6:{selectedBlueprintData.bloom_l6}</Badge>}
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="flex justify-end pt-4">
               <Button 

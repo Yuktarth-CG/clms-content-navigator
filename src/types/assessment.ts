@@ -2,7 +2,9 @@ export type AssessmentMode = 'FA' | 'SA';
 export type AssessmentStatus = 'Generated' | 'Assigned' | 'Archived';
 export type AssessmentSource = 'Automated' | 'Customised' | 'CSV Upload' | 'OCR';
 export type RepositoryType = 'Public' | 'Private';
-export type QuestionType = 'MCQ' | 'FITB' | 'Match' | 'Arrange' | 'Subjective';
+
+// Unified QuestionType definition
+export type QuestionType = 'MCQ' | 'FITB' | 'Match' | 'Arrange' | 'VSA' | 'SA' | 'ETA' | 'TF' | 'RC';
 
 export interface Blueprint {
   id: string;
@@ -126,12 +128,17 @@ export interface ManualQuestion {
   addedAt: string;
 }
 
+// Unified QuestionTypeLabels
 export const QuestionTypeLabels: Record<QuestionType, string> = {
-  'MCQ': 'Multiple Choice',
+  'MCQ': 'Multiple Choice Questions',
   'FITB': 'Fill in the Blank',
   'Match': 'Match the Column',
   'Arrange': 'Arrange in the Correct Order',
-  'Subjective': 'Subjective Questions'
+  'VSA': 'Very Short Answer',
+  'SA': 'Short Answer',
+  'ETA': 'Essay Type Answer',
+  'TF': 'True/False',
+  'RC': 'Reading Comprehension'
 };
 
 export const BloomLevels = {
