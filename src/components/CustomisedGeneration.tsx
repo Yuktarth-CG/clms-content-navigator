@@ -296,36 +296,23 @@ const CustomisedGeneration = () => {
               {/* Assessment Mode */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
-                  <Target className="w-5 h-5 text-blue-600" />
+                  <Target className="w-5 h-5 text-primary" />
                   <Label className="text-base font-medium">Assessment Type</Label>
                 </div>
+                
                 <RadioGroup 
                   value={formData.mode} 
                   onValueChange={(value: AssessmentMode) => setFormData(prev => ({ ...prev, mode: value }))}
-                  className="grid grid-cols-1 gap-4"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
                 >
-                  <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer">
-                    <RadioGroupItem value="FA" id="fa" />
-                    <div className="grid gap-1.5 leading-none">
-                      <Label htmlFor="fa" className="font-medium cursor-pointer">
-                        Formative Assessment (FA)/Practice Sheet
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        Regular classroom assessment for ongoing feedback
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 border rounded-lg p-4 cursor-pointer">
-                    <RadioGroupItem value="SA" id="sa" />
-                    <div className="grid gap-1.5 leading-none">
-                      <Label htmlFor="sa" className="font-medium cursor-pointer">
-                        Summative Assessment (SA)/Evaluation Sheet
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        Formal evaluation with marks and duration
-                      </p>
-                    </div>
-                  </div>
+                  <Label htmlFor="fa-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="FA" id="fa-option" />
+                    <div className="font-medium">Formative Assessment (FA)</div>
+                  </Label>
+                  <Label htmlFor="sa-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="SA" id="sa-option" />
+                    <div className="font-medium">Summative Assessment (SA)</div>
+                  </Label>
                 </RadioGroup>
               </div>
 

@@ -672,7 +672,6 @@ const AutomatedGeneration = () => {
                 <Target className="w-5 h-5 text-primary" />
                 <Label className="text-base font-medium">Assessment Type</Label>
               </div>
-              <p className="text-sm text-muted-foreground">Configure the basic settings for your assessment including marks and duration</p>
               
               <RadioGroup 
                 value={formData.mode} 
@@ -685,17 +684,11 @@ const AutomatedGeneration = () => {
               >
                 <Label htmlFor="fa-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
                   <RadioGroupItem value="FA" id="fa-option" />
-                  <div>
-                    <div className="font-medium">Formative Assessment (FA)/Practice Sheet</div>
-                    <div className="text-sm text-muted-foreground">Regular classroom assessment for ongoing feedback</div>
-                  </div>
+                  <div className="font-medium">Formative Assessment (FA)</div>
                 </Label>
                 <Label htmlFor="sa-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
                   <RadioGroupItem value="SA" id="sa-option" />
-                  <div>
-                    <div className="font-medium">Summative Assessment (SA)/Evaluation Sheet</div>
-                    <div className="text-sm text-muted-foreground">Formal evaluation with marks and duration</div>
-                  </div>
+                  <div className="font-medium">Summative Assessment (SA)</div>
                 </Label>
               </RadioGroup>
             </div>
