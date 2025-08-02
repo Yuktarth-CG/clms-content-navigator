@@ -1178,6 +1178,7 @@ const AutomatedGeneration = () => {
       <div className="overflow-y-auto">
         <PDFPreview
           title={formData.title || 'Assessment Preview'}
+          grade={formData.grade}
           questions={mockQuestions}
           onDownload={handleDownload}
           onQuestionAction={handleQuestionAction}

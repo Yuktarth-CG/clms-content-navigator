@@ -52,6 +52,7 @@ interface Theme {
 
 interface PDFPreviewProps {
   title: string;
+  grade?: string;
   questions: Question[];
   onDownload: () => void;
   onQuestionAction: (questionId: string, action: 'move-up' | 'move-down' | 'replace' | 'edit') => void;
@@ -67,6 +68,7 @@ interface PDFPreviewProps {
 
 const PDFPreview: React.FC<PDFPreviewProps> = ({ 
   title, 
+  grade,
   questions, 
   onDownload, 
   onQuestionAction,
@@ -210,6 +212,11 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
               <h1 className="text-xl font-bold uppercase tracking-wider mb-2">
                 {title}
               </h1>
+              {grade && (
+                <p className="text-lg font-semibold mb-2">
+                  Grade {grade}
+                </p>
+              )}
               {additionalLines.map((line, index) => (
                 line.text && (
                   <p

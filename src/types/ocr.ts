@@ -1,5 +1,8 @@
 import { QuestionType, QuestionTypeLabels as AssessmentQuestionTypeLabels } from './assessment'; // Import from assessment.ts
 
+// Export QuestionType for other components to use
+export type { QuestionType } from './assessment';
+
 export type OCRProcessType = 'test-paper-csv' | 'test-paper-blueprint' | 'content-digitization' | 'worksheet-creation';
 
 export interface CSVTemplate {

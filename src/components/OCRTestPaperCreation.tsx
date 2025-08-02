@@ -728,7 +728,7 @@ const OCRTestPaperCreation = () => {
         'Image Option 4': '',
         'Correct answer image': ''
       },
-      constraints: { minQuestions: 15, requiredQuestionTypes: ['mcq'] },
+      constraints: { minQuestions: 15, requiredQuestionTypes: ['MCQ'] },
       version: '2.1',
       createdAt: '2024-01-01',
       updatedAt: '2024-12-30'
@@ -762,7 +762,7 @@ const OCRTestPaperCreation = () => {
       name: 'Diagnostic Test Format',
       description: 'LO-aware diagnostic test layout for structured assessment',
       preview: '/template-previews/diagnostic.png',
-      constraints: { minQuestions: 25, questionTypes: ['mcq', 'subjective'] },
+      constraints: { minQuestions: 25, questionTypes: ['MCQ', 'SA'] },
       version: '2.0',
       createdAt: '2024-01-01',
       updatedAt: '2024-12-26',

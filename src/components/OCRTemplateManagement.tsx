@@ -43,7 +43,7 @@ const OCRTemplateManagement = () => {
       sampleData: {},
       constraints: { 
         minQuestions: 15, 
-        requiredQuestionTypes: ['mcq', 'subjective', 'fill-in-blank']
+        requiredQuestionTypes: ['MCQ', 'SA', 'FITB']
       },
       version: '2.1',
       createdAt: '2024-01-01',
@@ -59,7 +59,7 @@ const OCRTemplateManagement = () => {
       preview: '/template-previews/template-b-layout.png',
       constraints: { 
         minQuestions: 20,
-        questionTypes: ['mcq', 'subjective', 'fill-in-blank']
+        questionTypes: ['MCQ', 'SA', 'FITB']
       },
       version: '2.1',
       createdAt: '2024-01-01',
@@ -80,7 +80,7 @@ const OCRTemplateManagement = () => {
       constraints: {
         minQuestions: 15,
         maxQuestions: 50,
-        questionTypes: ['mcq', 'subjective', 'fill-in-blank', 'true-false']
+        questionTypes: ['MCQ', 'SA', 'FITB', 'TF']
       },
       version: '2.1',
       createdAt: '2024-01-01',

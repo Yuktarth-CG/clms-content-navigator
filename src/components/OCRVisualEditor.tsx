@@ -226,7 +226,7 @@ const OCRVisualEditor = ({ content, onSave, onCancel }: VisualEditorProps) => {
                           {index + 1}. {question.text}
                         </div>
                         
-                        {question.type === 'mcq' && question.options && (
+                        {question.type === 'MCQ' && question.options && (
                           <div className="mt-3 space-y-2">
                             {question.options.map((option, optIndex) => (
                               <div key={optIndex} className="flex items-center">
@@ -285,7 +285,7 @@ const OCRVisualEditor = ({ content, onSave, onCancel }: VisualEditorProps) => {
                           />
                         </div>
                         
-                        {question.type === 'mcq' && (
+                        {question.type === 'MCQ' && (
                           <div>
                             <Label>Options</Label>
                             <div className="space-y-2 mt-1">
