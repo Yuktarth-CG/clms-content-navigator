@@ -684,11 +684,11 @@ const AutomatedGeneration = () => {
               >
                 <Label htmlFor="fa-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
                   <RadioGroupItem value="FA" id="fa-option" />
-                  <div className="font-medium">Formative Assessment (FA)</div>
+                  <div className="font-medium">Formative Assessment (FA)/ Practice</div>
                 </Label>
                 <Label htmlFor="sa-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
                   <RadioGroupItem value="SA" id="sa-option" />
-                  <div className="font-medium">Summative Assessment (SA)</div>
+                  <div className="font-medium">Summative Assessment (SA)/ Evaluative</div>
                 </Label>
               </RadioGroup>
             </div>
