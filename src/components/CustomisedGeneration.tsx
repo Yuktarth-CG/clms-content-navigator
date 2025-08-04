@@ -27,12 +27,13 @@ import {
   Info
 } from 'lucide-react';
 import PDFPreview, { AdditionalLine } from './PDFPreview';
+import QuestionShortageResolver from './QuestionShortageResolver';
 import ChapterLOSelector from './ChapterLOSelector';
 import SectionEditor, { Section } from './SectionEditor';
 import AdditionalLinesEditor from './AdditionalLinesEditor';
 import StudentDetailsForm from './StudentDetailsForm';
 import GeneralInstructionsEditor from './GeneralInstructionsEditor';
-import { QuestionType, AssessmentMode, QuestionTypeLabels, BloomLevels, Blueprint, DifficultyLevels } from '@/types/assessment';
+import { QuestionType, AssessmentMode, QuestionTypeLabels, BloomLevels, Blueprint, DifficultyLevels, QuestionShortage, ManualQuestion } from '@/types/assessment';
 import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
@@ -58,6 +59,11 @@ const CustomisedGeneration = () => {
   const [showStudentDetails, setShowStudentDetails] = useState(false);
   const [studentDetailFields, setStudentDetailFields] = useState<any[]>([]);
   const [generalInstructions, setGeneralInstructions] = useState<string[]>([]);
+  
+  // Question shortage detection state
+  const [shortage, setShortage] = useState<QuestionShortage[]>([]);
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [addedManualQuestions, setAddedManualQuestions] = useState<ManualQuestion[]>([]);
   
   const [sections, setSections] = useState<Section[]>([{
     id: 'section-1',
@@ -265,7 +271,59 @@ const CustomisedGeneration = () => {
     console.log('Question action:', { questionId, action });
   };
 
+  const checkQuestionShortage = (blueprint: Blueprint): QuestionShortage[] => {
+    const availableQuestions = blueprint.name === 'Less questions on CLMS test' ? {
+      'MCQ': 8,
+      'FITB': 5,
+      'Match': 2,
+      'Arrange': 3
+    } : {
+      'MCQ': 25,
+      'FITB': 15,
+      'Match': 8,
+      'Arrange': 10
+    };
+
+    const shortages: QuestionShortage[] = [];
+    
+    sections.forEach(section => {
+      section.questionTypeConfigs.forEach(config => {
+        const available = availableQuestions[config.type] || 0;
+        if (config.count > available) {
+          const existingShortage = shortages.find(s => s.questionType === config.type);
+          if (existingShortage) {
+            existingShortage.required += config.count;
+            existingShortage.shortage = existingShortage.required - available;
+          } else {
+            shortages.push({
+              questionType: config.type,
+              required: config.count,
+              available,
+              shortage: config.count - available
+            });
+          }
+        }
+      });
+    });
+
+    return shortages;
+  };
+
   const handleCreate = async () => {
+    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+    if (blueprint) {
+      const shortages = checkQuestionShortage(blueprint);
+      if (shortages.length > 0) {
+        setShortage(shortages);
+        setShowManualEntry(true);
+        return;
+      }
+    }
+
+    await proceedWithGeneration();
+  };
+
+  const proceedWithGeneration = async () => {
     setGenerating(true);
     
     try {
@@ -284,6 +342,19 @@ const CustomisedGeneration = () => {
     } finally {
       setGenerating(false);
     }
+  };
+
+  const handleManualQuestionsSave = (questions: ManualQuestion[]) => {
+    setAddedManualQuestions(questions);
+    setShortage([]);
+    setShowManualEntry(false);
+    proceedWithGeneration();
+  };
+
+  const handleManualQuestionsCancel = () => {
+    setShortage([]);
+    setShowManualEntry(false);
+    setAddedManualQuestions([]);
   };
 
   const handleDownload = () => {
@@ -1044,6 +1115,15 @@ const CustomisedGeneration = () => {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {showManualEntry && shortage.length > 0 && (
+          <QuestionShortageResolver 
+            open={showManualEntry}
+            shortages={shortage}
+            onSave={handleManualQuestionsSave}
+            onCancel={handleManualQuestionsCancel}
+          />
         )}
       </div>
 
