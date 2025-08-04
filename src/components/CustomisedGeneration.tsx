@@ -94,6 +94,7 @@ const CustomisedGeneration = () => {
 
   // Blueprint functionality
   const fetchBlueprints = async () => {
+    console.log('🔄 Fetching blueprints for mode:', formData.mode);
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -103,9 +104,11 @@ const CustomisedGeneration = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('✅ Blueprints fetched:', data?.length || 0, 'blueprints');
+      console.log('📋 Blueprint data:', data);
       setBlueprints((data || []) as Blueprint[]);
     } catch (error) {
-      console.error('Error fetching blueprints:', error);
+      console.error('❌ Error fetching blueprints:', error);
       toast({
         title: "Error",
         description: "Failed to load blueprints",
@@ -291,6 +294,8 @@ const CustomisedGeneration = () => {
     }
   };
 
+  console.log('🎯 CustomisedGeneration render - currentStep:', currentStep, 'blueprints:', blueprints.length);
+  
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
       {/* Left Panel - Form Steps */}
