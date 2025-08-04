@@ -83,6 +83,7 @@ export interface BlueprintFormData {
   name: string;
   total_questions: number;
   allowed_question_types: QuestionType[];
+  distributionMethod?: 'blooms' | 'difficulty';
   bloom_l1: number;
   bloom_l2: number;
   bloom_l3: number;

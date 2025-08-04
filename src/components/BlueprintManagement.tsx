@@ -7,11 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { BookTemplate, Plus, Edit, Trash2, Search, Calculator, AlertCircle } from 'lucide-react';
-import { Blueprint, BlueprintFormData, QuestionType, AssessmentMode, QuestionTypeLabels, BloomLevels } from '@/types/assessment';
+import { Blueprint, BlueprintFormData, QuestionType, AssessmentMode, QuestionTypeLabels, BloomLevels, DifficultyLevels } from '@/types/assessment';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
@@ -29,12 +31,18 @@ const BlueprintManagement = () => {
     name: '',
     total_questions: 20,
     allowed_question_types: [],
+    distributionMethod: 'blooms',
     bloom_l1: 0,
     bloom_l2: 0,
     bloom_l3: 0,
     bloom_l4: 0,
     bloom_l5: 0,
     bloom_l6: 0,
+    difficulty_l1: 0,
+    difficulty_l2: 0,
+    difficulty_l3: 0,
+    difficulty_l4: 0,
+    difficulty_l5: 0,
     mode: 'FA',
     total_marks: undefined,
     duration: undefined,
@@ -250,12 +258,18 @@ const BlueprintManagement = () => {
       name: '',
       total_questions: 20,
       allowed_question_types: [],
+      distributionMethod: 'blooms',
       bloom_l1: 0,
       bloom_l2: 0,
       bloom_l3: 0,
       bloom_l4: 0,
       bloom_l5: 0,
       bloom_l6: 0,
+      difficulty_l1: 0,
+      difficulty_l2: 0,
+      difficulty_l3: 0,
+      difficulty_l4: 0,
+      difficulty_l5: 0,
       mode: 'FA',
       total_marks: undefined,
       duration: undefined,
@@ -515,45 +529,106 @@ const BlueprintManagement = () => {
                 </CardContent>
               </Card>
 
-              {/* Bloom's Distribution */}
+              {/* Distribution Method Selection */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center space-x-2">
-                    <span>Bloom's Taxonomy Distribution</span>
-                    <Badge variant={isBloomTotalValid ? "outline" : "destructive"} className="flex items-center space-x-1">
-                      <Calculator className="w-3 h-3" />
-                      <span>{getTotalQuestions()}/{formData.total_questions}</span>
-                    </Badge>
-                  </CardTitle>
+                  <CardTitle className="text-lg">Question Distribution Method</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {!isBloomTotalValid && (
-                    <Alert className="mb-4">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        The sum of Bloom levels ({getTotalQuestions()}) must equal total questions ({formData.total_questions}).
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {Object.entries(BloomLevels).map(([level, description]) => (
-                      <div key={level} className="space-y-2">
-                        <Label htmlFor={`bloom_${level}`} className="text-sm">
-                          {level} - {description}
-                        </Label>
-                        <Input
-                          id={`bloom_${level}`}
-                          type="number"
-                          min="0"
-                          placeholder="0"
-                          value={formData[`bloom_${level.toLowerCase()}` as keyof BlueprintFormData] || ''}
-                          onChange={(e) => handleBloomChange(level as keyof typeof BloomLevels, e.target.value)}
-                        />
+                  <RadioGroup 
+                    value={formData.distributionMethod || 'blooms'} 
+                    onValueChange={(value: 'blooms' | 'difficulty') => setFormData(prev => ({ ...prev, distributionMethod: value }))}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  >
+                    <Label htmlFor="blooms-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="blooms" id="blooms-option" />
+                      <div>
+                        <div className="font-medium">Bloom's Taxonomy</div>
+                        <div className="text-sm text-muted-foreground">Distribute questions by cognitive levels</div>
                       </div>
-                    ))}
-                  </div>
+                    </Label>
+                    <Label htmlFor="difficulty-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="difficulty" id="difficulty-option" />
+                      <div>
+                        <div className="font-medium">Difficulty Levels</div>
+                        <div className="text-sm text-muted-foreground">Distribute questions by difficulty (1-5)</div>
+                      </div>
+                    </Label>
+                  </RadioGroup>
                 </CardContent>
               </Card>
+
+              {/* Conditional Distribution Display */}
+              {(!formData.distributionMethod || formData.distributionMethod === 'blooms') && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center space-x-2">
+                      <span>Bloom's Taxonomy Distribution</span>
+                      <Badge variant={isBloomTotalValid ? "outline" : "destructive"} className="flex items-center space-x-1">
+                        <Calculator className="w-3 h-3" />
+                        <span>{getTotalQuestions()}/{formData.total_questions}</span>
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {!isBloomTotalValid && (
+                      <Alert className="mb-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          The sum of Bloom levels ({getTotalQuestions()}) must equal total questions ({formData.total_questions}).
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {Object.entries(BloomLevels).map(([level, description]) => (
+                        <div key={level} className="space-y-2">
+                          <Label htmlFor={`bloom_${level}`} className="text-sm">
+                            {level} - {description}
+                          </Label>
+                          <Input
+                            id={`bloom_${level}`}
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            value={formData[`bloom_${level.toLowerCase()}` as keyof BlueprintFormData] || ''}
+                            onChange={(e) => handleBloomChange(level as keyof typeof BloomLevels, e.target.value)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {formData.distributionMethod === 'difficulty' && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Difficulty Level Distribution</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {Object.entries(DifficultyLevels).map(([level, description]) => (
+                        <div key={level} className="space-y-2">
+                          <Label htmlFor={`difficulty_${level}`} className="text-sm">
+                            {level} - {description}
+                          </Label>
+                          <Input
+                            id={`difficulty_${level}`}
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            value={formData[`difficulty_${level.toLowerCase()}` as keyof BlueprintFormData] || ''}
+                            onChange={(e) => {
+                              const fieldName = `difficulty_${level.toLowerCase()}` as keyof BlueprintFormData;
+                              setFormData(prev => ({ ...prev, [fieldName]: parseInt(e.target.value) || 0 }));
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Assessment Mode */}
               <Card>
