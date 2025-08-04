@@ -4,20 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  FileText, 
-  Download, 
-  Edit, 
-  ArrowUpDown, 
-  RotateCcw, 
-  CheckCircle, 
-  RefreshCw,
-} from 'lucide-react';
+import { FileText, Download, Edit, ArrowUpDown, RotateCcw, CheckCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { debugService } from '@/services/debugService';
 import { Section } from './SectionEditor';
 import { QuestionTypeLabels } from '@/types/assessment';
-
 interface Question {
   id: string;
   questionNumber: number;
@@ -30,17 +21,14 @@ interface Question {
   options?: string[];
   answer?: string;
 }
-
 export interface ExtraField {
   label: string;
   value: string;
 }
-
 export interface AdditionalLine {
   text: string;
   orientation: 'left' | 'center' | 'right';
 }
-
 interface Theme {
   id: string;
   state_name: string;
@@ -49,7 +37,6 @@ interface Theme {
   secondary_color: string;
   button_color: string;
 }
-
 interface PDFPreviewProps {
   title: string;
   grade?: string;
@@ -65,12 +52,11 @@ interface PDFPreviewProps {
   additionalLines?: AdditionalLine[];
   sections?: Section[];
 }
-
-const PDFPreview: React.FC<PDFPreviewProps> = ({ 
-  title, 
+const PDFPreview: React.FC<PDFPreviewProps> = ({
+  title,
   grade,
-  questions, 
-  onDownload, 
+  questions,
+  onDownload,
   onQuestionAction,
   documentType = 'assessment',
   isReadyForDownload = false,
@@ -84,18 +70,16 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [showQuestionDialog, setShowQuestionDialog] = useState(false);
   const [theme, setTheme] = useState<Theme | null>(null);
-
   React.useEffect(() => {
     debugService.info('PDFPreview component mounted', 'PDFPreview', {
       title,
       questionCount: questions.length,
-      documentType,
+      documentType
     });
     return () => {
       debugService.info('PDFPreview component unmounted', 'PDFPreview');
     };
   }, [title, questions.length, documentType]);
-
   const handleQuestionSelect = (question: Question) => {
     debugService.debug('Question selected for action', 'PDFPreview', {
       questionId: question.id,
@@ -106,7 +90,6 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
     setSelectedQuestion(question);
     setShowQuestionDialog(true);
   };
-
   const handleQuestionAction = (action: 'move-up' | 'move-down' | 'replace' | 'edit') => {
     if (selectedQuestion) {
       debugService.info(`Question action performed: ${action}`, 'PDFPreview', {
@@ -119,25 +102,21 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
       setShowQuestionDialog(false);
     }
   };
-
   const handleDirectAction = (e: React.MouseEvent, question: Question, action: 'move-up' | 'move-down' | 'replace' | 'edit') => {
     e.stopPropagation();
     onQuestionAction(question.id, action);
   };
-
   useEffect(() => {
     fetchTheme();
   }, []);
-
   const fetchTheme = async () => {
     try {
-      const { data, error } = await supabase
-        .from('themes')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('themes').select('*').order('created_at', {
+        ascending: false
+      }).limit(1).single();
       if (data && !error) {
         setTheme(data);
       }
@@ -145,13 +124,13 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
       console.log('No theme found, using defaults');
     }
   };
-
-  const sectionsToRender = sections && sections.length > 0 
-    ? sections 
-    : [{ id: 'default', title: 'All Questions', label: '', questionTypes: [] }];
-
-  return (
-    <Card className="w-full">
+  const sectionsToRender = sections && sections.length > 0 ? sections : [{
+    id: 'default',
+    title: 'All Questions',
+    label: '',
+    questionTypes: []
+  }];
+  return <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -164,8 +143,7 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {isReadyForDownload && (
-              <>
+            {isReadyForDownload && <>
                 <Badge variant="outline" className="text-green-600 border-green-600">
                   <CheckCircle className="w-3 h-3 mr-1" />
                   Ready for Download
@@ -174,8 +152,7 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
                   <Download className="w-4 h-4" />
                   <span>Download PDF</span>
                 </Button>
-              </>
-            )}
+              </>}
           </div>
         </div>
       </CardHeader>
@@ -185,17 +162,9 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
           <div ref={pdfContentRef} className="bg-white shadow-lg rounded-lg p-8 max-w-4xl mx-auto font-serif">
             <div className="border-b pb-6 mb-8">
               <div className="flex items-center justify-between mb-4">
-                {theme?.logo_url ? (
-                  <img 
-                    src={theme.logo_url} 
-                    alt={`${theme.state_name} Logo`} 
-                    className="h-16 w-auto"
-                  />
-                ) : (
-                  <div className="h-16 w-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                {theme?.logo_url ? <img src={theme.logo_url} alt={`${theme.state_name} Logo`} className="h-16 w-auto" /> : <div className="h-16 w-16 bg-blue-100 rounded-lg flex items-center justify-center">
                     <FileText className="w-8 h-8 text-blue-600" />
-                  </div>
-                )}
+                  </div>}
                 
                 <div className="text-right">
                   <h2 className="text-lg font-semibold text-gray-700">
@@ -212,25 +181,15 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
               <h1 className="text-xl font-bold uppercase tracking-wider mb-2">
                 {title}
               </h1>
-              {grade && (
-                <p className="text-lg font-semibold mb-2">
+              {grade && <p className="text-lg font-semibold mb-2">
                   Grade {grade}
-                </p>
-              )}
-              {additionalLines.map((line, index) => (
-                line.text && (
-                  <p
-                    key={index}
-                    className={`text-sm 
+                </p>}
+              {additionalLines.map((line, index) => line.text && <p key={index} className={`text-sm 
                       ${line.orientation === 'left' ? 'text-left' : ''}
                       ${line.orientation === 'center' ? 'text-center' : ''}
-                      ${line.orientation === 'right' ? 'text-right' : ''}`
-                    }
-                  >
+                      ${line.orientation === 'right' ? 'text-right' : ''}`}>
                     {line.text}
-                  </p>
-                )
-              ))}
+                  </p>)}
             </div>
 
             <div className="flex justify-between mb-6 text-sm font-semibold">
@@ -242,53 +201,39 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
               </div>
             </div>
 
-            {showStudentDetails && (
-              <div className="mb-6 p-4 border border-gray-400">
+            {showStudentDetails && <div className="mb-6 p-4 border border-gray-400">
                 <h4 className="font-bold mb-3">Student Details:</h4>
                 <div className="grid grid-cols-2 gap-4">
-                  {studentDetailFields?.map((field, index) => (
-                    <div key={index} className="flex items-center space-x-2">
+                  {studentDetailFields?.map((field, index) => <div key={index} className="flex items-center space-x-2">
                       <span className="text-sm font-medium min-w-[80px]">{field.label}:</span>
                       <div className="border-b border-black flex-1 h-6"></div>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
-              </div>
-            )}
+              </div>}
 
-            {generalInstructions && generalInstructions.length > 0 && (
-              <div className="mb-6">
+            {generalInstructions && generalInstructions.length > 0 && <div className="mb-6">
                 <h3 className="font-bold text-base mb-3">General Instructions:</h3>
                 <div className="space-y-2 text-sm">
-                  {generalInstructions.map((instruction, index) => (
-                    <div key={index} className="flex">
+                  {generalInstructions.map((instruction, index) => <div key={index} className="flex">
                       <span className="font-semibold mr-2">{index + 1}.</span>
                       <span>{instruction}</span>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
-              </div>
-            )}
+              </div>}
 
             <ScrollArea className="h-96">
               <div className="space-y-6">
                 {sectionsToRender.map((section, sectionIndex) => {
-                  // Filter questions based on section's allowed types
-                  const sectionQuestions = questions.filter(q => section.questionTypes.includes(q.questionType as any));
+                // Filter questions based on section's allowed types
+                const sectionQuestions = questions.filter(q => section.questionTypes.includes(q.questionType as any));
+                if (sectionQuestions.length === 0 && section.id !== 'default') return null; // Only hide if it's not the default 'All Questions' section and has no questions
 
-                  if (sectionQuestions.length === 0 && section.id !== 'default') return null; // Only hide if it's not the default 'All Questions' section and has no questions
-
-                  return (
-                    <div key={section.id}>
+                return <div key={section.id}>
                       <div className="mb-4">
                         <h3 className="font-bold text-base text-center uppercase tracking-wider">
                           {section.title}{section.label && `: ${section.label}`}
                         </h3>
-                        {section.questionTypes.length > 0 && (
-                          <div className="text-center text-xs text-muted-foreground mt-1">
-                            ({section.questionTypes.map(type => QuestionTypeLabels[type]).join(', ')})
-                          </div>
-                        )}
+                        {section.questionTypes.length > 0}
                       </div>
 
                       <div className="border border-black">
@@ -301,68 +246,35 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
                             </tr>
                           </thead>
                           <tbody>
-                            {sectionQuestions.map((question, index) => (
-                              <tr 
-                                key={question.id}
-                                className="hover:bg-gray-50 cursor-pointer transition-colors group"
-                                onClick={() => handleQuestionSelect(question)}
-                              >
+                            {sectionQuestions.map((question, index) => <tr key={question.id} className="hover:bg-gray-50 cursor-pointer transition-colors group" onClick={() => handleQuestionSelect(question)}>
                                 <td className="border border-black p-3 text-center font-semibold align-top">
                                   Q.{question.questionNumber}
                                 </td>
                                 <td className="border border-black p-3 align-top relative">
                                   <div className="mb-2">
                                     <span className="font-medium">{question.questionStem}</span>
-                                    {question.questionType === 'MCQ' && question.options && (
-                                      <div className="mt-2 space-y-1">
-                                        {question.options.map((option, idx) => (
-                                          <div key={idx} className="ml-4">
+                                    {question.questionType === 'MCQ' && question.options && <div className="mt-2 space-y-1">
+                                        {question.options.map((option, idx) => <div key={idx} className="ml-4">
                                             <span className="font-medium">
                                               {String.fromCharCode(97 + idx)}) 
                                             </span>
                                             <span className="ml-2">{option}</span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
+                                          </div>)}
+                                      </div>}
                                   </div>
                                   
                                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <div className="flex items-center space-x-1 bg-white border rounded shadow-sm p-1">
-                                      <Button 
-                                        size="sm" 
-                                        variant="ghost" 
-                                        className="p-1 h-6 w-6"
-                                        onClick={(e) => handleDirectAction(e, question, 'move-up')}
-                                        title="Move Up"
-                                      >
+                                      <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'move-up')} title="Move Up">
                                         <ArrowUpDown className="w-3 h-3 rotate-180" />
                                       </Button>
-                                      <Button 
-                                        size="sm" 
-                                        variant="ghost" 
-                                        className="p-1 h-6 w-6"
-                                        onClick={(e) => handleDirectAction(e, question, 'move-down')}
-                                        title="Move Down"
-                                      >
+                                      <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'move-down')} title="Move Down">
                                         <ArrowUpDown className="w-3 h-3" />
                                       </Button>
-                                      <Button 
-                                        size="sm" 
-                                        variant="ghost" 
-                                        className="p-1 h-6 w-6"
-                                        onClick={(e) => handleDirectAction(e, question, 'replace')}
-                                        title="Replace Question"
-                                      >
+                                      <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'replace')} title="Replace Question">
                                         <RefreshCw className="w-3 h-3" />
                                       </Button>
-                                      <Button 
-                                        size="sm" 
-                                        variant="ghost" 
-                                        className="p-1 h-6 w-6"
-                                        onClick={(e) => handleDirectAction(e, question, 'edit')}
-                                        title="Edit Question"
-                                      >
+                                      <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'edit')} title="Edit Question">
                                         <Edit className="w-3 h-3" />
                                       </Button>
                                     </div>
@@ -371,14 +283,12 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
                                 <td className="border border-black p-3 text-center font-semibold align-top">
                                   {question.marks}
                                 </td>
-                              </tr>
-                            ))}
+                              </tr>)}
                           </tbody>
                         </table>
                       </div>
-                    </div>
-                  );
-                })}
+                    </div>;
+              })}
               </div>
             </ScrollArea>
           </div>
@@ -390,8 +300,7 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
               <DialogTitle>Question Actions</DialogTitle>
             </DialogHeader>
             
-            {selectedQuestion && (
-              <div className="space-y-4">
+            {selectedQuestion && <div className="space-y-4">
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm font-medium mb-1">
                     Question {selectedQuestion.questionNumber}
@@ -402,49 +311,30 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
                 </div>
                 
                 <div className="space-y-2">
-                  <Button 
-                    onClick={() => handleQuestionAction('edit')}
-                    className="w-full justify-start"
-                    variant="outline"
-                  >
+                  <Button onClick={() => handleQuestionAction('edit')} className="w-full justify-start" variant="outline">
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Question Content
                   </Button>
                   
-                  <Button 
-                    onClick={() => handleQuestionAction('move-up')}
-                    className="w-full justify-start"
-                    variant="outline"
-                  >
+                  <Button onClick={() => handleQuestionAction('move-up')} className="w-full justify-start" variant="outline">
                     <ArrowUpDown className="w-4 h-4 mr-2 rotate-180" />
                     Move Question Up
                   </Button>
                   
-                  <Button 
-                    onClick={() => handleQuestionAction('move-down')}
-                    className="w-full justify-start"
-                    variant="outline"
-                  >
+                  <Button onClick={() => handleQuestionAction('move-down')} className="w-full justify-start" variant="outline">
                     <ArrowUpDown className="w-4 h-4 mr-2" />
                     Move Question Down
                   </Button>
                   
-                  <Button 
-                    onClick={() => handleQuestionAction('replace')}
-                    className="w-full justify-start"
-                    variant="outline"
-                  >
+                  <Button onClick={() => handleQuestionAction('replace')} className="w-full justify-start" variant="outline">
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Replace with Similar Question
                   </Button>
                 </div>
-              </div>
-            )}
+              </div>}
           </DialogContent>
         </Dialog>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default PDFPreview;
