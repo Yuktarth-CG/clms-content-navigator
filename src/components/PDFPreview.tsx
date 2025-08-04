@@ -132,7 +132,7 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
     id: 'default',
     title: 'All Questions',
     label: '',
-    questionTypes: []
+    questionTypeConfigs: []
   }];
   return <Card className="w-full">
       <CardHeader>
@@ -246,7 +246,8 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
               <div className="space-y-6">
                 {sectionsToRender.map((section, sectionIndex) => {
                 // Filter questions based on section's allowed types
-                const sectionQuestions = questions.filter(q => section.questionTypes.includes(q.questionType as any));
+                const sectionQuestionTypes = section.questionTypeConfigs?.map(config => config.type) || [];
+                const sectionQuestions = questions.filter(q => sectionQuestionTypes.includes(q.questionType as any));
                 if (sectionQuestions.length === 0 && section.id !== 'default') return null; // Only hide if it's not the default 'All Questions' section and has no questions
 
                 return <div key={section.id}>
@@ -254,7 +255,7 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
                         <h3 className="font-bold text-base text-center uppercase tracking-wider">
                           {section.title}{section.label && `: ${section.label}`}
                         </h3>
-                        {section.questionTypes.length > 0}
+                        {sectionQuestionTypes.length > 0}
                       </div>
 
                       <div className="border border-black">
