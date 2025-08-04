@@ -434,7 +434,8 @@ const CustomisedGeneration = () => {
     setAddedManualQuestions(questions);
     setShortage([]);
     setShowManualEntry(false);
-    proceedWithGeneration();
+    // Proceed to next step (Section Management) instead of generating
+    setCurrentStep(currentStep + 1);
   };
 
   const handleManualQuestionsCancel = () => {
