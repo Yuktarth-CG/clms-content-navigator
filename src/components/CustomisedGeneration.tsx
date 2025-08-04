@@ -105,16 +105,94 @@ const CustomisedGeneration = () => {
     console.log('🔄 Fetching blueprints for mode:', formData.mode);
     setLoading(true);
     try {
+      // Add sample blueprints including the CLMS test blueprint
+      const sampleBlueprints = [
+        {
+          id: 'sample-1',
+          name: 'Quick Assessment Blueprint',
+          total_questions: 15,
+          total_marks: 75,
+          duration: 45,
+          allowed_question_types: ['MCQ', 'FITB', 'Match'] as QuestionType[],
+          bloom_l1: 6,
+          bloom_l2: 5,
+          bloom_l3: 3,
+          bloom_l4: 1,
+          bloom_l5: 0,
+          bloom_l6: 0,
+          mode: 'FA' as AssessmentMode,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          version: 1,
+          created_by: 'system'
+        },
+        {
+          id: 'sample-2',
+          name: 'Comprehensive Test Blueprint',
+          total_questions: 30,
+          total_marks: undefined,
+          duration: undefined,
+          allowed_question_types: ['MCQ', 'FITB', 'Match', 'Arrange'] as QuestionType[],
+          bloom_l1: 10,
+          bloom_l2: 8,
+          bloom_l3: 6,
+          bloom_l4: 4,
+          bloom_l5: 2,
+          bloom_l6: 0,
+          mode: 'SA' as AssessmentMode,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          version: 1,
+          created_by: 'system'
+        },
+        {
+          id: 'sample-3',
+          name: 'Less questions on CLMS test',
+          total_questions: 15,
+          total_marks: 30,
+          duration: 45,
+          allowed_question_types: ['MCQ', 'FITB'] as QuestionType[],
+          difficulty_l1: 6,
+          difficulty_l2: 5,
+          difficulty_l3: 3,
+          difficulty_l4: 1,
+          difficulty_l5: 0,
+          bloom_l1: 0,
+          bloom_l2: 0,
+          bloom_l3: 0,
+          bloom_l4: 0,
+          bloom_l5: 0,
+          bloom_l6: 0,
+          mode: 'FA' as AssessmentMode,
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          version: 1,
+          created_by: 'system'
+        }
+      ];
+
       const { data, error } = await supabase
         .from('blueprints')
         .select('*')
         .eq('mode', formData.mode)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      console.log('✅ Blueprints fetched:', data?.length || 0, 'blueprints');
-      console.log('📋 Blueprint data:', data);
-      setBlueprints((data || []) as Blueprint[]);
+      if (error) {
+        console.log('⚠️ Database error, using sample blueprints');
+        setBlueprints(sampleBlueprints.filter(bp => bp.mode === formData.mode));
+      } else {
+        console.log('✅ Blueprints fetched:', data?.length || 0, 'blueprints');
+        const filteredData = (data || []).map(bp => ({
+          ...bp,
+          allowed_question_types: bp.allowed_question_types.filter((type: string) => 
+            ['MCQ', 'FITB', 'Match', 'Arrange'].includes(type)
+          ) as QuestionType[]
+        }));
+        setBlueprints([...sampleBlueprints.filter(bp => bp.mode === formData.mode), ...filteredData]);
+      }
     } catch (error) {
       console.error('❌ Error fetching blueprints:', error);
       toast({
@@ -424,7 +502,6 @@ const CustomisedGeneration = () => {
   };
 
   const nextStep = () => {
-    alert(`NextStep called! Current step: ${currentStep}, Target step: ${currentStep + 1}`);
     console.log('🚀 [CustomisedGeneration] NextStep called - Current step:', currentStep);
     console.log('🚀 [CustomisedGeneration] Selected blueprint ID:', selectedBlueprint);
     
