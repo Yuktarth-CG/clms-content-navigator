@@ -1308,6 +1308,7 @@ const AutomatedGeneration = () => {
 
       {showManualEntry && shortage.length > 0 && (
         <QuestionShortageResolver 
+          open={showManualEntry}
           shortages={shortage}
           onSave={handleManualQuestionsSave}
           onCancel={handleManualQuestionsCancel}
