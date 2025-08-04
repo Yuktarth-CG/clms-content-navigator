@@ -147,6 +147,35 @@ const AutomatedGeneration = () => {
     { text: '', orientation: 'center' }
   ]);
   const [isHeaderSectionOpen, setIsHeaderSectionOpen] = useState(false);
+  
+  // Editable distribution state
+  const [editableDistribution, setEditableDistribution] = useState<{
+    bloom_l1: number;
+    bloom_l2: number;
+    bloom_l3: number;
+    bloom_l4: number;
+    bloom_l5: number;
+    bloom_l6: number;
+    difficulty_l1: number;
+    difficulty_l2: number;
+    difficulty_l3: number;
+    difficulty_l4: number;
+    difficulty_l5: number;
+  }>({
+    bloom_l1: 0,
+    bloom_l2: 0,
+    bloom_l3: 0,
+    bloom_l4: 0,
+    bloom_l5: 0,
+    bloom_l6: 0,
+    difficulty_l1: 0,
+    difficulty_l2: 0,
+    difficulty_l3: 0,
+    difficulty_l4: 0,
+    difficulty_l5: 0,
+  });
+  const [isDistributionEditing, setIsDistributionEditing] = useState(false);
+
   const [sections, setSections] = useState<Section[]>([
     { id: 'section-a', title: 'Section A', label: 'Multiple Choice Questions', questionTypes: ['MCQ', 'FITB', 'Match'], questionCount: 10 },
     { id: 'section-b', title: 'Section B', label: 'Short Answer Questions', questionTypes: ['Arrange', 'SA'], questionCount: 5 },
@@ -172,6 +201,29 @@ const AutomatedGeneration = () => {
   useEffect(() => {
     fetchBlueprints();
   }, []);
+
+  // Update editable distribution when blueprint changes
+  useEffect(() => {
+    if (selectedBlueprint) {
+      const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+      if (blueprint) {
+        setEditableDistribution({
+          bloom_l1: blueprint.bloom_l1,
+          bloom_l2: blueprint.bloom_l2,
+          bloom_l3: blueprint.bloom_l3,
+          bloom_l4: blueprint.bloom_l4,
+          bloom_l5: blueprint.bloom_l5,
+          bloom_l6: blueprint.bloom_l6,
+          difficulty_l1: blueprint.difficulty_l1 || 0,
+          difficulty_l2: blueprint.difficulty_l2 || 0,
+          difficulty_l3: blueprint.difficulty_l3 || 0,
+          difficulty_l4: blueprint.difficulty_l4 || 0,
+          difficulty_l5: blueprint.difficulty_l5 || 0,
+        });
+        setIsDistributionEditing(false);
+      }
+    }
+  }, [selectedBlueprint, blueprints]);
 
   const fetchBlueprints = async () => {
     setLoading(true);
@@ -1334,15 +1386,29 @@ const AutomatedGeneration = () => {
                     return (
                       <div className="space-y-4">
                         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                          <h4 className="font-medium text-blue-800 mb-2">📊 Question Difficulty Breakdown</h4>
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-blue-800">📊 Question Difficulty Breakdown</h4>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setIsDistributionEditing(!isDistributionEditing)}
+                              className="text-blue-700 border-blue-300 hover:bg-blue-100"
+                            >
+                              {isDistributionEditing ? 'Save Changes' : 'Edit Distribution'}
+                            </Button>
+                          </div>
                           <p className="text-sm text-blue-600 mb-3">
-                            This shows how many questions of each difficulty level will be included in your test based on the selected blueprint.
+                            {isDistributionEditing 
+                              ? 'Adjust the number of questions for each difficulty level. Total should match your blueprint.'
+                              : 'This shows how many questions of each difficulty level will be included in your test.'
+                            }
                           </p>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {relevantDifficultyLevels.map(([level, label]) => {
-                            const count = blueprint ? blueprint[`difficulty_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                            const levelKey = `difficulty_l${level.slice(1)}` as keyof typeof editableDistribution;
+                            const count = editableDistribution[levelKey];
                             const descriptions = {
                               'Very Easy': 'Basic recall and simple concepts',
                               'Easy': 'Understanding and simple application',
@@ -1353,7 +1419,20 @@ const AutomatedGeneration = () => {
                               <div key={level} className="p-4 border rounded-lg bg-card hover:shadow-sm transition-shadow">
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="font-medium text-lg">{label}</span>
-                                  <Badge variant="secondary" className="text-sm font-medium">{count} questions</Badge>
+                                  {isDistributionEditing ? (
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={count}
+                                      onChange={(e) => setEditableDistribution(prev => ({
+                                        ...prev,
+                                        [levelKey]: parseInt(e.target.value) || 0
+                                      }))}
+                                      className="w-20 h-8 text-center"
+                                    />
+                                  ) : (
+                                    <Badge variant="secondary" className="text-sm font-medium">{count} questions</Badge>
+                                  )}
                                 </div>
                                 <p className="text-sm text-muted-foreground">{descriptions[label as keyof typeof descriptions]}</p>
                               </div>
@@ -1367,15 +1446,29 @@ const AutomatedGeneration = () => {
                     return (
                       <div className="space-y-4">
                         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                          <h4 className="font-medium text-green-800 mb-2">🎯 Learning Objectives Breakdown</h4>
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-green-800">🎯 Learning Objectives Breakdown</h4>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setIsDistributionEditing(!isDistributionEditing)}
+                              className="text-green-700 border-green-300 hover:bg-green-100"
+                            >
+                              {isDistributionEditing ? 'Save Changes' : 'Edit Distribution'}
+                            </Button>
+                          </div>
                           <p className="text-sm text-green-600 mb-3">
-                            This shows how many questions target each type of thinking skill based on Bloom's Taxonomy. Higher levels require more complex thinking.
+                            {isDistributionEditing 
+                              ? 'Adjust the number of questions for each thinking skill level. Total should match your blueprint.'
+                              : 'This shows how many questions target each type of thinking skill based on Bloom\'s Taxonomy.'
+                            }
                           </p>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {Object.entries(BloomLevels).map(([level, label]) => {
-                            const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                            const levelKey = `bloom_l${level.slice(1)}` as keyof typeof editableDistribution;
+                            const count = editableDistribution[levelKey];
                             const descriptions = {
                               'Remember': 'Recall facts and basic concepts',
                               'Understand': 'Explain ideas and concepts',
@@ -1392,13 +1485,35 @@ const AutomatedGeneration = () => {
                                     <span className="font-medium text-lg">{label}</span>
                                     <span className="text-xs text-muted-foreground ml-2">Level {levelNumber}</span>
                                   </div>
-                                  <Badge variant="secondary" className="text-sm font-medium">{count} questions</Badge>
+                                  {isDistributionEditing ? (
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={count}
+                                      onChange={(e) => setEditableDistribution(prev => ({
+                                        ...prev,
+                                        [levelKey]: parseInt(e.target.value) || 0
+                                      }))}
+                                      className="w-20 h-8 text-center"
+                                    />
+                                  ) : (
+                                    <Badge variant="secondary" className="text-sm font-medium">{count} questions</Badge>
+                                  )}
                                 </div>
                                 <p className="text-sm text-muted-foreground">{descriptions[label as keyof typeof descriptions]}</p>
                               </div>
                             );
                           })}
                         </div>
+                        
+                        {isDistributionEditing && (
+                          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                            <p className="text-sm text-amber-700">
+                              💡 <strong>Tip:</strong> Total questions: {Object.values(editableDistribution).slice(0, 6).reduce((sum, val) => sum + val, 0)} 
+                              {blueprint && ` (Blueprint: ${blueprint.total_questions})`}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     );
                   }
