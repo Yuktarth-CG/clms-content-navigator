@@ -1096,7 +1096,7 @@ const OCRTestPaperCreation = () => {
                         <Badge variant="outline">Grade {question.grade}</Badge>
                         <Badge variant="outline">{question.subject}</Badge>
                         <Badge variant="outline">Bloom's L{question.bloomsTag}</Badge>
-                        <Badge variant="outline">Difficulty {question.difficultyTag}</Badge>
+                        <Badge variant="outline">Difficulty L{question.difficultyTag}</Badge>
                       </div>
                       <h4 className="font-medium mb-2">{question.questionStem}</h4>
                       <div className="text-xs text-gray-500 mb-2">
@@ -1580,7 +1580,7 @@ const OCRTestPaperCreation = () => {
                   <Badge variant="outline">Grade {question.grade}</Badge>
                   <Badge variant="outline">{question.subject}</Badge>
                   <Badge variant="outline">Bloom's L{question.bloomsTag}</Badge>
-                  <Badge variant="outline">Difficulty {question.difficultyTag}</Badge>
+                  <Badge variant="outline">Difficulty L{question.difficultyTag}</Badge>
                 </div>
                 <h4 className="font-medium mb-2">{question.questionStem}</h4>
                 <div className="text-xs text-gray-500 mb-2">
@@ -1715,7 +1715,7 @@ const OCRTestPaperCreation = () => {
                         <Badge variant="outline">Grade {question.grade}</Badge>
                         <Badge variant="outline">{question.subject}</Badge>
                         <Badge variant="outline">Bloom's L{question.bloomsTag}</Badge>
-                        <Badge variant="outline">Difficulty {question.difficultyTag}</Badge>
+                        <Badge variant="outline">Difficulty L{question.difficultyTag}</Badge>
                       </div>
                       <h4 className="font-medium mb-2">{question.questionStem}</h4>
                       <div className="text-xs text-gray-500 mb-2">

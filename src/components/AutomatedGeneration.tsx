@@ -162,6 +162,14 @@ const AutomatedGeneration = () => {
     mode: 'FA' as AssessmentMode
   });
 
+  const [difficultyDistribution, setDifficultyDistribution] = useState({
+    difficultyL1: 0,
+    difficultyL2: 0,
+    difficultyL3: 0,
+    difficultyL4: 0,
+    difficultyL5: 0
+  });
+
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
   const totalSteps = 4;

@@ -326,15 +326,17 @@ const OCRVisualEditor = ({ content, onSave, onCancel }: VisualEditorProps) => {
                         </div>
                         
                         <div>
-                          <Label>Difficulty</Label>
+                          <Label>Difficulty Level</Label>
                           <select
-                            value={question.difficulty || 'Medium'}
+                            value={question.difficulty || '3'}
                             onChange={(e) => updateQuestion(question.id, { difficulty: e.target.value as any })}
                             className="w-full mt-1 p-2 border rounded"
                           >
-                            <option value="Easy">Easy</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Hard">Hard</option>
+                            <option value="1">1 (Very Easy)</option>
+                            <option value="2">2 (Easy)</option>
+                            <option value="3">3 (Medium)</option>
+                            <option value="4">4 (Hard)</option>
+                            <option value="5">5 (Very Hard)</option>
                           </select>
                         </div>
                         
