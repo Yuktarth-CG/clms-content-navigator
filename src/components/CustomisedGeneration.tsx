@@ -128,6 +128,24 @@ const CustomisedGeneration = () => {
     setBlueprintPage(1);
   }, [formData.mode]);
 
+  // Prefill distribution from selected blueprint
+  useEffect(() => {
+    if (selectedBlueprint) {
+      const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+      if (blueprint) {
+        setFormData(prev => ({
+          ...prev,
+          bloomL1: blueprint.bloom_l1,
+          bloomL2: blueprint.bloom_l2,
+          bloomL3: blueprint.bloom_l3,
+          bloomL4: blueprint.bloom_l4,
+          bloomL5: blueprint.bloom_l5,
+          bloomL6: blueprint.bloom_l6,
+        }));
+      }
+    }
+  }, [selectedBlueprint, blueprints]);
+
   // Update allowed question types from sections
   useEffect(() => {
     const allQuestionTypes = sections.reduce<QuestionType[]>((acc, section) => {
@@ -146,10 +164,32 @@ const CustomisedGeneration = () => {
   }, [sections]);
 
   const handleBloomChange = (level: keyof typeof BloomLevels, value: number[]) => {
+    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+    if (!blueprint) return;
+
     const fieldName = `bloom${level}` as keyof typeof formData;
+    const newValue = value[0];
+    
+    // Calculate current total with the new value
+    const otherLevels = Object.entries(BloomLevels).filter(([l]) => l !== level);
+    const otherLevelsTotal = otherLevels.reduce((sum, [l]) => {
+      const fname = `bloom${l}` as keyof typeof formData;
+      return sum + (formData[fname] as number);
+    }, 0);
+    
+    // Check if new total would exceed blueprint limit
+    if (otherLevelsTotal + newValue > blueprint.total_questions) {
+      toast({
+        title: "Question Limit Exceeded",
+        description: `Total questions cannot exceed ${blueprint.total_questions} as per the selected blueprint.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     setFormData(prev => ({
       ...prev,
-      [fieldName]: value[0]
+      [fieldName]: newValue
     }));
   };
 
@@ -786,6 +826,9 @@ const CustomisedGeneration = () => {
                         {Object.entries(BloomLevels).map(([level, label]) => {
                           const fieldName = `bloom${level}` as keyof typeof formData;
                           const value = formData[fieldName] as number;
+                          const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                          const maxValue = blueprint ? blueprint.total_questions : 50;
+                          
                           return (
                             <div key={level} className="space-y-2">
                               <div className="flex items-center justify-between">
@@ -795,7 +838,7 @@ const CustomisedGeneration = () => {
                               <Slider
                                 value={[value]}
                                 onValueChange={(val) => handleBloomChange(level as keyof typeof BloomLevels, val)}
-                                max={50}
+                                max={maxValue}
                                 step={1}
                                 className="w-full"
                               />
@@ -811,6 +854,9 @@ const CustomisedGeneration = () => {
                         {Object.entries(DifficultyLevels).slice(0, 5).map(([level, label]) => {
                           const fieldName = `difficulty${level}` as keyof typeof formData;
                           const value = formData[fieldName] as number;
+                          const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                          const maxValue = blueprint ? blueprint.total_questions : 50;
+                          
                           return (
                             <div key={level} className="space-y-2">
                               <div className="flex items-center justify-between">
@@ -820,7 +866,7 @@ const CustomisedGeneration = () => {
                               <Slider
                                 value={[value]}
                                 onValueChange={(val) => setFormData(prev => ({ ...prev, [fieldName]: val[0] }))}
-                                max={50}
+                                max={maxValue}
                                 step={1}
                                 className="w-full"
                               />
@@ -831,13 +877,51 @@ const CustomisedGeneration = () => {
                     </div>
                   )}
 
-                  <div className="bg-muted/50 p-4 rounded-lg">
-                    <div className="text-sm text-muted-foreground">
-                      <strong>Total Questions:</strong> {formData.distributionMethod === 'blooms' 
+                  <div className={`p-4 rounded-lg ${(() => {
+                    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                    if (!blueprint) return 'bg-muted/50';
+                    
+                    const totalQuestions = formData.distributionMethod === 'blooms' 
+                      ? formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6
+                      : getTotalDifficultyQuestions();
+                    
+                    if (totalQuestions > blueprint.total_questions) {
+                      return 'bg-red-50 border border-red-200';
+                    } else if (totalQuestions < blueprint.total_questions) {
+                      return 'bg-yellow-50 border border-yellow-200';
+                    } else {
+                      return 'bg-green-50 border border-green-200';
+                    }
+                  })()}`}>
+                    {(() => {
+                      const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                      if (!blueprint) return null;
+                      
+                      const totalQuestions = formData.distributionMethod === 'blooms' 
                         ? formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6
-                        : getTotalDifficultyQuestions()
-                      }
-                    </div>
+                        : getTotalDifficultyQuestions();
+                      
+                      return (
+                        <div className="text-sm">
+                          <div className={`font-medium ${totalQuestions > blueprint.total_questions ? 'text-red-700' : totalQuestions < blueprint.total_questions ? 'text-yellow-700' : 'text-green-700'}`}>
+                            <strong>Total Questions:</strong> {totalQuestions} / {blueprint.total_questions} (Blueprint Limit)
+                          </div>
+                          {totalQuestions > blueprint.total_questions ? (
+                            <p className="text-red-600 mt-1 text-xs">
+                              ⚠️ Exceeds blueprint limit by {totalQuestions - blueprint.total_questions} questions
+                            </p>
+                          ) : totalQuestions < blueprint.total_questions ? (
+                            <p className="text-yellow-600 mt-1 text-xs">
+                              📊 You can add {blueprint.total_questions - totalQuestions} more questions
+                            </p>
+                          ) : (
+                            <p className="text-green-600 mt-1 text-xs">
+                              ✅ Perfect! Matches blueprint exactly
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
