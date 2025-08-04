@@ -272,6 +272,8 @@ const CustomisedGeneration = () => {
   };
 
   const checkQuestionShortage = (blueprint: Blueprint): QuestionShortage[] => {
+    console.log('🔍 [CustomisedGeneration] Checking question shortage for blueprint:', blueprint.name);
+    
     const availableQuestions = blueprint.name === 'Less questions on CLMS test' ? {
       'MCQ': 8,
       'FITB': 5,
@@ -285,27 +287,26 @@ const CustomisedGeneration = () => {
     };
 
     const shortages: QuestionShortage[] = [];
+    console.log('🔍 [CustomisedGeneration] Available questions for blueprint:', availableQuestions);
     
-    sections.forEach(section => {
-      section.questionTypeConfigs.forEach(config => {
-        const available = availableQuestions[config.type] || 0;
-        if (config.count > available) {
-          const existingShortage = shortages.find(s => s.questionType === config.type);
-          if (existingShortage) {
-            existingShortage.required += config.count;
-            existingShortage.shortage = existingShortage.required - available;
-          } else {
-            shortages.push({
-              questionType: config.type,
-              required: config.count,
-              available,
-              shortage: config.count - available
-            });
-          }
-        }
-      });
+    // Check shortage based on blueprint requirements, not current sections
+    blueprint.allowed_question_types.forEach(type => {
+      const required = Math.ceil(blueprint.total_questions / blueprint.allowed_question_types.length);
+      const available = availableQuestions[type] || 0;
+      
+      console.log(`🔍 [CustomisedGeneration] ${type}: required=${required}, available=${available}`);
+      
+      if (required > available) {
+        shortages.push({
+          questionType: type,
+          required,
+          available,
+          shortage: required - available
+        });
+      }
     });
 
+    console.log('🔍 [CustomisedGeneration] Final shortages detected:', shortages);
     return shortages;
   };
 
@@ -416,6 +417,25 @@ const CustomisedGeneration = () => {
   };
 
   const nextStep = () => {
+    console.log('🔍 [CustomisedGeneration] Moving to next step. Current step:', currentStep);
+    
+    // Check for question shortage when moving to section management step (step 4)
+    if (currentStep === 3 && selectedBlueprint) {
+      const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+      console.log('🔍 [CustomisedGeneration] Checking blueprint before section management:', blueprint?.name);
+      
+      if (blueprint) {
+        const shortages = checkQuestionShortage(blueprint);
+        console.log('🔍 [CustomisedGeneration] Detected shortages:', shortages);
+        
+        if (shortages.length > 0) {
+          setShortage(shortages);
+          setShowManualEntry(true);
+          return; // Don't proceed to next step
+        }
+      }
+    }
+    
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
