@@ -1507,11 +1507,37 @@ const AutomatedGeneration = () => {
                         </div>
                         
                         {isDistributionEditing && (
-                          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                            <p className="text-sm text-amber-700">
-                              💡 <strong>Tip:</strong> Total questions: {Object.values(editableDistribution).slice(0, 6).reduce((sum, val) => sum + val, 0)} 
-                              {blueprint && ` (Blueprint: ${blueprint.total_questions})`}
-                            </p>
+                          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            {(() => {
+                              const totalQuestions = Object.values(editableDistribution).slice(0, 6).reduce((sum, val) => sum + val, 0);
+                              const blueprintTotal = blueprint?.total_questions || 0;
+                              const isExceeding = totalQuestions > blueprintTotal;
+                              
+                              return (
+                                <div className="flex items-start space-x-2">
+                                  <span className="text-blue-600">📊</span>
+                                  <div>
+                                    <p className="text-sm text-blue-700">
+                                      <strong>Current Total:</strong> {totalQuestions} questions 
+                                      {blueprint && ` (Blueprint: ${blueprintTotal})`}
+                                    </p>
+                                    {isExceeding ? (
+                                      <p className="text-xs text-blue-600 mt-1">
+                                        ✓ You can proceed with more questions than the blueprint. The system will generate additional questions as needed.
+                                      </p>
+                                    ) : totalQuestions < blueprintTotal ? (
+                                      <p className="text-xs text-blue-600 mt-1">
+                                        ✓ You can add more questions or proceed with fewer. The system is flexible with your needs.
+                                      </p>
+                                    ) : (
+                                      <p className="text-xs text-blue-600 mt-1">
+                                        ✓ Perfect match with your blueprint! You can proceed to the next step.
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })()}
                           </div>
                         )}
                       </div>
