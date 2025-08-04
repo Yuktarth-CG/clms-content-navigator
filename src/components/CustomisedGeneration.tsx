@@ -10,11 +10,13 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Progress } from '@/components/ui/progress';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Settings, 
   Calculator, 
   ChevronRight, 
   ChevronLeft, 
+  ChevronDown,
   BookOpen, 
   Target, 
   CheckCircle, 
@@ -22,9 +24,12 @@ import {
   AlertCircle,
   FileText
 } from 'lucide-react';
-import PDFPreview from './PDFPreview';
+import PDFPreview, { AdditionalLine } from './PDFPreview';
 import ChapterLOSelector from './ChapterLOSelector';
 import SectionEditor, { Section } from './SectionEditor';
+import AdditionalLinesEditor from './AdditionalLinesEditor';
+import StudentDetailsForm from './StudentDetailsForm';
+import GeneralInstructionsEditor from './GeneralInstructionsEditor';
 import { QuestionType, AssessmentMode, QuestionTypeLabels, BloomLevels, Blueprint, DifficultyLevels } from '@/types/assessment';
 import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,6 +43,14 @@ const CustomisedGeneration = () => {
   const [generating, setGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const [contentType, setContentType] = useState<'chapters' | 'learningOutcomes'>('chapters');
+  
+  // Additional state for matching AutomatedGeneration
+  const [additionalLines, setAdditionalLines] = useState<AdditionalLine[]>([]);
+  const [isHeaderSectionOpen, setIsHeaderSectionOpen] = useState(false);
+  const [showStudentDetails, setShowStudentDetails] = useState(false);
+  const [studentDetailFields, setStudentDetailFields] = useState<any[]>([]);
+  const [generalInstructions, setGeneralInstructions] = useState<string[]>([]);
+  
   const [sections, setSections] = useState<Section[]>([{
     id: 'section-1',
     title: 'Section A',
@@ -275,28 +288,27 @@ const CustomisedGeneration = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Basic Information */}
+              {/* Assessment Information */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
                   <FileText className="w-5 h-5 text-primary" />
-                  <Label className="text-base font-medium">Basic Information</Label>
+                  <Label className="text-base font-medium">Assessment Information</Label>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="flex items-center space-x-1">
-                    <span>Assessment Title</span>
-                    <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="title"
-                    placeholder="e.g., Science Unit Test"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="h-11"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="title" className="flex items-center space-x-1">
+                      <span>Assessment Title</span>
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="title"
+                      placeholder="e.g., Science Unit Test"
+                      value={formData.title}
+                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                      className="h-11"
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="grade" className="flex items-center space-x-1">
                       <span>Grade</span>
@@ -308,15 +320,16 @@ const CustomisedGeneration = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
-                          <SelectItem key={grade} value={grade.toString()}>
-                            Grade {grade}
-                          </SelectItem>
+                          <SelectItem key={grade} value={grade.toString()}>{grade}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="medium">Medium</Label>
+                    <Label htmlFor="medium" className="flex items-center space-x-1">
+                      <span>Medium</span>
+                      <span className="text-destructive">*</span>
+                    </Label>
                     <Select value={formData.medium} onValueChange={(value) => setFormData(prev => ({ ...prev, medium: value }))}>
                       <SelectTrigger className="h-11">
                         <SelectValue />
@@ -324,6 +337,14 @@ const CustomisedGeneration = () => {
                       <SelectContent>
                         <SelectItem value="English">English</SelectItem>
                         <SelectItem value="Hindi">Hindi</SelectItem>
+                        <SelectItem value="Tamil">Tamil</SelectItem>
+                        <SelectItem value="Telugu">Telugu</SelectItem>
+                        <SelectItem value="Kannada">Kannada</SelectItem>
+                        <SelectItem value="Malayalam">Malayalam</SelectItem>
+                        <SelectItem value="Marathi">Marathi</SelectItem>
+                        <SelectItem value="Gujarati">Gujarati</SelectItem>
+                        <SelectItem value="Bengali">Bengali</SelectItem>
+                        <SelectItem value="Punjabi">Punjabi</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -340,16 +361,44 @@ const CustomisedGeneration = () => {
                         <SelectItem value="Mathematics">Mathematics</SelectItem>
                         <SelectItem value="Science">Science</SelectItem>
                         <SelectItem value="English">English</SelectItem>
+                        <SelectItem value="Hindi">Hindi</SelectItem>
+                        <SelectItem value="Social Science">Social Science</SelectItem>
                         <SelectItem value="Physics">Physics</SelectItem>
                         <SelectItem value="Chemistry">Chemistry</SelectItem>
                         <SelectItem value="Biology">Biology</SelectItem>
+                        <SelectItem value="Computer Science">Computer Science</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
               </div>
 
-              <Separator />
+              <AdditionalLinesEditor lines={additionalLines} onLinesChange={setAdditionalLines} />
+
+              <Collapsible open={isHeaderSectionOpen} onOpenChange={setIsHeaderSectionOpen}>
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50">
+                    <Label className="text-sm font-medium">Header & Instructions</Label>
+                    <Button variant="ghost" size="sm">
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="p-3 border border-t-0 rounded-b-lg space-y-4">
+                  <StudentDetailsForm
+                    show={showStudentDetails}
+                    onToggle={setShowStudentDetails}
+                    fields={studentDetailFields}
+                    onFieldsChange={setStudentDetailFields}
+                  />
+                  <GeneralInstructionsEditor
+                    instructions={generalInstructions}
+                    onInstructionsChange={setGeneralInstructions}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Separator className="my-6" />
 
               {/* Assessment Mode */}
               <div className="space-y-4">
@@ -374,7 +423,7 @@ const CustomisedGeneration = () => {
                 </RadioGroup>
               </div>
 
-              <Separator />
+              <Separator className="my-6" />
 
               {/* Marks and Duration */}
               <div className="space-y-4">
