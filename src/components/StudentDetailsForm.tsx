@@ -33,14 +33,14 @@ const StudentDetailsForm: React.FC<StudentDetailsFormProps> = ({ show, onToggle,
   };
 
   return (
-    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+    <div className="p-4 bg-card border rounded-lg shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-blue-800">Student Details</h3>
-          <p className="text-sm text-blue-600">Add space for student information on the assessment</p>
+          <h3 className="font-semibold text-foreground">Student Details</h3>
+          <p className="text-sm text-muted-foreground">Add space for student information on the assessment</p>
         </div>
         <div className="flex items-center space-x-3">
-          <Label htmlFor="student-details-toggle" className="text-sm text-blue-700 font-medium">
+          <Label htmlFor="student-details-toggle" className="text-sm text-muted-foreground font-medium">
             {show ? 'Enabled' : 'Disabled'}
           </Label>
           <Switch
@@ -53,7 +53,7 @@ const StudentDetailsForm: React.FC<StudentDetailsFormProps> = ({ show, onToggle,
       
       {show && (
         <div className="space-y-3">
-          <div className="text-sm text-blue-700 mb-2">
+          <div className="text-sm text-muted-foreground mb-2">
             Customize what information students should fill in:
           </div>
           

@@ -27,17 +27,16 @@ const GeneralInstructionsEditor: React.FC<GeneralInstructionsEditorProps> = ({ i
   };
 
   return (
-    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+    <div className="p-4 bg-card border rounded-lg shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-green-800">General Instructions</h3>
-          <p className="text-sm text-green-600">Customize the instructions that appear on the assessment</p>
+          <h3 className="font-semibold text-foreground">General Instructions</h3>
+          <p className="text-sm text-muted-foreground">Customize the instructions that appear on the assessment</p>
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setIsEditing(!isEditing)}
-          className="border-green-300 text-green-700 hover:bg-green-100"
         >
           <Edit className="w-4 h-4 mr-2" />
           {isEditing ? 'Save Instructions' : 'Edit Instructions'}
@@ -48,7 +47,7 @@ const GeneralInstructionsEditor: React.FC<GeneralInstructionsEditorProps> = ({ i
         <div className="space-y-3">
           {instructions.map((instruction, index) => (
             <div key={index} className="flex items-start space-x-2">
-              <span className="font-semibold text-green-700 mt-2">{index + 1}.</span>
+              <span className="font-semibold text-muted-foreground mt-2">{index + 1}.</span>
               <Textarea
                 value={instruction}
                 onChange={(e) => updateInstruction(index, e.target.value)}
@@ -77,10 +76,10 @@ const GeneralInstructionsEditor: React.FC<GeneralInstructionsEditorProps> = ({ i
           </Button>
         </div>
       ) : (
-        <div className="space-y-2 text-sm text-green-800">
+        <div className="space-y-2 text-sm text-foreground">
           {instructions.map((instruction, index) => (
             <div key={index} className="flex">
-              <span className="font-semibold mr-2">{index + 1}.</span>
+              <span className="font-semibold mr-2 text-muted-foreground">{index + 1}.</span>
               <span>{instruction}</span>
             </div>
           ))}
