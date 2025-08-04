@@ -107,52 +107,47 @@ const CustomisedGeneration = () => {
            formData.difficultyL4 + formData.difficultyL5;
   };
 
-  // Generate mock questions for preview based on current form data
+  // Generate mock questions for preview based on sections
   const mockQuestions = useMemo(() => {
     const questions = [];
     let questionNumber = 1;
     
     // Only generate questions if we have the minimum required data
-    if (!formData.title || getTotalQuestions() === 0) {
+    if (!formData.title || sections.length === 0) {
       return [];
     }
     
-    // Generate questions based on Bloom's levels
-    const bloomLevels = [
-      { level: 'L1', count: formData.bloomL1, name: 'Remember' },
-      { level: 'L2', count: formData.bloomL2, name: 'Understand' },
-      { level: 'L3', count: formData.bloomL3, name: 'Apply' },
-      { level: 'L4', count: formData.bloomL4, name: 'Analyze' },
-      { level: 'L5', count: formData.bloomL5, name: 'Evaluate' },
-      { level: 'L6', count: formData.bloomL6, name: 'Create' }
-    ];
-    
-    bloomLevels.forEach(bloom => {
-      for (let i = 0; i < bloom.count; i++) {
-        const questionType = formData.allowedQuestionTypes[i % formData.allowedQuestionTypes.length] || 'MCQ';
-        questions.push({
-          id: `question-${questionNumber}`,
-          questionNumber,
-          questionStem: `Sample ${bloom.name} level question ${i + 1} - This is a placeholder question for ${questionType} type focusing on ${bloom.name} cognitive level.`,
-          questionType,
-          bloomLevel: parseInt(bloom.level.substring(1)),
-          marks: formData.mode === 'SA' ? (bloom.level === 'L1' || bloom.level === 'L2' ? 1 : 2) : 1,
-          chapter: formData.chapters[0] || 'Sample Chapter',
-          topic: 'Sample Topic',
-          options: questionType === 'MCQ' ? [
-            'Option A - Sample answer choice',
-            'Option B - Another choice',
-            'Option C - Third option',
-            'Option D - Fourth option'
-          ] : undefined,
-          answer: questionType === 'MCQ' ? 'Option A' : 'Sample Answer'
-        });
-        questionNumber++;
+    // Generate questions based on sections
+    sections.forEach((section, sectionIndex) => {
+      if (section.questionCount > 0 && section.questionTypes.length > 0) {
+        for (let i = 0; i < section.questionCount; i++) {
+          const questionType = section.questionTypes[i % section.questionTypes.length];
+          questions.push({
+            id: `question-${questionNumber}`,
+            questionNumber,
+            questionStem: `${section.title} - Sample ${questionType} question ${i + 1} - This is a placeholder question for ${section.label || 'this section'}.`,
+            questionType,
+            bloomLevel: Math.floor(Math.random() * 6) + 1,
+            marks: formData.mode === 'SA' ? (questionType === 'MCQ' ? 1 : 2) : 1,
+            chapter: formData.chapters[0] || 'Sample Chapter',
+            topic: 'Sample Topic',
+            section: section.title,
+            sectionLabel: section.label,
+            options: questionType === 'MCQ' ? [
+              'Option A - Sample answer choice',
+              'Option B - Another choice',
+              'Option C - Third option',
+              'Option D - Fourth option'
+            ] : undefined,
+            answer: questionType === 'MCQ' ? 'Option A' : 'Sample Answer'
+          });
+          questionNumber++;
+        }
       }
     });
     
     return questions;
-  }, [formData.bloomL1, formData.bloomL2, formData.bloomL3, formData.bloomL4, formData.bloomL5, formData.bloomL6, formData.allowedQuestionTypes, formData.mode, formData.chapters, formData.title]);
+  }, [sections, formData.mode, formData.chapters, formData.title]);
 
   const handleQuestionAction = (questionId: string, action: 'move-up' | 'move-down' | 'replace' | 'edit') => {
     // Handle question actions in preview
