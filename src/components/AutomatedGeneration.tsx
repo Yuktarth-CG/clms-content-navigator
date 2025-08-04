@@ -484,16 +484,31 @@ const AutomatedGeneration = () => {
     
     const isClmsBlueprint = blueprint.name === 'Less questions on CLMS test';
     
+    // Check if editable distribution exceeds blueprint limit
+    let totalEditableQuestions = 0;
+    if (isClmsBlueprint) {
+      totalEditableQuestions = editableDistribution.difficulty_l1 + editableDistribution.difficulty_l2 + 
+                              editableDistribution.difficulty_l3 + editableDistribution.difficulty_l4 + editableDistribution.difficulty_l5;
+    } else {
+      totalEditableQuestions = editableDistribution.bloom_l1 + editableDistribution.bloom_l2 + editableDistribution.bloom_l3 + 
+                              editableDistribution.bloom_l4 + editableDistribution.bloom_l5 + editableDistribution.bloom_l6;
+    }
+    
+    // Don't allow proceeding if total exceeds blueprint limit
+    if (totalEditableQuestions > blueprint.total_questions) {
+      return false;
+    }
+    
     if (isClmsBlueprint) {
       const totalDifficultyQuestions = 
         (blueprint.difficulty_l1 || 0) + (blueprint.difficulty_l2 || 0) + (blueprint.difficulty_l3 || 0) + 
         (blueprint.difficulty_l4 || 0) + (blueprint.difficulty_l5 || 0);
-      return totalDifficultyQuestions > 0;
+      return totalDifficultyQuestions > 0 && totalEditableQuestions > 0;
     } else {
       const totalBloomQuestions = 
         blueprint.bloom_l1 + blueprint.bloom_l2 + blueprint.bloom_l3 + 
         blueprint.bloom_l4 + blueprint.bloom_l5 + blueprint.bloom_l6;
-      return totalBloomQuestions > 0;
+      return totalBloomQuestions > 0 && totalEditableQuestions > 0;
     }
   };
 
@@ -1507,7 +1522,19 @@ const AutomatedGeneration = () => {
                         </div>
                         
                         {isDistributionEditing && (
-                          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className={`p-3 border rounded-lg ${(() => {
+                            const totalQuestions = Object.values(editableDistribution).slice(0, 6).reduce((sum, val) => sum + val, 0);
+                            const blueprintTotal = blueprint?.total_questions || 0;
+                            const isExceeding = totalQuestions > blueprintTotal;
+                            
+                            if (isExceeding) {
+                              return 'bg-red-50 border-red-200';
+                            } else if (totalQuestions < blueprintTotal) {
+                              return 'bg-amber-50 border-amber-200';
+                            } else {
+                              return 'bg-green-50 border-green-200';
+                            }
+                          })()}`}>
                             {(() => {
                               const totalQuestions = Object.values(editableDistribution).slice(0, 6).reduce((sum, val) => sum + val, 0);
                               const blueprintTotal = blueprint?.total_questions || 0;
@@ -1515,23 +1542,25 @@ const AutomatedGeneration = () => {
                               
                               return (
                                 <div className="flex items-start space-x-2">
-                                  <span className="text-blue-600">📊</span>
+                                  <span className={`${isExceeding ? 'text-red-600' : totalQuestions < blueprintTotal ? 'text-amber-600' : 'text-green-600'}`}>
+                                    {isExceeding ? '⚠️' : totalQuestions < blueprintTotal ? '📊' : '✅'}
+                                  </span>
                                   <div>
-                                    <p className="text-sm text-blue-700">
+                                    <p className={`text-sm font-medium ${isExceeding ? 'text-red-700' : totalQuestions < blueprintTotal ? 'text-amber-700' : 'text-green-700'}`}>
                                       <strong>Current Total:</strong> {totalQuestions} questions 
-                                      {blueprint && ` (Blueprint: ${blueprintTotal})`}
+                                      {blueprint && ` (Blueprint Limit: ${blueprintTotal})`}
                                     </p>
                                     {isExceeding ? (
-                                      <p className="text-xs text-blue-600 mt-1">
-                                        ✓ You can proceed with more questions than the blueprint. The system will generate additional questions as needed.
+                                      <p className="text-xs text-red-600 mt-1">
+                                        ❌ <strong>Cannot proceed:</strong> You have exceeded the blueprint limit by {totalQuestions - blueprintTotal} questions. Please reduce the total to {blueprintTotal} or less.
                                       </p>
                                     ) : totalQuestions < blueprintTotal ? (
-                                      <p className="text-xs text-blue-600 mt-1">
-                                        ✓ You can add more questions or proceed with fewer. The system is flexible with your needs.
+                                      <p className="text-xs text-amber-600 mt-1">
+                                        ⚡ You can add {blueprintTotal - totalQuestions} more questions to reach the blueprint target, or proceed with fewer questions.
                                       </p>
                                     ) : (
-                                      <p className="text-xs text-blue-600 mt-1">
-                                        ✓ Perfect match with your blueprint! You can proceed to the next step.
+                                      <p className="text-xs text-green-600 mt-1">
+                                        ✅ Perfect! Your distribution matches the blueprint exactly. You can proceed to the next step.
                                       </p>
                                     )}
                                   </div>
