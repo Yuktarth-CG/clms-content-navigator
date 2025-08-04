@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { VersionInfo } from '@/components/VersionInfo';
 
 interface HeaderProps {
   userRole: string;
@@ -24,6 +25,7 @@ const Header = ({ userRole, userName }: HeaderProps) => {
         <div className="flex items-center space-x-4">
           <h2 className="text-lg font-semibold text-foreground">Content Management System</h2>
           <Badge variant="secondary">{userRole}</Badge>
+          <VersionInfo />
         </div>
         
         <div className="flex items-center space-x-4">
