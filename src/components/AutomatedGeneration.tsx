@@ -599,8 +599,8 @@ const AutomatedGeneration = () => {
     const questions = [];
     let questionNumber = 1;
     
-    // Only generate questions if we're in the final step (step 4) AND have required data
-    if (!formData.title || !selectedBlueprint || currentStep < 4) {
+    // Only generate questions if we're in the final step (step 3) AND have required data
+    if (!formData.title || !selectedBlueprint || currentStep < 3) {
       return [];
     }
     
