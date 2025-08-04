@@ -199,7 +199,20 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
             <div className="flex justify-between mb-6 text-sm font-semibold">
               {duration && duration.trim() !== '' && (
                 <div>
-                  <strong>Max. Time: {duration} Minutes</strong>
+                  <strong>Max. Time: {(() => {
+                    const minutes = parseInt(duration);
+                    if (minutes >= 60) {
+                      const hours = Math.floor(minutes / 60);
+                      const remainingMinutes = minutes % 60;
+                      if (remainingMinutes === 0) {
+                        return `${hours} ${hours === 1 ? 'Hour' : 'Hours'}`;
+                      } else {
+                        return `${hours} ${hours === 1 ? 'Hour' : 'Hours'} ${remainingMinutes} Minutes`;
+                      }
+                    } else {
+                      return `${minutes} Minutes`;
+                    }
+                  })()}</strong>
                 </div>
               )}
               {totalMarks && totalMarks.trim() !== '' && (
