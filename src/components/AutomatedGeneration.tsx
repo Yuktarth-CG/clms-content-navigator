@@ -1324,26 +1324,38 @@ const AutomatedGeneration = () => {
           <CardContent className="space-y-6">
             {selectedBlueprint && (
               <>
-
-
-                {/* Automatically show distribution based on blueprint */}
                 {(() => {
                   const blueprint = blueprints.find(b => b.id === selectedBlueprint);
                   const isClmsBlueprint = blueprint?.name === 'Less questions on CLMS test';
                   
                   if (isClmsBlueprint) {
-                    // Show difficulty levels for CLMS blueprint (only L1-L4: Very Easy to Hard)
-                    const relevantDifficultyLevels = Object.entries(DifficultyLevels).slice(0, 4); // Only L1-L4
+                    // Show difficulty levels for CLMS blueprint
+                    const relevantDifficultyLevels = Object.entries(DifficultyLevels).slice(0, 4);
                     return (
-                      <div className="space-y-3">
-                        <Label className="text-sm font-medium text-muted-foreground">Difficulty Level Distribution (from Blueprint)</Label>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      <div className="space-y-4">
+                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                          <h4 className="font-medium text-blue-800 mb-2">📊 Question Difficulty Breakdown</h4>
+                          <p className="text-sm text-blue-600 mb-3">
+                            This shows how many questions of each difficulty level will be included in your test based on the selected blueprint.
+                          </p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {relevantDifficultyLevels.map(([level, label]) => {
                             const count = blueprint ? blueprint[`difficulty_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                            const descriptions = {
+                              'Very Easy': 'Basic recall and simple concepts',
+                              'Easy': 'Understanding and simple application',
+                              'Medium': 'Problem-solving and analysis',
+                              'Hard': 'Complex thinking and evaluation'
+                            };
                             return (
-                              <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
-                                <span className="font-medium">{label}</span>
-                                <Badge variant="outline" className="text-xs">{count}</Badge>
+                              <div key={level} className="p-4 border rounded-lg bg-card hover:shadow-sm transition-shadow">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-medium text-lg">{label}</span>
+                                  <Badge variant="secondary" className="text-sm font-medium">{count} questions</Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground">{descriptions[label as keyof typeof descriptions]}</p>
                               </div>
                             );
                           })}
@@ -1353,15 +1365,36 @@ const AutomatedGeneration = () => {
                   } else {
                     // Show Bloom's taxonomy for other blueprints
                     return (
-                      <div className="space-y-3">
-                        <Label className="text-sm font-medium text-muted-foreground">Bloom's Taxonomy Distribution (from Blueprint)</Label>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      <div className="space-y-4">
+                        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                          <h4 className="font-medium text-green-800 mb-2">🎯 Learning Objectives Breakdown</h4>
+                          <p className="text-sm text-green-600 mb-3">
+                            This shows how many questions target each type of thinking skill based on Bloom's Taxonomy. Higher levels require more complex thinking.
+                          </p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {Object.entries(BloomLevels).map(([level, label]) => {
                             const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                            const descriptions = {
+                              'Remember': 'Recall facts and basic concepts',
+                              'Understand': 'Explain ideas and concepts',
+                              'Apply': 'Use information in new situations',
+                              'Analyze': 'Draw connections among ideas',
+                              'Evaluate': 'Justify decisions or opinions',
+                              'Create': 'Produce new or original work'
+                            };
+                            const levelNumber = level.slice(1);
                             return (
-                              <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
-                                <span className="font-medium">{label}</span>
-                                <Badge variant="outline" className="text-xs">{count}</Badge>
+                              <div key={level} className="p-4 border rounded-lg bg-card hover:shadow-sm transition-shadow">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div>
+                                    <span className="font-medium text-lg">{label}</span>
+                                    <span className="text-xs text-muted-foreground ml-2">Level {levelNumber}</span>
+                                  </div>
+                                  <Badge variant="secondary" className="text-sm font-medium">{count} questions</Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground">{descriptions[label as keyof typeof descriptions]}</p>
                               </div>
                             );
                           })}
