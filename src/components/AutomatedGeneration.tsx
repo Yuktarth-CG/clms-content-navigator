@@ -1198,59 +1198,44 @@ const AutomatedGeneration = () => {
                   const blueprint = blueprints.find(b => b.id === selectedBlueprint);
                   const isClmsBlueprint = blueprint?.name === 'Less questions on CLMS test';
                   
-                  return !isClmsBlueprint ? (
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground">Bloom's Taxonomy Distribution (from Blueprint)</Label>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {Object.entries(BloomLevels).map(([level, label]) => {
-                          const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
-                          return (
-                            <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
-                              <span className="font-medium">{label}</span>
-                              <Badge variant="outline" className="text-xs">{count}</Badge>
-                            </div>
-                          );
-                        })}
+                  if (isClmsBlueprint) {
+                    // Show difficulty levels for CLMS blueprint (only L1-L4: Very Easy to Hard)
+                    const relevantDifficultyLevels = Object.entries(DifficultyLevels).slice(0, 4); // Only L1-L4
+                    return (
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium text-muted-foreground">Difficulty Level Distribution (from Blueprint)</Label>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {relevantDifficultyLevels.map(([level, label]) => {
+                            const count = blueprint ? blueprint[`difficulty_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                            return (
+                              <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
+                                <span className="font-medium">{label}</span>
+                                <Badge variant="outline" className="text-xs">{count}</Badge>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground">Difficulty Level Distribution (from Blueprint)</Label>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {Object.entries(DifficultyLevels).map(([level, label]) => {
-                          const count = blueprint ? blueprint[`difficulty_l${level.slice(1)}` as keyof Blueprint] as number : 0;
-                          return (
-                            <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
-                              <span className="font-medium">{label}</span>
-                              <Badge variant="outline" className="text-xs">{count}</Badge>
-                            </div>
-                          );
-                        })}
+                    );
+                  } else {
+                    // Show Bloom's taxonomy for other blueprints
+                    return (
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium text-muted-foreground">Bloom's Taxonomy Distribution (from Blueprint)</Label>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {Object.entries(BloomLevels).map(([level, label]) => {
+                            const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                            return (
+                              <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
+                                <span className="font-medium">{label}</span>
+                                <Badge variant="outline" className="text-xs">{count}</Badge>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })()}
-
-                {(() => {
-                  const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                  const isClmsBlueprint = blueprint?.name === 'Less questions on CLMS test';
-                  
-                  return isClmsBlueprint ? (
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium text-muted-foreground">Difficulty Level Distribution (from Blueprint)</Label>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {Object.entries(DifficultyLevels).map(([level, label]) => {
-                          const count = blueprint ? blueprint[`difficulty_l${level.slice(1)}` as keyof Blueprint] as number : 0;
-                          return (
-                            <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
-                              <span className="font-medium">{label}</span>
-                              <Badge variant="outline" className="text-xs">{count}</Badge>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ) : null;
+                    );
+                  }
                 })()}
               </>
             )}
