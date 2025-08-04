@@ -147,9 +147,9 @@ const AutomatedGeneration = () => {
   ]);
   const [isHeaderSectionOpen, setIsHeaderSectionOpen] = useState(false);
   const [sections, setSections] = useState<Section[]>([
-    { id: 'section-a', title: 'Section A', label: 'Multiple Choice Questions', questionTypes: ['MCQ', 'FITB', 'Match'] },
-    { id: 'section-b', title: 'Section B', label: 'Short Answer Questions', questionTypes: ['Arrange', 'SA'] },
-    { id: 'section-c', title: 'Section C', label: 'Essay Type Questions', questionTypes: ['ETA'] }
+    { id: 'section-a', title: 'Section A', label: 'Multiple Choice Questions', questionTypes: ['MCQ', 'FITB', 'Match'], questionCount: 10 },
+    { id: 'section-b', title: 'Section B', label: 'Short Answer Questions', questionTypes: ['Arrange', 'SA'], questionCount: 5 },
+    { id: 'section-c', title: 'Section C', label: 'Essay Type Questions', questionTypes: ['ETA'], questionCount: 3 }
   ]);
 
   const [formData, setFormData] = useState({

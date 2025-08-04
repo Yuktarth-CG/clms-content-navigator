@@ -12,7 +12,8 @@ export interface Section {
   id: string;
   title: string; // e.g., "Section A"
   label: string; // e.g., "Multiple Choice Questions"
-  questionTypes: QuestionType[]; // New field for selected question types
+  questionTypes: QuestionType[]; // Selected question types for this section
+  questionCount: number; // Number of questions for this section
 }
 
 interface SectionEditorProps {
@@ -32,6 +33,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChang
       title: `Section ${String.fromCharCode(65 + sections.length)}`,
       label: '',
       questionTypes: [], // Default empty for new sections
+      questionCount: 0, // Default question count
     };
     onSectionsChange([...sections, newSection]);
   };
@@ -74,7 +76,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChang
       </CardHeader>
       <CardContent className="space-y-4">
         {sections.map(section => (
-          <div key={section.id} className="p-3 border rounded-lg space-y-3">
+          <div key={section.id} className="p-4 border rounded-lg space-y-4">
             <div className="flex items-center space-x-4">
               <div className="font-medium w-24">{section.title}</div>
               <Input
@@ -83,6 +85,16 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChang
                 onChange={(e) => updateSection(section.id, 'label', e.target.value)}
                 className="flex-1"
               />
+              <div className="w-32">
+                <Input
+                  type="number"
+                  placeholder="Questions"
+                  value={section.questionCount || ''}
+                  onChange={(e) => updateSection(section.id, 'questionCount', parseInt(e.target.value) || 0)}
+                  min="0"
+                  className="text-center"
+                />
+              </div>
               <Button variant="outline" size="icon" onClick={() => removeSection(section.id)} disabled={sections.length <= 1}>
                 <Trash2 className="w-4 h-4" />
               </Button>

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import PDFPreview from './PDFPreview';
 import ChapterLOSelector from './ChapterLOSelector';
+import SectionEditor, { Section } from './SectionEditor';
 import { QuestionType, AssessmentMode, QuestionTypeLabels, BloomLevels, Blueprint, DifficultyLevels } from '@/types/assessment';
 import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,9 +37,13 @@ const CustomisedGeneration = () => {
   const [generating, setGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const [contentType, setContentType] = useState<'chapters' | 'learningOutcomes'>('chapters');
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
-  const [loadingBlueprints, setLoadingBlueprints] = useState(false);
+  const [sections, setSections] = useState<Section[]>([{
+    id: 'section-1',
+    title: 'Section A',
+    label: '',
+    questionTypes: [],
+    questionCount: 0
+  }]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -68,42 +73,22 @@ const CustomisedGeneration = () => {
   const totalSteps = 5;
   const stepProgress = (currentStep / totalSteps) * 100;
 
-  // Fetch blueprints when component mounts
+  // Update allowed question types from sections
   useEffect(() => {
-    fetchBlueprints();
-  }, []);
-
-  const fetchBlueprints = async () => {
-    setLoadingBlueprints(true);
-    try {
-      const { data, error } = await supabase
-        .from('blueprints')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setBlueprints((data || []) as Blueprint[]);
-    } catch (error) {
-      console.error('Error fetching blueprints:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load blueprint templates",
-        variant: "destructive"
+    const allQuestionTypes = sections.reduce<QuestionType[]>((acc, section) => {
+      section.questionTypes.forEach(type => {
+        if (!acc.includes(type)) {
+          acc.push(type);
+        }
       });
-    } finally {
-      setLoadingBlueprints(false);
-    }
-  };
-
-  const handleQuestionTypeChange = (questionType: QuestionType, checked: boolean) => {
+      return acc;
+    }, []);
+    
     setFormData(prev => ({
       ...prev,
-      allowedQuestionTypes: checked 
-        ? [...prev.allowedQuestionTypes, questionType]
-        : prev.allowedQuestionTypes.filter(type => type !== questionType)
+      allowedQuestionTypes: allQuestionTypes
     }));
-  };
+  }, [sections]);
 
   const handleBloomChange = (level: keyof typeof BloomLevels, value: number[]) => {
     const fieldName = `bloom${level}` as keyof typeof formData;
@@ -113,39 +98,8 @@ const CustomisedGeneration = () => {
     }));
   };
 
-  const applyBlueprint = (blueprintId: string) => {
-    const blueprint = blueprints.find(b => b.id === blueprintId);
-    if (!blueprint) return;
-
-    setFormData(prev => ({
-      ...prev,
-      allowedQuestionTypes: blueprint.allowed_question_types,
-      bloomL1: blueprint.bloom_l1,
-      bloomL2: blueprint.bloom_l2,
-      bloomL3: blueprint.bloom_l3,
-      bloomL4: blueprint.bloom_l4,
-      bloomL5: blueprint.bloom_l5,
-      bloomL6: blueprint.bloom_l6,
-      difficultyL1: blueprint.difficulty_l1 || 0,
-      difficultyL2: blueprint.difficulty_l2 || 0,
-      difficultyL3: blueprint.difficulty_l3 || 0,
-      difficultyL4: blueprint.difficulty_l4 || 0,
-      difficultyL5: blueprint.difficulty_l5 || 0,
-      mode: blueprint.mode,
-      totalMarks: blueprint.total_marks?.toString() || '',
-      duration: blueprint.duration?.toString() || ''
-    }));
-
-    setSelectedTemplate(blueprintId);
-    toast({
-      title: "Blueprint Applied",
-      description: `Applied "${blueprint.name}" blueprint template`,
-    });
-  };
-
   const getTotalQuestions = () => {
-    return formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + 
-           formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
+    return sections.reduce((total, section) => total + (section.questionCount || 0), 0);
   };
 
   const getTotalDifficultyQuestions = () => {
@@ -247,7 +201,7 @@ const CustomisedGeneration = () => {
   };
 
   const canProceedToStep5 = () => {
-    return formData.allowedQuestionTypes.length > 0 && getTotalQuestions() > 0;
+    return sections.some(section => section.questionTypes.length > 0);
   };
 
   const canProceedToStep6 = () => {
@@ -297,7 +251,7 @@ const CustomisedGeneration = () => {
                 <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>Configuration</span>
                 <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Basic Info</span>
                 <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
-                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Questions</span>
+                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Sections</span>
                 <span className={currentStep >= 5 ? "text-primary font-medium" : "text-muted-foreground"}>Generate</span>
               </div>
               <Progress value={stepProgress} className="h-2" />
@@ -518,7 +472,7 @@ const CustomisedGeneration = () => {
                   disabled={!canProceedToStep4()}
                   className="flex items-center space-x-2"
                 >
-                  <span>Next: Question Setup</span>
+                  <span>Next: Section Setup</span>
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -526,172 +480,20 @@ const CustomisedGeneration = () => {
           </Card>
         )}
 
-        {/* Step 4: Question Setup */}
+        {/* Step 4: Section Management */}
         {currentStep === 4 && (
           <Card className="animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
-                <span>Question Setup</span>
+                <span>Section Management</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Allowed Question Types */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Target className="w-5 h-5 text-primary" />
-                  <Label className="text-base font-medium">Allowed Question Types</Label>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {Object.entries(QuestionTypeLabels).map(([type, label]) => (
-                    <div key={type} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                      <Checkbox
-                        id={type}
-                        checked={formData.allowedQuestionTypes.includes(type as QuestionType)}
-                        onCheckedChange={(checked) => handleQuestionTypeChange(type as QuestionType, !!checked)}
-                      />
-                      <Label htmlFor={type} className="cursor-pointer text-sm">{label}</Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Blueprint Selection Section */}
-              {blueprints.length > 0 && (
-                <>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <BookTemplate className="w-5 h-5 text-blue-600" />
-                      <Label className="text-base font-medium">Use Blueprint Template</Label>
-                      <Badge variant="secondary" className="text-xs">Optional</Badge>
-                    </div>
-                    <Select value={selectedTemplate} onValueChange={applyBlueprint}>
-                      <SelectTrigger className="h-11">
-                        <SelectValue placeholder="Select a blueprint template" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {blueprints.map(blueprint => (
-                          <SelectItem key={blueprint.id} value={blueprint.id}>
-                            {blueprint.name} - {blueprint.total_questions} questions
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {selectedTemplate && (
-                      <Alert>
-                        <CheckCircle className="h-4 w-4" />
-                        <AlertDescription>
-                          Blueprint template applied! The question distribution has been updated.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
-                  <Separator />
-                </>
-              )}
-
-              {/* Distribution Method Selection */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Calculator className="w-5 h-5 text-green-600" />
-                  <Label className="text-base font-medium">Distribution Method</Label>
-                </div>
-                <RadioGroup value={formData.distributionMethod} onValueChange={(value: 'blooms' | 'difficulty') => setFormData(prev => ({ ...prev, distributionMethod: value }))}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Label htmlFor="blooms-method" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="blooms" id="blooms-method" />
-                      <div>
-                        <div className="font-medium">Bloom's Taxonomy</div>
-                        <div className="text-sm text-muted-foreground">Distribute by cognitive levels</div>
-                      </div>
-                    </Label>
-                    <Label htmlFor="difficulty-method" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="difficulty" id="difficulty-method" />
-                      <div>
-                        <div className="font-medium">Difficulty Levels</div>
-                        <div className="text-sm text-muted-foreground">Distribute by question difficulty</div>
-                      </div>
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              <Separator />
-
-              {/* Conditional Distribution Display */}
-              {(!formData.distributionMethod || formData.distributionMethod === 'blooms') && (
-                <div className="space-y-4">
-                  <Label className="text-base font-medium">Bloom's Taxonomy Distribution</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Specify the number of questions for each Bloom's Taxonomy level.
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {Object.entries(BloomLevels).map(([level, label]) => (
-                      <div key={level} className="space-y-2">
-                        <Label htmlFor={`bloom-${level}`}>{label}</Label>
-                        <Input
-                          id={`bloom-${level}`}
-                          type="number"
-                          min="0"
-                          value={formData[`bloom${level}` as keyof typeof formData] || 0}
-                          onChange={(e) => {
-                            const value = parseInt(e.target.value) || 0;
-                            handleBloomChange(level as keyof typeof BloomLevels, [value]);
-                          }}
-                          placeholder={`e.g., ${level === 'L1' ? '4' : '2'}`}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Total Questions: {getTotalQuestions()}
-                  </div>
-                </div>
-              )}
-
-              {formData.distributionMethod === 'difficulty' && (
-                <div className="space-y-4">
-                  <Label className="text-base font-medium">Difficulty Level Distribution</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {Object.entries(DifficultyLevels).map(([level, label]) => (
-                      <div key={level} className="space-y-3">
-                        <div className="flex justify-between">
-                          <Label htmlFor={`difficulty-${level}`}>{label}</Label>
-                          <span className="text-sm text-muted-foreground">
-                            {formData[`difficulty${level}` as keyof typeof formData] || 0}
-                          </span>
-                        </div>
-                        <Slider
-                          id={`difficulty-${level}`}
-                          min={0}
-                          max={50}
-                          step={1}
-                          value={[formData[`difficulty${level}` as keyof typeof formData] as number || 0]}
-                          onValueChange={(value) => {
-                            const fieldName = `difficulty${level}` as keyof typeof formData;
-                            setFormData(prev => ({ ...prev, [fieldName]: value[0] }));
-                          }}
-                          className="w-full"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Total Questions by Difficulty: {getTotalDifficultyQuestions()}
-                  </div>
-                </div>
-              )}
-
-              {hasQuestionCountExceeded() && (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Question count exceeds 100. Please reduce the number of questions.
-                  </AlertDescription>
-                </Alert>
-              )}
+              <SectionEditor
+                sections={sections}
+                onSectionsChange={setSections}
+              />
 
               <div className="flex justify-between pt-4">
                 <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
@@ -731,6 +533,7 @@ const CustomisedGeneration = () => {
                   <div><strong>Total Questions:</strong> {getTotalQuestions()}</div>
                   {formData.totalMarks && <div><strong>Total Marks:</strong> {formData.totalMarks}</div>}
                   {formData.duration && <div><strong>Duration:</strong> {formData.duration} minutes</div>}
+                  <div><strong>Sections:</strong> {sections.length} section{sections.length !== 1 ? 's' : ''} configured</div>
                   <div><strong>Question Types:</strong> {formData.allowedQuestionTypes.map(type => QuestionTypeLabels[type]).join(', ')}</div>
                   <div><strong>Content:</strong> {contentType === 'chapters' ? `${formData.chapters.length} chapters selected` : `${formData.learningOutcomes.length} learning outcomes selected`}</div>
                 </div>
