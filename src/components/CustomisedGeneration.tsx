@@ -164,29 +164,9 @@ const CustomisedGeneration = () => {
   }, [sections]);
 
   const handleBloomChange = (level: keyof typeof BloomLevels, value: number[]) => {
-    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-    if (!blueprint) return;
-
     const fieldName = `bloom${level}` as keyof typeof formData;
     const newValue = value[0];
     
-    // Calculate current total with the new value
-    const otherLevels = Object.entries(BloomLevels).filter(([l]) => l !== level);
-    const otherLevelsTotal = otherLevels.reduce((sum, [l]) => {
-      const fname = `bloom${l}` as keyof typeof formData;
-      return sum + (formData[fname] as number);
-    }, 0);
-    
-    // Check if new total would exceed blueprint limit
-    if (otherLevelsTotal + newValue > blueprint.total_questions) {
-      toast({
-        title: "Question Limit Exceeded",
-        description: `Total questions cannot exceed ${blueprint.total_questions} as per the selected blueprint.`,
-        variant: "destructive"
-      });
-      return;
-    }
-
     setFormData(prev => ({
       ...prev,
       [fieldName]: newValue
@@ -858,7 +838,7 @@ const CustomisedGeneration = () => {
                           </div>
                           {totalQuestions > blueprint.total_questions ? (
                             <p className="text-red-600 text-sm">
-                              ⚠️ Exceeds blueprint limit by {totalQuestions - blueprint.total_questions}
+                              ⚠️ Total exceeds blueprint by {totalQuestions - blueprint.total_questions} questions. Please reduce from other levels.
                             </p>
                           ) : totalQuestions < blueprint.total_questions ? (
                             <p className="text-yellow-600 text-sm">
