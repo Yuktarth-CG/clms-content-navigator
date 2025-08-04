@@ -379,7 +379,7 @@ const QuestionShortageResolver: React.FC<QuestionShortageResolverProps> = ({
                     <Alert>
                       <PlusCircle className="h-4 w-4" />
                       <AlertDescription>
-                        Questions added here can also be saved to the CLMS library for future use. They will be marked as manually added and won&apos;t appear in CLMS until reviewed.
+                        Questions added here will not be saved to the CLMS library for future use. Please add them if you want to use them.
                       </AlertDescription>
                     </Alert>
                   </CardHeader>
