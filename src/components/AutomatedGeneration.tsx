@@ -1087,7 +1087,7 @@ const AutomatedGeneration = () => {
                                 45 questions available
                               </Badge>
                               <Badge variant="outline" className="text-xs">
-                                {chapter.learningOutcomes.length} skills
+                                {chapter.learningOutcomes.join(', ')}
                               </Badge>
                             </div>
                           </div>
