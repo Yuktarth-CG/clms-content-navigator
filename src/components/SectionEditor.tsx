@@ -8,12 +8,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { QuestionType, QuestionTypeLabels } from '@/types/assessment';
 
+export interface QuestionTypeConfig {
+  type: QuestionType;
+  count: number;
+  marks: number;
+}
+
 export interface Section {
   id: string;
   title: string; // e.g., "Section A"
   label: string; // e.g., "Multiple Choice Questions"
-  questionTypes: QuestionType[]; // Selected question types for this section
-  questionCount: number; // Number of questions for this section
+  questionTypeConfigs: QuestionTypeConfig[]; // Detailed config for each question type
 }
 
 interface SectionEditorProps {
@@ -32,8 +37,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChang
       id: `section-${Date.now()}`,
       title: `Section ${String.fromCharCode(65 + sections.length)}`,
       label: '',
-      questionTypes: [], // Default empty for new sections
-      questionCount: 0, // Default question count
+      questionTypeConfigs: [], // Default empty for new sections
     };
     onSectionsChange([...sections, newSection]);
   };
@@ -44,18 +48,54 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChang
     );
   };
 
-  const handleQuestionTypeToggle = (sectionId: string, type: QuestionType, checked: boolean) => {
+  const addQuestionTypeConfig = (sectionId: string, type: QuestionType) => {
     onSectionsChange(
       sections.map(section => {
         if (section.id === sectionId) {
-          const newTypes = checked
-            ? [...section.questionTypes, type]
-            : section.questionTypes.filter(t => t !== type);
-          return { ...section, questionTypes: newTypes };
+          const newConfig: QuestionTypeConfig = { type, count: 1, marks: 1 };
+          return { ...section, questionTypeConfigs: [...section.questionTypeConfigs, newConfig] };
         }
         return section;
       })
     );
+  };
+
+  const removeQuestionTypeConfig = (sectionId: string, type: QuestionType) => {
+    onSectionsChange(
+      sections.map(section => {
+        if (section.id === sectionId) {
+          return { 
+            ...section, 
+            questionTypeConfigs: section.questionTypeConfigs.filter(config => config.type !== type) 
+          };
+        }
+        return section;
+      })
+    );
+  };
+
+  const updateQuestionTypeConfig = (sectionId: string, type: QuestionType, field: 'count' | 'marks', value: number) => {
+    onSectionsChange(
+      sections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            questionTypeConfigs: section.questionTypeConfigs.map(config =>
+              config.type === type ? { ...config, [field]: value } : config
+            )
+          };
+        }
+        return section;
+      })
+    );
+  };
+
+  const getTotalQuestions = (section: Section) => {
+    return section.questionTypeConfigs.reduce((total, config) => total + config.count, 0);
+  };
+
+  const getTotalMarks = (section: Section) => {
+    return section.questionTypeConfigs.reduce((total, config) => total + (config.count * config.marks), 0);
   };
 
   const removeSection = (id: string) => {
@@ -85,15 +125,8 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChang
                 onChange={(e) => updateSection(section.id, 'label', e.target.value)}
                 className="flex-1"
               />
-              <div className="w-32">
-                <Input
-                  type="number"
-                  placeholder="Questions"
-                  value={section.questionCount || ''}
-                  onChange={(e) => updateSection(section.id, 'questionCount', parseInt(e.target.value) || 0)}
-                  min="0"
-                  className="text-center"
-                />
+              <div className="text-sm text-muted-foreground">
+                Total: {getTotalQuestions(section)} questions, {getTotalMarks(section)} marks
               </div>
               <Button variant="outline" size="icon" onClick={() => removeSection(section.id)} disabled={sections.length <= 1}>
                 <Trash2 className="w-4 h-4" />
@@ -101,21 +134,60 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChang
             </div>
             
             <div>
-              <Label className="text-sm font-medium mb-2 block">Question Types for this Section:</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {ALL_QUESTION_TYPES.map(type => (
-                  <div key={type.value} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`${section.id}-${type.value}`}
-                      checked={section.questionTypes.includes(type.value)}
-                      onCheckedChange={(checked) => handleQuestionTypeToggle(section.id, type.value, Boolean(checked))}
-                    />
-                    <Label htmlFor={`${section.id}-${type.value}`} className="text-sm">
-                      {type.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
+              <Label className="text-sm font-medium mb-2 block">Question Types Configuration:</Label>
+              
+              {section.questionTypeConfigs.length > 0 && (
+                <div className="space-y-2 mb-4">
+                  {section.questionTypeConfigs.map(config => (
+                    <div key={config.type} className="flex items-center space-x-2 p-2 bg-muted rounded">
+                      <span className="text-sm font-medium w-32">{QuestionTypeLabels[config.type]}</span>
+                      <div className="flex items-center space-x-1">
+                        <Label className="text-xs">Count:</Label>
+                        <Input
+                          type="number"
+                          value={config.count}
+                          onChange={(e) => updateQuestionTypeConfig(section.id, config.type, 'count', parseInt(e.target.value) || 0)}
+                          min="0"
+                          className="w-16 h-8"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Label className="text-xs">Marks each:</Label>
+                        <Input
+                          type="number"
+                          value={config.marks}
+                          onChange={(e) => updateQuestionTypeConfig(section.id, config.type, 'marks', parseInt(e.target.value) || 0)}
+                          min="0"
+                          className="w-16 h-8"
+                        />
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => removeQuestionTypeConfig(section.id, config.type)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <Select onValueChange={(value) => addQuestionTypeConfig(section.id, value as QuestionType)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Add question type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {ALL_QUESTION_TYPES
+                    .filter(type => !section.questionTypeConfigs.some(config => config.type === type.value))
+                    .map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
             </div>
           </div>
         ))}

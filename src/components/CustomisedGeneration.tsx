@@ -55,8 +55,7 @@ const CustomisedGeneration = () => {
     id: 'section-1',
     title: 'Section A',
     label: '',
-    questionTypes: [],
-    questionCount: 0
+    questionTypeConfigs: []
   }]);
 
   const [formData, setFormData] = useState({
@@ -90,9 +89,9 @@ const CustomisedGeneration = () => {
   // Update allowed question types from sections
   useEffect(() => {
     const allQuestionTypes = sections.reduce<QuestionType[]>((acc, section) => {
-      section.questionTypes.forEach(type => {
-        if (!acc.includes(type)) {
-          acc.push(type);
+      section.questionTypeConfigs.forEach(config => {
+        if (!acc.includes(config.type)) {
+          acc.push(config.type);
         }
       });
       return acc;
@@ -113,7 +112,9 @@ const CustomisedGeneration = () => {
   };
 
   const getTotalQuestions = () => {
-    return sections.reduce((total, section) => total + (section.questionCount || 0), 0);
+    return sections.reduce((total, section) => {
+      return total + section.questionTypeConfigs.reduce((sectionTotal, config) => sectionTotal + config.count, 0);
+    }, 0);
   };
 
   const getTotalDifficultyQuestions = () => {
@@ -139,33 +140,32 @@ const CustomisedGeneration = () => {
     sections.forEach((section, sectionIndex) => {
       console.log('🔍 [CustomisedGeneration] Processing section:', section);
       
-      // For demo purposes, add some default questions even if not configured
-      const questionCount = section.questionCount > 0 ? section.questionCount : 2; // Default 2 questions per section
-      const questionTypes = section.questionTypes.length > 0 ? section.questionTypes : ['MCQ']; // Default to MCQ
+      // Generate questions based on question type configs
+      section.questionTypeConfigs.forEach(config => {
+        for (let i = 0; i < config.count; i++) {
       
-      for (let i = 0; i < questionCount; i++) {
-        const questionType = questionTypes[i % questionTypes.length];
-        questions.push({
-          id: `question-${questionNumber}`,
-          questionNumber,
-          questionStem: `${section.title} - Sample ${questionType} question ${i + 1} - This is a placeholder question for ${section.label || 'this section'}.`,
-          questionType,
-          bloomLevel: Math.floor(Math.random() * 6) + 1,
-          marks: formData.mode === 'SA' ? (questionType === 'MCQ' ? 1 : 2) : 1,
-          chapter: formData.chapters[0] || 'Sample Chapter',
-          topic: 'Sample Topic',
-          section: section.title,
-          sectionLabel: section.label,
-          options: questionType === 'MCQ' ? [
-            'Option A - Sample answer choice',
-            'Option B - Another choice',
-            'Option C - Third option',
-            'Option D - Fourth option'
-          ] : undefined,
-          answer: questionType === 'MCQ' ? 'Option A' : 'Sample Answer'
-        });
-        questionNumber++;
-      }
+          questions.push({
+            id: `question-${questionNumber}`,
+            questionNumber,
+            questionStem: `${section.title} - Sample ${config.type} question ${i + 1} - This is a placeholder question for ${section.label || 'this section'}.`,
+            questionType: config.type,
+            bloomLevel: Math.floor(Math.random() * 6) + 1,
+            marks: config.marks,
+            chapter: formData.chapters[0] || 'Sample Chapter',
+            topic: 'Sample Topic',
+            section: section.title,
+            sectionLabel: section.label,
+            options: config.type === 'MCQ' ? [
+              'Option A - Sample answer choice',
+              'Option B - Another choice',
+              'Option C - Third option',
+              'Option D - Fourth option'
+            ] : undefined,
+            answer: config.type === 'MCQ' ? 'Option A' : 'Sample Answer'
+          });
+          questionNumber++;
+        }
+      });
     });
     
     console.log('🔍 [CustomisedGeneration] Generated questions:', questions);
@@ -219,7 +219,7 @@ const CustomisedGeneration = () => {
   };
 
   const canProceedToStep5 = () => {
-    const hasValidSections = sections.some(section => section.questionTypes.length > 0);
+    const hasValidSections = sections.some(section => section.questionTypeConfigs.length > 0);
     const hasTotalQuestions = getTotalQuestions() > 0;
     return hasValidSections && hasTotalQuestions;
   };

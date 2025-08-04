@@ -177,9 +177,33 @@ const AutomatedGeneration = () => {
   const [isDistributionEditing, setIsDistributionEditing] = useState(false);
 
   const [sections, setSections] = useState<Section[]>([
-    { id: 'section-a', title: 'Section A', label: 'Multiple Choice Questions', questionTypes: ['MCQ', 'FITB', 'Match'], questionCount: 10 },
-    { id: 'section-b', title: 'Section B', label: 'Short Answer Questions', questionTypes: ['Arrange', 'SA'], questionCount: 5 },
-    { id: 'section-c', title: 'Section C', label: 'Essay Type Questions', questionTypes: ['ETA'], questionCount: 3 }
+    { 
+      id: 'section-a', 
+      title: 'Section A', 
+      label: 'Multiple Choice Questions', 
+      questionTypeConfigs: [
+        { type: 'MCQ', count: 6, marks: 1 },
+        { type: 'FITB', count: 2, marks: 1 },
+        { type: 'Match', count: 2, marks: 1 }
+      ]
+    },
+    { 
+      id: 'section-b', 
+      title: 'Section B', 
+      label: 'Short Answer Questions', 
+      questionTypeConfigs: [
+        { type: 'Arrange', count: 2, marks: 2 },
+        { type: 'SA', count: 3, marks: 3 }
+      ]
+    },
+    { 
+      id: 'section-c', 
+      title: 'Section C', 
+      label: 'Essay Type Questions', 
+      questionTypeConfigs: [
+        { type: 'ETA', count: 3, marks: 5 }
+      ]
+    }
   ]);
 
   const [formData, setFormData] = useState({
@@ -513,7 +537,7 @@ const AutomatedGeneration = () => {
   };
 
   const canProceedToStep5 = () => {
-    return sections.length > 0 && sections.every(s => s.label.trim() !== '' && s.questionTypes.length > 0);
+    return sections.length > 0 && sections.every(s => s.label.trim() !== '' && s.questionTypeConfigs.length > 0);
   };
 
   const canGenerate = () => {
