@@ -273,6 +273,8 @@ const CustomisedGeneration = () => {
 
   const checkQuestionShortage = (blueprint: Blueprint): QuestionShortage[] => {
     console.log('🔍 [CustomisedGeneration] Checking question shortage for blueprint:', blueprint.name);
+    console.log('🔍 [CustomisedGeneration] Blueprint total questions:', blueprint.total_questions);
+    console.log('🔍 [CustomisedGeneration] Blueprint allowed types:', blueprint.allowed_question_types);
     
     const availableQuestions = blueprint.name === 'Less questions on CLMS test' ? {
       'MCQ': 8,
@@ -417,27 +419,34 @@ const CustomisedGeneration = () => {
   };
 
   const nextStep = () => {
-    console.log('🔍 [CustomisedGeneration] Moving to next step. Current step:', currentStep);
+    console.log('🚀 [CustomisedGeneration] NextStep called - Current step:', currentStep);
+    console.log('🚀 [CustomisedGeneration] Selected blueprint ID:', selectedBlueprint);
     
     // Check for question shortage when moving to section management step (step 4)
     if (currentStep === 3 && selectedBlueprint) {
       const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-      console.log('🔍 [CustomisedGeneration] Checking blueprint before section management:', blueprint?.name);
+      console.log('🚀 [CustomisedGeneration] Found blueprint:', blueprint);
+      console.log('🚀 [CustomisedGeneration] Blueprint name:', blueprint?.name);
+      console.log('🚀 [CustomisedGeneration] Is CLMS blueprint?', blueprint?.name === 'Less questions on CLMS test');
       
       if (blueprint) {
         const shortages = checkQuestionShortage(blueprint);
-        console.log('🔍 [CustomisedGeneration] Detected shortages:', shortages);
+        console.log('🚀 [CustomisedGeneration] Detected shortages:', shortages);
         
         if (shortages.length > 0) {
+          console.log('🚀 [CustomisedGeneration] Shortages found, showing manual entry dialog');
           setShortage(shortages);
           setShowManualEntry(true);
           return; // Don't proceed to next step
+        } else {
+          console.log('🚀 [CustomisedGeneration] No shortages detected, proceeding to next step');
         }
       }
     }
     
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
+      console.log('🚀 [CustomisedGeneration] Moving to step:', currentStep + 1);
     }
   };
 
