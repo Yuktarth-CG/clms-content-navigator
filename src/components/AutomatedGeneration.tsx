@@ -159,17 +159,9 @@ const AutomatedGeneration = () => {
     subject: '',
     chapters: [] as string[],
     learningOutcomes: [] as string[],
-    mode: 'FA' as AssessmentMode,
-    distributionMethod: 'bloom' as 'bloom' | 'difficulty'
+    mode: 'FA' as AssessmentMode
   });
 
-  const [difficultyDistribution, setDifficultyDistribution] = useState({
-    difficultyL1: 0,
-    difficultyL2: 0,
-    difficultyL3: 0,
-    difficultyL4: 0,
-    difficultyL5: 0
-  });
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
@@ -1200,32 +1192,13 @@ const AutomatedGeneration = () => {
             {selectedBlueprint && (
               <>
 
-                {/* Distribution Method Selection */}
-                <div className="space-y-3 mb-4">
-                  <Label className="text-base font-medium">Choose Distribution Method</Label>
-                  <RadioGroup
-                    value={formData.distributionMethod || 'bloom'}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, distributionMethod: value as 'bloom' | 'difficulty' }))}
-                    className="flex space-x-6"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="bloom" id="bloom" />
-                      <Label htmlFor="bloom">Bloom's Taxonomy</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="difficulty" id="difficulty" />
-                      <Label htmlFor="difficulty">Difficulty Levels</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
 
-                {/* Conditionally show Bloom's Taxonomy or Difficulty Distribution */}
+                {/* Automatically show distribution based on blueprint */}
                 {(() => {
                   const blueprint = blueprints.find(b => b.id === selectedBlueprint);
                   const isClmsBlueprint = blueprint?.name === 'Less questions on CLMS test';
-                  const showDifficulty = formData.distributionMethod === 'difficulty' || isClmsBlueprint;
                   
-                  return !showDifficulty ? (
+                  return !isClmsBlueprint ? (
                     <div className="space-y-3">
                       <Label className="text-sm font-medium text-muted-foreground">Bloom's Taxonomy Distribution (from Blueprint)</Label>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -1258,42 +1231,27 @@ const AutomatedGeneration = () => {
                   );
                 })()}
 
-                {formData.distributionMethod === 'difficulty' && (
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-muted-foreground">Difficulty Level Distribution</Label>
+                {(() => {
+                  const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                  const isClmsBlueprint = blueprint?.name === 'Less questions on CLMS test';
+                  
+                  return isClmsBlueprint ? (
                     <div className="space-y-3">
-                      {Object.entries(DifficultyLevels).map(([level, label]) => (
-                        <div key={level} className="space-y-1">
-                          <div className="flex justify-between text-sm">
-                            <Label htmlFor={`difficulty-${level}`} className="text-sm">{label}</Label>
-                            <span className="text-muted-foreground text-xs">
-                              {difficultyDistribution[`difficulty${level}` as keyof typeof difficultyDistribution]}
-                            </span>
-                          </div>
-                          <Slider
-                            id={`difficulty-${level}`}
-                            min={0}
-                            max={50}
-                            step={1}
-                            value={[difficultyDistribution[`difficulty${level}` as keyof typeof difficultyDistribution]]}
-                            onValueChange={(value) => {
-                              const fieldName = `difficulty${level}` as keyof typeof difficultyDistribution;
-                              setDifficultyDistribution(prev => ({ ...prev, [fieldName]: value[0] }));
-                            }}
-                            className="w-full h-2"
-                          />
-                        </div>
-                      ))}
+                      <Label className="text-sm font-medium text-muted-foreground">Difficulty Level Distribution (from Blueprint)</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {Object.entries(DifficultyLevels).map(([level, label]) => {
+                          const count = blueprint ? blueprint[`difficulty_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                          return (
+                            <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
+                              <span className="font-medium">{label}</span>
+                              <Badge variant="outline" className="text-xs">{count}</Badge>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      Total Questions: {
-                        difficultyDistribution.difficultyL1 + difficultyDistribution.difficultyL2 + 
-                        difficultyDistribution.difficultyL3 + difficultyDistribution.difficultyL4 + 
-                        difficultyDistribution.difficultyL5
-                      }
-                    </div>
-                  </div>
-                )}
+                  ) : null;
+                })()}
               </>
             )}
 
