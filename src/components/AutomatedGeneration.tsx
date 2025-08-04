@@ -569,7 +569,7 @@ const AutomatedGeneration = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">1</div>
-              <span>Assessment Information & Blueprint Selection</span>
+              <span>Assessment Information</span>
             </CardTitle>
             <p className="text-muted-foreground">Provide basic assessment details and choose a pre-configured template</p>
           </CardHeader>
