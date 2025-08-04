@@ -671,6 +671,7 @@ const CustomisedGeneration = () => {
               <SectionEditor
                 sections={sections}
                 onSectionsChange={setSections}
+                selectedBlueprint={blueprints.find(b => b.id === selectedBlueprint)}
               />
 
               <div className="flex justify-between pt-4">

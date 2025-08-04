@@ -6,7 +6,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { QuestionType, QuestionTypeLabels } from '@/types/assessment';
+import { QuestionType, QuestionTypeLabels, Blueprint } from '@/types/assessment';
 
 export interface QuestionTypeConfig {
   type: QuestionType;
@@ -24,6 +24,7 @@ export interface Section {
 interface SectionEditorProps {
   sections: Section[];
   onSectionsChange: (sections: Section[]) => void;
+  selectedBlueprint?: Blueprint;
 }
 
 const ALL_QUESTION_TYPES: { value: QuestionType; label: string }[] = Object.entries(QuestionTypeLabels).map(([key, value]) => ({
@@ -31,7 +32,7 @@ const ALL_QUESTION_TYPES: { value: QuestionType; label: string }[] = Object.entr
   label: value,
 }));
 
-const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChange }) => {
+const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChange, selectedBlueprint }) => {
   const addSection = () => {
     const newSection: Section = {
       id: `section-${Date.now()}`,
@@ -48,11 +49,57 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChang
     );
   };
 
+  const calculateDefaultQuestionCountAndMarks = (type: QuestionType): { count: number; marks: number } => {
+    if (!selectedBlueprint) {
+      return { count: 1, marks: 1 }; // Fallback values
+    }
+
+    // Calculate total questions in blueprint
+    const totalBlueprintQuestions = selectedBlueprint.total_questions;
+    const totalSections = sections.length || 1;
+    
+    // Distribute questions roughly equally across sections
+    const questionsPerSection = Math.ceil(totalBlueprintQuestions / totalSections);
+    
+    // Calculate marks based on blueprint total marks and question count
+    let marksPerQuestion = 1; // Default
+    if (selectedBlueprint.total_marks && totalBlueprintQuestions > 0) {
+      marksPerQuestion = Math.ceil(selectedBlueprint.total_marks / totalBlueprintQuestions);
+    }
+
+    // For different question types, adjust marks
+    switch (type) {
+      case 'MCQ':
+      case 'FITB':
+      case 'TF':
+        marksPerQuestion = Math.max(1, Math.floor(marksPerQuestion * 0.5)); // Lower marks for objective
+        break;
+      case 'VSA':
+        marksPerQuestion = Math.max(1, Math.floor(marksPerQuestion * 0.7));
+        break;
+      case 'SA':
+        marksPerQuestion = Math.max(2, Math.floor(marksPerQuestion * 1.0));
+        break;
+      case 'ETA':
+        marksPerQuestion = Math.max(3, Math.floor(marksPerQuestion * 1.5)); // Higher marks for essays
+        break;
+      default:
+        marksPerQuestion = Math.max(1, marksPerQuestion);
+    }
+
+    return {
+      count: Math.max(1, Math.floor(questionsPerSection / 3)), // Rough distribution
+      marks: marksPerQuestion
+    };
+  };
+
   const addQuestionTypeConfig = (sectionId: string, type: QuestionType) => {
+    const { count, marks } = calculateDefaultQuestionCountAndMarks(type);
+    
     onSectionsChange(
       sections.map(section => {
         if (section.id === sectionId) {
-          const newConfig: QuestionTypeConfig = { type, count: 1, marks: 1 };
+          const newConfig: QuestionTypeConfig = { type, count, marks };
           return { ...section, questionTypeConfigs: [...section.questionTypeConfigs, newConfig] };
         }
         return section;
