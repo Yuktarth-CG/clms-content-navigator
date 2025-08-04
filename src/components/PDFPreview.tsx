@@ -245,113 +245,75 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
               </div>}
 
             <ScrollArea className="h-96">
-              {showGenerationInstructions ? (
-                <div className="space-y-6 p-6 text-center">
-                  <div className="mb-8">
-                    <h3 className="text-xl font-bold mb-4">🎯 Assessment Generation Instructions</h3>
-                    <p className="text-muted-foreground mb-6">Complete the setup process to generate your custom assessment</p>
-                  </div>
+              <div className="space-y-6">
+                {sectionsToRender.map((section, sectionIndex) => {
+                // Filter questions based on section's allowed types
+                const sectionQuestionTypes = section.questionTypeConfigs?.map(config => config.type) || [];
+                const sectionQuestions = questions.filter(q => sectionQuestionTypes.includes(q.questionType as any));
+                if (sectionQuestions.length === 0 && section.id !== 'default') return null; // Only hide if it's not the default 'All Questions' section and has no questions
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                    <div className="p-4 border rounded-lg bg-blue-50">
-                      <h4 className="font-semibold text-blue-800 mb-2">✅ Step 1: Setup & Blueprint</h4>
-                      <p className="text-sm text-blue-700">Configure your assessment details and select a blueprint that defines the structure and question distribution.</p>
-                    </div>
+                return <div key={section.id}>
+                      <div className="mb-4">
+                        <h3 className="font-bold text-base text-center uppercase tracking-wider">
+                          {section.title}{section.label && `: ${section.label}`}
+                        </h3>
+                        {sectionQuestionTypes.length > 0}
+                      </div>
 
-                    <div className="p-4 border rounded-lg bg-orange-50">
-                      <h4 className="font-semibold text-orange-800 mb-2">📚 Step 2: Content Selection</h4>
-                      <p className="text-sm text-orange-700">Choose specific chapters or learning outcomes that will be covered in your assessment.</p>
-                    </div>
-
-                    <div className="p-4 border rounded-lg bg-purple-50">
-                      <h4 className="font-semibold text-purple-800 mb-2">📊 Step 3: Distribution</h4>
-                      <p className="text-sm text-purple-700">Customize question distribution by Bloom's Taxonomy levels or difficulty for personalized assessment targeting.</p>
-                    </div>
-
-                    <div className="p-4 border rounded-lg bg-green-50">
-                      <h4 className="font-semibold text-green-800 mb-2">📝 Step 4: Sections</h4>
-                      <p className="text-sm text-green-700">Organize your questions into labeled sections and configure question types and marks for each section.</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-sm text-yellow-800">
-                      <strong>💡 Tip:</strong> Your assessment preview will appear here as you progress through the steps. 
-                      Questions will be generated based on your selections and will be fully customizable.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {sectionsToRender.map((section, sectionIndex) => {
-                  // Filter questions based on section's allowed types
-                  const sectionQuestionTypes = section.questionTypeConfigs?.map(config => config.type) || [];
-                  const sectionQuestions = questions.filter(q => sectionQuestionTypes.includes(q.questionType as any));
-                  if (sectionQuestions.length === 0 && section.id !== 'default') return null; // Only hide if it's not the default 'All Questions' section and has no questions
-
-                  return <div key={section.id}>
-                        <div className="mb-4">
-                          <h3 className="font-bold text-base text-center uppercase tracking-wider">
-                            {section.title}{section.label && `: ${section.label}`}
-                          </h3>
-                          {sectionQuestionTypes.length > 0}
-                        </div>
-
-                        <div className="border border-black">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="bg-gray-100">
-                                <th className="border border-black p-2 text-center font-bold w-16">Q. No.</th>
-                                <th className="border border-black p-2 text-center font-bold">QUESTION</th>
-                                <th className="border border-black p-2 text-center font-bold w-20">Marks</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {sectionQuestions.map((question, index) => <tr key={question.id} className="hover:bg-gray-50 cursor-pointer transition-colors group" onClick={() => handleQuestionSelect(question)}>
-                                  <td className="border border-black p-3 text-center font-semibold align-top">
-                                    Q.{question.questionNumber}
-                                  </td>
-                                  <td className="border border-black p-3 align-top relative">
-                                    <div className="mb-2">
-                                      <span className="font-medium">{question.questionStem}</span>
-                                      {question.questionType === 'MCQ' && question.options && <div className="mt-2 space-y-1">
-                                          {question.options.map((option, idx) => <div key={idx} className="ml-4">
-                                              <span className="font-medium">
-                                                {String.fromCharCode(97 + idx)}) 
-                                              </span>
-                                              <span className="ml-2">{option}</span>
-                                            </div>)}
-                                        </div>}
+                      <div className="border border-black">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="border border-black p-2 text-center font-bold w-16">Q. No.</th>
+                              <th className="border border-black p-2 text-center font-bold">QUESTION</th>
+                              <th className="border border-black p-2 text-center font-bold w-20">Marks</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sectionQuestions.map((question, index) => <tr key={question.id} className="hover:bg-gray-50 cursor-pointer transition-colors group" onClick={() => handleQuestionSelect(question)}>
+                                <td className="border border-black p-3 text-center font-semibold align-top">
+                                  Q.{question.questionNumber}
+                                </td>
+                                <td className="border border-black p-3 align-top relative">
+                                  <div className="mb-2">
+                                    <span className="font-medium">{question.questionStem}</span>
+                                    {question.questionType === 'MCQ' && question.options && <div className="mt-2 space-y-1">
+                                        {question.options.map((option, idx) => <div key={idx} className="ml-4">
+                                            <span className="font-medium">
+                                              {String.fromCharCode(97 + idx)}) 
+                                            </span>
+                                            <span className="ml-2">{option}</span>
+                                          </div>)}
+                                      </div>}
+                                  </div>
+                                  
+                                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center space-x-1 bg-white border rounded shadow-sm p-1">
+                                      <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'move-up')} title="Move Up">
+                                        <ArrowUpDown className="w-3 h-3 rotate-180" />
+                                      </Button>
+                                      <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'move-down')} title="Move Down">
+                                        <ArrowUpDown className="w-3 h-3" />
+                                      </Button>
+                                      <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'replace')} title="Replace Question">
+                                        <RefreshCw className="w-3 h-3" />
+                                      </Button>
+                                      <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'edit')} title="Edit Question">
+                                        <Edit className="w-3 h-3" />
+                                      </Button>
                                     </div>
-                                    
-                                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <div className="flex items-center space-x-1 bg-white border rounded shadow-sm p-1">
-                                        <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'move-up')} title="Move Up">
-                                          <ArrowUpDown className="w-3 h-3 rotate-180" />
-                                        </Button>
-                                        <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'move-down')} title="Move Down">
-                                          <ArrowUpDown className="w-3 h-3" />
-                                        </Button>
-                                        <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'replace')} title="Replace Question">
-                                          <RefreshCw className="w-3 h-3" />
-                                        </Button>
-                                        <Button size="sm" variant="ghost" className="p-1 h-6 w-6" onClick={e => handleDirectAction(e, question, 'edit')} title="Edit Question">
-                                          <Edit className="w-3 h-3" />
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="border border-black p-3 text-center font-semibold align-top">
-                                    {question.marks}
-                                  </td>
-                                </tr>)}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>;
-                })}
-                </div>
-              )}
+                                  </div>
+                                </td>
+                                <td className="border border-black p-3 text-center font-semibold align-top">
+                                  {question.marks}
+                                </td>
+                              </tr>)}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>;
+              })}
+              </div>
             </ScrollArea>
           </div>
         </div>

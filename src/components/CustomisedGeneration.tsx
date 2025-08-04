@@ -960,7 +960,6 @@ const CustomisedGeneration = () => {
           isReadyForDownload={isGenerated}
           totalMarks={formData.totalMarks && formData.totalMarks.trim() !== '' ? formData.totalMarks : undefined}
           duration={formData.duration && formData.duration.trim() !== '' ? formData.duration : undefined}
-          showGenerationInstructions={currentStep <= 2}
         />
       </div>
     </div>
