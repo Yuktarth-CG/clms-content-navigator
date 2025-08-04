@@ -790,132 +790,84 @@ const CustomisedGeneration = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               {selectedBlueprint && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="flex items-center space-x-2">
                     <BookOpen className="w-5 h-5 text-primary" />
-                    <Label className="text-base font-medium">Distribution Method</Label>
+                    <Label className="text-base font-medium">Question Distribution</Label>
                   </div>
                   
-                  <RadioGroup 
-                    value={formData.distributionMethod} 
-                    onValueChange={(value: 'blooms' | 'difficulty') => setFormData(prev => ({ ...prev, distributionMethod: value }))}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                  >
-                    <Label htmlFor="blooms-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="blooms" id="blooms-option" />
-                      <div>
-                        <div className="font-medium">Bloom's Taxonomy</div>
-                        <div className="text-sm text-muted-foreground">Distribute by thinking skills</div>
-                      </div>
-                    </Label>
-                    <Label htmlFor="difficulty-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="difficulty" id="difficulty-option" />
-                      <div>
-                        <div className="font-medium">Difficulty Levels</div>
-                        <div className="text-sm text-muted-foreground">Distribute by question difficulty</div>
-                      </div>
-                    </Label>
-                  </RadioGroup>
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-semibold text-blue-800 mb-2">📊 Bloom's Taxonomy Distribution</h4>
+                    <p className="text-sm text-blue-700">
+                      Adjust the number of questions for each thinking skill level. The total must match your selected blueprint.
+                    </p>
+                  </div>
 
-                  <Separator className="my-6" />
-
-                  {formData.distributionMethod === 'blooms' ? (
+                  <div className="space-y-4">
                     <div className="space-y-4">
-                      <Label className="text-base font-medium">Bloom's Taxonomy Distribution</Label>
-                      <div className="space-y-4">
-                        {Object.entries(BloomLevels).map(([level, label]) => {
-                          const fieldName = `bloom${level}` as keyof typeof formData;
-                          const value = formData[fieldName] as number;
-                          const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                          const maxValue = blueprint ? blueprint.total_questions : 50;
-                          
-                          return (
-                            <div key={level} className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <Label className="text-sm font-medium">{label} (L{level.slice(1)})</Label>
-                                <Badge variant="outline">{value} questions</Badge>
-                              </div>
-                              <Slider
-                                value={[value]}
-                                onValueChange={(val) => handleBloomChange(level as keyof typeof BloomLevels, val)}
-                                max={maxValue}
-                                step={1}
-                                className="w-full"
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <Label className="text-base font-medium">Difficulty Distribution</Label>
-                      <div className="space-y-4">
-                        {Object.entries(DifficultyLevels).slice(0, 5).map(([level, label]) => {
-                          const fieldName = `difficulty${level}` as keyof typeof formData;
-                          const value = formData[fieldName] as number;
-                          const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                          const maxValue = blueprint ? blueprint.total_questions : 50;
-                          
-                          return (
-                            <div key={level} className="space-y-2">
-                              <div className="flex items-center justify-between">
+                      {Object.entries(BloomLevels).map(([level, label]) => {
+                        const fieldName = `bloom${level}` as keyof typeof formData;
+                        const value = formData[fieldName] as number;
+                        const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                        const maxValue = blueprint ? blueprint.total_questions : 50;
+                        
+                        return (
+                          <div key={level} className="p-3 border rounded-lg bg-card">
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
                                 <Label className="text-sm font-medium">{label}</Label>
-                                <Badge variant="outline">{value} questions</Badge>
+                                <p className="text-xs text-muted-foreground">Level {level.slice(1)}</p>
                               </div>
-                              <Slider
-                                value={[value]}
-                                onValueChange={(val) => setFormData(prev => ({ ...prev, [fieldName]: val[0] }))}
-                                max={maxValue}
-                                step={1}
-                                className="w-full"
-                              />
+                              <Badge variant="outline" className="text-sm">{value} questions</Badge>
                             </div>
-                          );
-                        })}
-                      </div>
+                            <Slider
+                              value={[value]}
+                              onValueChange={(val) => handleBloomChange(level as keyof typeof BloomLevels, val)}
+                              max={maxValue}
+                              step={1}
+                              className="w-full"
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
-                  )}
+                  </div>
 
-                  <div className={`p-4 rounded-lg ${(() => {
+                  <div className={`p-4 rounded-lg border ${(() => {
                     const blueprint = blueprints.find(b => b.id === selectedBlueprint);
                     if (!blueprint) return 'bg-muted/50';
                     
-                    const totalQuestions = formData.distributionMethod === 'blooms' 
-                      ? formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6
-                      : getTotalDifficultyQuestions();
+                    const totalQuestions = formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
                     
                     if (totalQuestions > blueprint.total_questions) {
-                      return 'bg-red-50 border border-red-200';
+                      return 'bg-red-50 border-red-200';
                     } else if (totalQuestions < blueprint.total_questions) {
-                      return 'bg-yellow-50 border border-yellow-200';
+                      return 'bg-yellow-50 border-yellow-200';
                     } else {
-                      return 'bg-green-50 border border-green-200';
+                      return 'bg-green-50 border-green-200';
                     }
                   })()}`}>
                     {(() => {
                       const blueprint = blueprints.find(b => b.id === selectedBlueprint);
                       if (!blueprint) return null;
                       
-                      const totalQuestions = formData.distributionMethod === 'blooms' 
-                        ? formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6
-                        : getTotalDifficultyQuestions();
+                      const totalQuestions = formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
                       
                       return (
-                        <div className="text-sm">
-                          <div className={`font-medium ${totalQuestions > blueprint.total_questions ? 'text-red-700' : totalQuestions < blueprint.total_questions ? 'text-yellow-700' : 'text-green-700'}`}>
-                            <strong>Total Questions:</strong> {totalQuestions} / {blueprint.total_questions} (Blueprint Limit)
+                        <div className="text-center">
+                          <div className={`text-lg font-semibold mb-2 ${totalQuestions > blueprint.total_questions ? 'text-red-700' : totalQuestions < blueprint.total_questions ? 'text-yellow-700' : 'text-green-700'}`}>
+                            {totalQuestions} / {blueprint.total_questions} Questions
                           </div>
                           {totalQuestions > blueprint.total_questions ? (
-                            <p className="text-red-600 mt-1 text-xs">
-                              ⚠️ Exceeds blueprint limit by {totalQuestions - blueprint.total_questions} questions
+                            <p className="text-red-600 text-sm">
+                              ⚠️ Exceeds blueprint limit by {totalQuestions - blueprint.total_questions}
                             </p>
                           ) : totalQuestions < blueprint.total_questions ? (
-                            <p className="text-yellow-600 mt-1 text-xs">
-                              📊 You can add {blueprint.total_questions - totalQuestions} more questions
+                            <p className="text-yellow-600 text-sm">
+                              📊 {blueprint.total_questions - totalQuestions} more questions needed
                             </p>
                           ) : (
-                            <p className="text-green-600 mt-1 text-xs">
+                            <p className="text-green-600 text-sm">
                               ✅ Perfect! Matches blueprint exactly
                             </p>
                           )}
