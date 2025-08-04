@@ -128,11 +128,38 @@ const CustomisedGeneration = () => {
     setBlueprintPage(1);
   }, [formData.mode]);
 
-  // Prefill distribution from selected blueprint
+  // Auto-populate sections when blueprint is selected
   useEffect(() => {
     if (selectedBlueprint) {
       const blueprint = blueprints.find(b => b.id === selectedBlueprint);
       if (blueprint) {
+        // Auto-populate sections based on blueprint
+        const autoSections: Section[] = [
+          { 
+            id: 'section-a', 
+            title: 'Section A', 
+            label: 'Multiple Choice Questions', 
+            questionTypeConfigs: blueprint.allowed_question_types.slice(0, 2).map(type => ({
+              type,
+              count: Math.ceil(blueprint.total_questions * 0.4 / blueprint.allowed_question_types.slice(0, 2).length),
+              marks: type === 'MCQ' || type === 'FITB' || type === 'TF' ? 1 : 2
+            }))
+          },
+          { 
+            id: 'section-b', 
+            title: 'Section B', 
+            label: 'Short Answer Questions', 
+            questionTypeConfigs: blueprint.allowed_question_types.slice(2, 4).map(type => ({
+              type,
+              count: Math.ceil(blueprint.total_questions * 0.6 / Math.max(1, blueprint.allowed_question_types.slice(2, 4).length)),
+              marks: type === 'ETA' ? 5 : type === 'SA' ? 3 : 2
+            }))
+          }
+        ].filter(section => section.questionTypeConfigs.length > 0);
+
+        setSections(autoSections);
+        
+        // Prefill distribution from selected blueprint
         setFormData(prev => ({
           ...prev,
           bloomL1: blueprint.bloom_l1,
@@ -295,13 +322,22 @@ const CustomisedGeneration = () => {
   };
 
   const hasQuestionCountExceeded = () => {
-    const total = getTotalQuestions();
-    return total > 100;
+    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+    if (!blueprint) return false;
+    
+    const totalSectionQuestions = getTotalQuestions();
+    return totalSectionQuestions > blueprint.total_questions;
   };
 
   const canGenerate = () => {
-    return canProceedToStep2() && canProceedToStep3() && canProceedToStep4() && canProceedToStep5() && canProceedToStep6() &&
-           !hasQuestionCountExceeded();
+    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+    if (!blueprint) return false;
+    
+    const totalSectionQuestions = getTotalQuestions();
+    const validSectionCount = totalSectionQuestions === blueprint.total_questions;
+    
+    return canProceedToStep2() && canProceedToStep3() && canProceedToStep4() && 
+           canProceedToStep5() && canProceedToStep6() && validSectionCount;
   };
 
   const nextStep = () => {
@@ -878,6 +914,56 @@ const CustomisedGeneration = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Section validation feedback */}
+              {selectedBlueprint && (
+                <div className={`p-4 rounded-lg border text-center ${(() => {
+                  const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                  if (!blueprint) return 'bg-muted/50';
+                  
+                  const totalSectionQuestions = getTotalQuestions();
+                  
+                  if (totalSectionQuestions > blueprint.total_questions) {
+                    return 'bg-red-50 border-red-200';
+                  } else if (totalSectionQuestions < blueprint.total_questions) {
+                    return 'bg-yellow-50 border-yellow-200';
+                  } else {
+                    return 'bg-green-50 border-green-200';
+                  }
+                })()}`}>
+                  {(() => {
+                    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                    if (!blueprint) return null;
+                    
+                    const totalSectionQuestions = getTotalQuestions();
+                    
+                    return (
+                      <div>
+                        <div className={`text-lg font-semibold mb-2 ${
+                          totalSectionQuestions > blueprint.total_questions ? 'text-red-700' : 
+                          totalSectionQuestions < blueprint.total_questions ? 'text-yellow-700' : 
+                          'text-green-700'
+                        }`}>
+                          {totalSectionQuestions} / {blueprint.total_questions} Questions in Sections
+                        </div>
+                        {totalSectionQuestions > blueprint.total_questions ? (
+                          <p className="text-red-600 text-sm">
+                            ⚠️ Sections exceed blueprint by {totalSectionQuestions - blueprint.total_questions} questions. Please reduce question counts.
+                          </p>
+                        ) : totalSectionQuestions < blueprint.total_questions ? (
+                          <p className="text-yellow-600 text-sm">
+                            📊 {blueprint.total_questions - totalSectionQuestions} more questions needed in sections
+                          </p>
+                        ) : (
+                          <p className="text-green-600 text-sm">
+                            ✅ Perfect! Section totals match blueprint exactly
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+              
               <SectionEditor
                 sections={sections}
                 onSectionsChange={setSections}
