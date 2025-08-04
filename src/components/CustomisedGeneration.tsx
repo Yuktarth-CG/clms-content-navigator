@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Progress } from '@/components/ui/progress';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Settings, 
   Calculator, 
@@ -22,7 +23,8 @@ import {
   CheckCircle, 
   BookTemplate,
   AlertCircle,
-  FileText
+  FileText,
+  Info
 } from 'lucide-react';
 import PDFPreview, { AdditionalLine } from './PDFPreview';
 import ChapterLOSelector from './ChapterLOSelector';
@@ -532,7 +534,7 @@ const CustomisedGeneration = () => {
                         </AlertDescription>
                       </Alert>
                     ) : (
-                      <div className="grid gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {blueprints.slice((blueprintPage - 1) * 6, blueprintPage * 6).map(blueprint => (
                           <div 
                             key={blueprint.id} 
@@ -543,20 +545,114 @@ const CustomisedGeneration = () => {
                           >
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
-                                <h3 className="font-medium">{blueprint.name}</h3>
-                                <input
-                                  type="radio"
-                                  name="blueprint"
-                                  value={blueprint.id}
-                                  checked={selectedBlueprint === blueprint.id}
-                                  onChange={() => setSelectedBlueprint(blueprint.id)}
-                                  className="w-4 h-4"
-                                />
+                                <div className="flex items-center space-x-3">
+                                  <input
+                                    type="radio"
+                                    name="blueprint"
+                                    value={blueprint.id}
+                                    checked={selectedBlueprint === blueprint.id}
+                                    onChange={() => setSelectedBlueprint(blueprint.id)}
+                                    className="w-4 h-4"
+                                  />
+                                  <div className="font-medium">{blueprint.name}</div>
+                                </div>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="p-1 h-8 w-8 hover:bg-primary/10"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <Info className="w-4 h-4" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-2xl">
+                                    <DialogHeader>
+                                      <DialogTitle className="text-xl">{blueprint.name}</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-4">
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                          <Label className="font-medium text-muted-foreground">Total Questions</Label>
+                                          <p className="text-lg">{blueprint.total_questions}</p>
+                                        </div>
+                                        <div>
+                                          <Label className="font-medium text-muted-foreground">Total Marks</Label>
+                                          <p className="text-lg">{blueprint.total_marks || 'Not specified'}</p>
+                                        </div>
+                                        <div>
+                                          <Label className="font-medium text-muted-foreground">Duration</Label>
+                                          <p className="text-lg">{blueprint.duration ? `${blueprint.duration} minutes` : 'Not specified'}</p>
+                                        </div>
+                                        <div>
+                                          <Label className="font-medium text-muted-foreground">Assessment Mode</Label>
+                                          <Badge variant={blueprint.mode === 'SA' ? 'default' : 'secondary'} className="text-sm">
+                                            {blueprint.mode}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                      
+                                      <div>
+                                        <Label className="font-medium text-muted-foreground">Question Types</Label>
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                          {blueprint.allowed_question_types.map((type, index) => (
+                                            <Badge key={index} variant="outline" className="text-xs">
+                                              {QuestionTypeLabels[type] || type}
+                                            </Badge>
+                                          ))}
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        <Label className="font-medium text-muted-foreground">Bloom's Taxonomy Distribution</Label>
+                                        <div className="grid grid-cols-3 gap-2 mt-2">
+                                          <div className="text-center p-2 bg-muted/50 rounded">
+                                            <p className="text-xs text-muted-foreground">L1 (Remember)</p>
+                                            <p className="font-medium">{blueprint.bloom_l1}</p>
+                                          </div>
+                                          <div className="text-center p-2 bg-muted/50 rounded">
+                                            <p className="text-xs text-muted-foreground">L2 (Understand)</p>
+                                            <p className="font-medium">{blueprint.bloom_l2}</p>
+                                          </div>
+                                          <div className="text-center p-2 bg-muted/50 rounded">
+                                            <p className="text-xs text-muted-foreground">L3 (Apply)</p>
+                                            <p className="font-medium">{blueprint.bloom_l3}</p>
+                                          </div>
+                                          <div className="text-center p-2 bg-muted/50 rounded">
+                                            <p className="text-xs text-muted-foreground">L4 (Analyze)</p>
+                                            <p className="font-medium">{blueprint.bloom_l4}</p>
+                                          </div>
+                                          <div className="text-center p-2 bg-muted/50 rounded">
+                                            <p className="text-xs text-muted-foreground">L5 (Evaluate)</p>
+                                            <p className="font-medium">{blueprint.bloom_l5}</p>
+                                          </div>
+                                          <div className="text-center p-2 bg-muted/50 rounded">
+                                            <p className="text-xs text-muted-foreground">L6 (Create)</p>
+                                            <p className="font-medium">{blueprint.bloom_l6}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="text-xs text-muted-foreground border-t pt-2">
+                                        <p>Created: {new Date(blueprint.created_at).toLocaleDateString()}</p>
+                                        <p>Version: {blueprint.version}</p>
+                                      </div>
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
                               </div>
-                              <div className="text-sm text-muted-foreground space-y-1">
-                                <div>Total Questions: {blueprint.total_questions}</div>
-                                <div>Question Types: {blueprint.allowed_question_types.map(type => QuestionTypeLabels[type] || type).join(', ')}</div>
-                                <div>Mode: {blueprint.mode}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {blueprint.total_questions} questions • {blueprint.allowed_question_types.map(type => QuestionTypeLabels[type] || type).join(', ')}
+                              </div>
+                              <div className="flex justify-between items-center text-xs">
+                                <div className="flex flex-wrap gap-1">
+                                  {blueprint.total_marks && <span>{blueprint.total_marks} marks</span>}
+                                  {blueprint.duration && <span>{blueprint.duration} minutes</span>}
+                                </div>
+                                <Badge variant={blueprint.mode === 'SA' ? 'default' : 'secondary'} className="text-xs">
+                                  {blueprint.mode}
+                                </Badge>
                               </div>
                             </div>
                           </div>
