@@ -436,6 +436,7 @@ const CustomisedGeneration = () => {
                 <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">2</div>
                 <span>Content Selection</span>
               </CardTitle>
+              <p className="text-muted-foreground">Select the chapters or learning outcomes for your assessment</p>
             </CardHeader>
             <CardContent className="space-y-6">
               <ChapterLOSelector
