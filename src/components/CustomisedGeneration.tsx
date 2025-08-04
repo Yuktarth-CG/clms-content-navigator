@@ -755,6 +755,8 @@ const CustomisedGeneration = () => {
           onQuestionAction={handleQuestionAction}
           documentType='assessment'
           isReadyForDownload={isGenerated}
+          totalMarks={formData.totalMarks && formData.totalMarks.trim() !== '' ? formData.totalMarks : undefined}
+          duration={formData.duration && formData.duration.trim() !== '' ? formData.duration : undefined}
         />
       </div>
     </div>

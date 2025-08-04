@@ -51,6 +51,8 @@ interface PDFPreviewProps {
   pdfContentRef?: RefObject<HTMLDivElement>;
   additionalLines?: AdditionalLine[];
   sections?: Section[];
+  totalMarks?: string;
+  duration?: string;
 }
 const PDFPreview: React.FC<PDFPreviewProps> = ({
   title,
@@ -65,7 +67,9 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
   generalInstructions = [],
   pdfContentRef,
   additionalLines = [],
-  sections
+  sections,
+  totalMarks,
+  duration
 }) => {
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [showQuestionDialog, setShowQuestionDialog] = useState(false);
@@ -193,12 +197,16 @@ const PDFPreview: React.FC<PDFPreviewProps> = ({
             </div>
 
             <div className="flex justify-between mb-6 text-sm font-semibold">
-              <div>
-                <strong>Max. Time: 3 Hours</strong>
-              </div>
-              <div>
-                <strong>Max. Marks: {questions.reduce((sum, q) => sum + q.marks, 0)}</strong>
-              </div>
+              {duration && duration.trim() !== '' && (
+                <div>
+                  <strong>Max. Time: {duration} Minutes</strong>
+                </div>
+              )}
+              {totalMarks && totalMarks.trim() !== '' && (
+                <div>
+                  <strong>Max. Marks: {totalMarks}</strong>
+                </div>
+              )}
             </div>
 
             {showStudentDetails && <div className="mb-6 p-4 border border-gray-400">
