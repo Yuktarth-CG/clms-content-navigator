@@ -109,43 +109,52 @@ const CustomisedGeneration = () => {
 
   // Generate mock questions for preview based on sections
   const mockQuestions = useMemo(() => {
+    console.log('🔍 [CustomisedGeneration] Generating mock questions with sections:', sections);
+    console.log('🔍 [CustomisedGeneration] Form data title:', formData.title);
+    
     const questions = [];
     let questionNumber = 1;
     
     // Only generate questions if we have the minimum required data
     if (!formData.title || sections.length === 0) {
+      console.log('🔍 [CustomisedGeneration] No questions generated - missing title or no sections');
       return [];
     }
     
     // Generate questions based on sections
     sections.forEach((section, sectionIndex) => {
-      if (section.questionCount > 0 && section.questionTypes.length > 0) {
-        for (let i = 0; i < section.questionCount; i++) {
-          const questionType = section.questionTypes[i % section.questionTypes.length];
-          questions.push({
-            id: `question-${questionNumber}`,
-            questionNumber,
-            questionStem: `${section.title} - Sample ${questionType} question ${i + 1} - This is a placeholder question for ${section.label || 'this section'}.`,
-            questionType,
-            bloomLevel: Math.floor(Math.random() * 6) + 1,
-            marks: formData.mode === 'SA' ? (questionType === 'MCQ' ? 1 : 2) : 1,
-            chapter: formData.chapters[0] || 'Sample Chapter',
-            topic: 'Sample Topic',
-            section: section.title,
-            sectionLabel: section.label,
-            options: questionType === 'MCQ' ? [
-              'Option A - Sample answer choice',
-              'Option B - Another choice',
-              'Option C - Third option',
-              'Option D - Fourth option'
-            ] : undefined,
-            answer: questionType === 'MCQ' ? 'Option A' : 'Sample Answer'
-          });
-          questionNumber++;
-        }
+      console.log('🔍 [CustomisedGeneration] Processing section:', section);
+      
+      // For demo purposes, add some default questions even if not configured
+      const questionCount = section.questionCount > 0 ? section.questionCount : 2; // Default 2 questions per section
+      const questionTypes = section.questionTypes.length > 0 ? section.questionTypes : ['MCQ']; // Default to MCQ
+      
+      for (let i = 0; i < questionCount; i++) {
+        const questionType = questionTypes[i % questionTypes.length];
+        questions.push({
+          id: `question-${questionNumber}`,
+          questionNumber,
+          questionStem: `${section.title} - Sample ${questionType} question ${i + 1} - This is a placeholder question for ${section.label || 'this section'}.`,
+          questionType,
+          bloomLevel: Math.floor(Math.random() * 6) + 1,
+          marks: formData.mode === 'SA' ? (questionType === 'MCQ' ? 1 : 2) : 1,
+          chapter: formData.chapters[0] || 'Sample Chapter',
+          topic: 'Sample Topic',
+          section: section.title,
+          sectionLabel: section.label,
+          options: questionType === 'MCQ' ? [
+            'Option A - Sample answer choice',
+            'Option B - Another choice',
+            'Option C - Third option',
+            'Option D - Fourth option'
+          ] : undefined,
+          answer: questionType === 'MCQ' ? 'Option A' : 'Sample Answer'
+        });
+        questionNumber++;
       }
     });
     
+    console.log('🔍 [CustomisedGeneration] Generated questions:', questions);
     return questions;
   }, [sections, formData.mode, formData.chapters, formData.title]);
 
