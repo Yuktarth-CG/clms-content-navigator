@@ -812,13 +812,10 @@ const CustomisedGeneration = () => {
                         const maxValue = blueprint ? blueprint.total_questions : 50;
                         
                         return (
-                          <div key={level} className="p-3 border rounded-lg bg-card">
-                            <div className="flex items-center justify-between mb-3">
-                              <div>
-                                <Label className="text-sm font-medium">{label}</Label>
-                                <p className="text-xs text-muted-foreground">Level {level.slice(1)}</p>
-                              </div>
-                              <Badge variant="outline" className="text-sm">{value} questions</Badge>
+                          <div key={level} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-medium">{label} (Level {level.slice(1)})</Label>
+                              <Badge variant="outline">{value} questions</Badge>
                             </div>
                             <Slider
                               value={[value]}
