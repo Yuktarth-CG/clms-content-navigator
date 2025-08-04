@@ -13,13 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from '@/components/ui/pagination';
 import { Zap, FileText, Download, Send, AlertCircle, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Target, Info, CheckCircle, Search } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 import PDFPreview, { ExtraField, AdditionalLine } from './PDFPreview';
 import ManualQuestionEntry from './ManualQuestionEntry';
 import StudentDetailsForm from './StudentDetailsForm';
 import GeneralInstructionsEditor from './GeneralInstructionsEditor';
 import AdditionalLinesEditor from './AdditionalLinesEditor';
 import SectionEditor, { Section } from './SectionEditor';
-import { Blueprint, QuestionShortage, QuestionType, AssessmentMode, ManualQuestion } from '@/types/assessment';
+import { Blueprint, QuestionShortage, QuestionType, AssessmentMode, ManualQuestion, DifficultyLevels, BloomLevels } from '@/types/assessment';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
@@ -163,7 +164,7 @@ const AutomatedGeneration = () => {
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
-  const totalSteps = 3;
+  const totalSteps = 4;
   const stepProgress = (currentStep / totalSteps) * 100;
 
   useEffect(() => {
@@ -410,11 +411,20 @@ const AutomatedGeneration = () => {
   };
 
   const canProceedToStep4 = () => {
+    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+    const totalBloomQuestions = blueprint ? 
+      blueprint.bloom_l1 + blueprint.bloom_l2 + blueprint.bloom_l3 + 
+      blueprint.bloom_l4 + blueprint.bloom_l5 + blueprint.bloom_l6 : 0;
+    
+    return totalBloomQuestions > 0;
+  };
+
+  const canProceedToStep5 = () => {
     return sections.length > 0 && sections.every(s => s.label.trim() !== '' && s.questionTypes.length > 0);
   };
 
   const canGenerate = () => {
-    return selectedBlueprint && canProceedToStep2() && canProceedToStep3() && canProceedToStep4();
+    return selectedBlueprint && canProceedToStep2() && canProceedToStep3() && canProceedToStep4() && canProceedToStep5();
   };
 
   const nextStep = () => {
@@ -1112,7 +1122,7 @@ const AutomatedGeneration = () => {
                 disabled={!canProceedToStep3()}
                 className="flex items-center space-x-2"
               >
-                <span>Next: Manage Sections</span>
+                <span>Next: Question Distribution</span>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -1125,6 +1135,110 @@ const AutomatedGeneration = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
+              <span>Question Distribution</span>
+            </CardTitle>
+            <p className="text-muted-foreground">Review Bloom's taxonomy levels and set difficulty distribution for your assessment</p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {selectedBlueprint && (
+              <>
+                {/* Blueprint Information */}
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2">Selected Blueprint Distribution</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                    {Object.entries(BloomLevels).map(([level, label]) => {
+                      const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                      const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                      return (
+                        <div key={level} className="flex justify-between">
+                          <span>{label}:</span>
+                          <span className="font-medium">{count} questions</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Bloom's Taxonomy - Read Only */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">Bloom's Taxonomy Distribution (from Blueprint)</Label>
+                    <div className="space-y-3">
+                      {Object.entries(BloomLevels).map(([level, label]) => {
+                        const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                        const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                        return (
+                          <div key={level} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                            <span className="font-medium">{label}</span>
+                            <Badge variant="outline">{count} questions</Badge>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Difficulty Level Distribution - Editable */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-medium">Difficulty Level Distribution</Label>
+                    <div className="space-y-4">
+                      {Object.entries(DifficultyLevels).map(([level, label]) => (
+                        <div key={level} className="space-y-2">
+                          <div className="flex justify-between">
+                            <Label htmlFor={`difficulty-${level}`}>{label}</Label>
+                            <span className="text-sm text-muted-foreground">
+                              {difficultyDistribution[`difficulty${level}` as keyof typeof difficultyDistribution]}
+                            </span>
+                          </div>
+                          <Slider
+                            id={`difficulty-${level}`}
+                            min={0}
+                            max={50}
+                            step={1}
+                            value={[difficultyDistribution[`difficulty${level}` as keyof typeof difficultyDistribution]]}
+                            onValueChange={(value) => {
+                              const fieldName = `difficulty${level}` as keyof typeof difficultyDistribution;
+                              setDifficultyDistribution(prev => ({ ...prev, [fieldName]: value[0] }));
+                            }}
+                            className="w-full"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Total Questions by Difficulty: {
+                        difficultyDistribution.difficultyL1 + difficultyDistribution.difficultyL2 + 
+                        difficultyDistribution.difficultyL3 + difficultyDistribution.difficultyL4 + 
+                        difficultyDistribution.difficultyL5
+                      }
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="flex justify-between pt-4">
+              <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
+                <ChevronLeft className="w-4 h-4" />
+                <span>Previous</span>
+              </Button>
+              <Button 
+                onClick={nextStep}
+                disabled={!canProceedToStep4()}
+                className="flex items-center space-x-2"
+              >
+                <span>Next: Manage Sections</span>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {currentStep === 4 && (
+        <Card className="animate-fade-in">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
               <span>Section Management & Generation</span>
             </CardTitle>
             <p className="text-muted-foreground">Organize your assessment into labeled sections and generate the final document.</p>

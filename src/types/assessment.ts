@@ -17,6 +17,11 @@ export interface Blueprint {
   bloom_l4: number;
   bloom_l5: number;
   bloom_l6: number;
+  difficulty_l1?: number;
+  difficulty_l2?: number;
+  difficulty_l3?: number;
+  difficulty_l4?: number;
+  difficulty_l5?: number;
   mode: AssessmentMode;
   total_marks?: number;
   duration?: number;
@@ -51,6 +56,11 @@ export interface Assessment {
   bloom_l4: number;
   bloom_l5: number;
   bloom_l6: number;
+  difficulty_l1?: number;
+  difficulty_l2?: number;
+  difficulty_l3?: number;
+  difficulty_l4?: number;
+  difficulty_l5?: number;
   mode: AssessmentMode;
   source: AssessmentSource;
   repository: RepositoryType;
@@ -79,6 +89,11 @@ export interface BlueprintFormData {
   bloom_l4: number;
   bloom_l5: number;
   bloom_l6: number;
+  difficulty_l1?: number;
+  difficulty_l2?: number;
+  difficulty_l3?: number;
+  difficulty_l4?: number;
+  difficulty_l5?: number;
   mode: AssessmentMode;
   total_marks?: number;
   duration?: number;
@@ -103,6 +118,11 @@ export interface AssessmentFormData {
   bloom_l4: number;
   bloom_l5: number;
   bloom_l6: number;
+  difficulty_l1?: number;
+  difficulty_l2?: number;
+  difficulty_l3?: number;
+  difficulty_l4?: number;
+  difficulty_l5?: number;
   mode: AssessmentMode;
   total_marks?: number;
   duration?: number;
@@ -148,4 +168,12 @@ export const BloomLevels = {
   L4: 'Analyze',
   L5: 'Evaluate',
   L6: 'Create'
+};
+
+export const DifficultyLevels = {
+  L1: 'Very Easy',
+  L2: 'Easy',
+  L3: 'Medium',
+  L4: 'Hard',
+  L5: 'Very Hard'
 };

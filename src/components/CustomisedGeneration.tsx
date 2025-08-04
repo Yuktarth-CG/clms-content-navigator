@@ -23,7 +23,8 @@ import {
 } from 'lucide-react';
 import PDFPreview from './PDFPreview';
 import ChapterLOSelector from './ChapterLOSelector';
-import { QuestionType, AssessmentMode, QuestionTypeLabels, BloomLevels, Blueprint } from '@/types/assessment';
+import { QuestionType, AssessmentMode, QuestionTypeLabels, BloomLevels, Blueprint, DifficultyLevels } from '@/types/assessment';
+import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
@@ -53,6 +54,11 @@ const CustomisedGeneration = () => {
     bloomL4: 0,
     bloomL5: 0,
     bloomL6: 0,
+    difficultyL1: 0,
+    difficultyL2: 0,
+    difficultyL3: 0,
+    difficultyL4: 0,
+    difficultyL5: 0,
     mode: 'FA' as AssessmentMode,
     totalMarks: '',
     duration: ''
@@ -119,6 +125,11 @@ const CustomisedGeneration = () => {
       bloomL4: blueprint.bloom_l4,
       bloomL5: blueprint.bloom_l5,
       bloomL6: blueprint.bloom_l6,
+      difficultyL1: blueprint.difficulty_l1 || 0,
+      difficultyL2: blueprint.difficulty_l2 || 0,
+      difficultyL3: blueprint.difficulty_l3 || 0,
+      difficultyL4: blueprint.difficulty_l4 || 0,
+      difficultyL5: blueprint.difficulty_l5 || 0,
       mode: blueprint.mode,
       totalMarks: blueprint.total_marks?.toString() || '',
       duration: blueprint.duration?.toString() || ''
@@ -134,6 +145,11 @@ const CustomisedGeneration = () => {
   const getTotalQuestions = () => {
     return formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + 
            formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
+  };
+
+  const getTotalDifficultyQuestions = () => {
+    return formData.difficultyL1 + formData.difficultyL2 + formData.difficultyL3 + 
+           formData.difficultyL4 + formData.difficultyL5;
   };
 
   // Generate mock questions for preview based on current form data
@@ -556,6 +572,40 @@ const CustomisedGeneration = () => {
                 </div>
                 <div className="text-sm text-muted-foreground">
                   Total Questions: {getTotalQuestions()}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Difficulty Level Distribution */}
+              <div className="space-y-4">
+                <Label className="text-base font-medium">Difficulty Level Distribution</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(DifficultyLevels).map(([level, label]) => (
+                    <div key={level} className="space-y-3">
+                      <div className="flex justify-between">
+                        <Label htmlFor={`difficulty-${level}`}>{label}</Label>
+                        <span className="text-sm text-muted-foreground">
+                          {formData[`difficulty${level}` as keyof typeof formData] || 0}
+                        </span>
+                      </div>
+                      <Slider
+                        id={`difficulty-${level}`}
+                        min={0}
+                        max={50}
+                        step={1}
+                        value={[formData[`difficulty${level}` as keyof typeof formData] as number || 0]}
+                        onValueChange={(value) => {
+                          const fieldName = `difficulty${level}` as keyof typeof formData;
+                          setFormData(prev => ({ ...prev, [fieldName]: value[0] }));
+                        }}
+                        className="w-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Total Questions by Difficulty: {getTotalDifficultyQuestions()}
                 </div>
               </div>
 
