@@ -44,6 +44,12 @@ const CustomisedGeneration = () => {
   const [isGenerated, setIsGenerated] = useState(false);
   const [contentType, setContentType] = useState<'chapters' | 'learningOutcomes'>('chapters');
   
+  // Blueprint state
+  const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
+  const [selectedBlueprint, setSelectedBlueprint] = useState<string>('');
+  const [blueprintPage, setBlueprintPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  
   // Additional state for matching AutomatedGeneration
   const [additionalLines, setAdditionalLines] = useState<AdditionalLine[]>([]);
   const [isHeaderSectionOpen, setIsHeaderSectionOpen] = useState(false);
@@ -83,8 +89,39 @@ const CustomisedGeneration = () => {
     duration: ''
   });
 
-  const totalSteps = 4;
+  const totalSteps = 5;
   const stepProgress = (currentStep / totalSteps) * 100;
+
+  // Blueprint functionality
+  const fetchBlueprints = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('blueprints')
+        .select('*')
+        .eq('mode', formData.mode)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBlueprints((data || []) as Blueprint[]);
+    } catch (error) {
+      console.error('Error fetching blueprints:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load blueprints",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load blueprints when component mounts or mode changes
+  useEffect(() => {
+    fetchBlueprints();
+    setSelectedBlueprint(''); // Reset blueprint selection when mode changes
+    setBlueprintPage(1);
+  }, [formData.mode]);
 
   // Update allowed question types from sections
   useEffect(() => {
@@ -219,13 +256,17 @@ const CustomisedGeneration = () => {
   };
 
   const canProceedToStep5 = () => {
+    return selectedBlueprint !== '';
+  };
+
+  const canProceedToStep6 = () => {
     const hasValidSections = sections.some(section => section.questionTypeConfigs.length > 0);
     const hasTotalQuestions = getTotalQuestions() > 0;
     return hasValidSections && hasTotalQuestions;
   };
 
-  const canProceedToStep6 = () => {
-    return canProceedToStep5();
+  const canProceedToStep7 = () => {
+    return canProceedToStep6();
   };
 
   const hasQuestionCountExceeded = () => {
@@ -234,7 +275,7 @@ const CustomisedGeneration = () => {
   };
 
   const canGenerate = () => {
-    return canProceedToStep2() && canProceedToStep3() && canProceedToStep4() && canProceedToStep5() &&
+    return canProceedToStep2() && canProceedToStep3() && canProceedToStep4() && canProceedToStep5() && canProceedToStep6() &&
            !hasQuestionCountExceeded();
   };
 
@@ -269,9 +310,10 @@ const CustomisedGeneration = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
                 <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>Setup</span>
-                <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
-                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Sections</span>
-                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Generate</span>
+                <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Blueprint</span>
+                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
+                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Sections</span>
+                <span className={currentStep >= 5 ? "text-primary font-medium" : "text-muted-foreground"}>Generate</span>
               </div>
               <Progress value={stepProgress} className="h-2" />
             </div>
@@ -471,6 +513,105 @@ const CustomisedGeneration = () => {
                   disabled={!canProceedToStep3()}
                   className="flex items-center space-x-2"
                 >
+                  <span>Next: Blueprint Selection</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 2: Blueprint Selection */}
+        {currentStep === 2 && (
+          <Card className="animate-fade-in">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                <span>Blueprint Selection</span>
+              </CardTitle>
+              <p className="text-muted-foreground">Choose a blueprint to define the structure of your assessment</p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {loading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {blueprints.length === 0 ? (
+                    <Alert>
+                      <AlertCircle className="w-4 h-4" />
+                      <AlertDescription>
+                        No blueprints available for {formData.mode} mode. Please check your assessment mode or create a blueprint first.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <div className="grid gap-4">
+                      {blueprints.slice((blueprintPage - 1) * 6, blueprintPage * 6).map(blueprint => (
+                        <div 
+                          key={blueprint.id} 
+                          className={`border rounded-lg p-4 cursor-pointer transition-all hover:border-primary/50 ${
+                            selectedBlueprint === blueprint.id ? 'border-primary bg-primary/5' : ''
+                          }`} 
+                          onClick={() => setSelectedBlueprint(blueprint.id)}
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-medium">{blueprint.name}</h3>
+                              <input
+                                type="radio"
+                                name="blueprint"
+                                value={blueprint.id}
+                                checked={selectedBlueprint === blueprint.id}
+                                onChange={() => setSelectedBlueprint(blueprint.id)}
+                                className="w-4 h-4"
+                              />
+                            </div>
+                            <div className="text-sm text-muted-foreground space-y-1">
+                              <div>Total Questions: {blueprint.total_questions}</div>
+                              <div>Question Types: {blueprint.allowed_question_types.map(type => QuestionTypeLabels[type] || type).join(', ')}</div>
+                              <div>Mode: {blueprint.mode}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {blueprints.length > 6 && (
+                    <div className="flex items-center justify-between">
+                      <Button
+                        variant="outline"
+                        onClick={() => setBlueprintPage(Math.max(1, blueprintPage - 1))}
+                        disabled={blueprintPage === 1}
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-sm text-muted-foreground">
+                        Page {blueprintPage} of {Math.ceil(blueprints.length / 6)}
+                      </span>
+                      <Button
+                        variant="outline"
+                        onClick={() => setBlueprintPage(Math.min(Math.ceil(blueprints.length / 6), blueprintPage + 1))}
+                        disabled={blueprintPage >= Math.ceil(blueprints.length / 6)}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-between pt-4">
+                <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </Button>
+                <Button 
+                  onClick={nextStep}
+                  disabled={!canProceedToStep5()}
+                  className="flex items-center space-x-2"
+                >
                   <span>Next: Content Selection</span>
                   <ChevronRight className="w-4 h-4" />
                 </Button>
@@ -479,12 +620,12 @@ const CustomisedGeneration = () => {
           </Card>
         )}
 
-        {/* Step 2: Content Selection */}
-        {currentStep === 2 && (
+        {/* Step 3: Content Selection */}
+        {currentStep === 3 && (
           <Card className="animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
                 <span>Content Selection</span>
               </CardTitle>
               <p className="text-muted-foreground">Select the chapters or learning outcomes for your assessment</p>
@@ -517,12 +658,12 @@ const CustomisedGeneration = () => {
           </Card>
         )}
 
-        {/* Step 3: Section Management */}
-        {currentStep === 3 && (
+        {/* Step 4: Section Management */}
+        {currentStep === 4 && (
           <Card className="animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
                 <span>Section Management</span>
               </CardTitle>
             </CardHeader>
@@ -539,7 +680,7 @@ const CustomisedGeneration = () => {
                 </Button>
                 <Button
                   onClick={nextStep}
-                  disabled={!canProceedToStep5()}
+                  disabled={!canProceedToStep6()}
                   className="flex items-center space-x-2"
                 >
                   <span>Next: Generate</span>
@@ -550,12 +691,12 @@ const CustomisedGeneration = () => {
           </Card>
         )}
 
-        {/* Step 4: Generate */}
-        {currentStep === 4 && (
+        {/* Step 5: Generate */}
+        {currentStep === 5 && (
           <Card className="animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">5</div>
                 <span>Final Review & Generate</span>
               </CardTitle>
             </CardHeader>
