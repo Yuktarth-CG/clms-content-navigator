@@ -219,7 +219,7 @@ const AutomatedGeneration = () => {
 
   const pdfContentRef = useRef<HTMLDivElement>(null);
 
-  const totalSteps = 4;
+  const totalSteps = 3;
   const stepProgress = (currentStep / totalSteps) * 100;
 
   useEffect(() => {
@@ -700,8 +700,7 @@ const AutomatedGeneration = () => {
               <div className="flex justify-between text-xs">
                 <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>Blueprint & Info</span>
                 <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
-                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Distribution</span>
-                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Sections & Generate</span>
+                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Sections & Generate</span>
               </div>
               <Progress value={stepProgress} className="h-2" />
             </div>
@@ -1396,234 +1395,20 @@ const AutomatedGeneration = () => {
                 disabled={!canProceedToStep3()}
                 className="flex items-center space-x-2"
               >
-                <span>Next: Question Distribution</span>
+                <span>Next: Section Management</span>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
+
 
       {currentStep === 3 && (
         <Card className="animate-fade-in">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
-              <span>Question Distribution</span>
-            </CardTitle>
-            <p className="text-muted-foreground">Review Bloom's taxonomy levels and set difficulty distribution for your assessment</p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {selectedBlueprint && (
-              <>
-                {(() => {
-                  const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                  const isClmsBlueprint = blueprint?.name === 'Less questions on CLMS test';
-                  
-                  if (isClmsBlueprint) {
-                    // Show difficulty levels for CLMS blueprint
-                    const relevantDifficultyLevels = Object.entries(DifficultyLevels).slice(0, 4);
-                    return (
-                      <div className="space-y-4">
-                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium text-blue-800">📊 Question Difficulty Breakdown</h4>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setIsDistributionEditing(!isDistributionEditing)}
-                              className="text-blue-700 border-blue-300 hover:bg-blue-100"
-                            >
-                              {isDistributionEditing ? 'Save Changes' : 'Edit Distribution'}
-                            </Button>
-                          </div>
-                          <p className="text-sm text-blue-600 mb-3">
-                            {isDistributionEditing 
-                              ? 'Adjust the number of questions for each difficulty level. Total should match your blueprint.'
-                              : 'This shows how many questions of each difficulty level will be included in your test.'
-                            }
-                          </p>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {relevantDifficultyLevels.map(([level, label]) => {
-                            const levelKey = `difficulty_l${level.slice(1)}` as keyof typeof editableDistribution;
-                            const count = editableDistribution[levelKey];
-                            const descriptions = {
-                              'Very Easy': 'Basic recall and simple concepts',
-                              'Easy': 'Understanding and simple application',
-                              'Medium': 'Problem-solving and analysis',
-                              'Hard': 'Complex thinking and evaluation'
-                            };
-                            return (
-                              <div key={level} className="p-4 border rounded-lg bg-card hover:shadow-sm transition-shadow">
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="font-medium text-lg">{label}</span>
-                                  {isDistributionEditing ? (
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      value={count}
-                                      onChange={(e) => setEditableDistribution(prev => ({
-                                        ...prev,
-                                        [levelKey]: parseInt(e.target.value) || 0
-                                      }))}
-                                      className="w-20 h-8 text-center"
-                                    />
-                                  ) : (
-                                    <Badge variant="secondary" className="text-sm font-medium">{count} questions</Badge>
-                                  )}
-                                </div>
-                                <p className="text-sm text-muted-foreground">{descriptions[label as keyof typeof descriptions]}</p>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  } else {
-                    // Show Bloom's taxonomy for other blueprints
-                    return (
-                      <div className="space-y-4">
-                        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium text-green-800">🎯 Learning Objectives Breakdown</h4>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setIsDistributionEditing(!isDistributionEditing)}
-                              className="text-green-700 border-green-300 hover:bg-green-100"
-                            >
-                              {isDistributionEditing ? 'Save Changes' : 'Edit Distribution'}
-                            </Button>
-                          </div>
-                          <p className="text-sm text-green-600 mb-3">
-                            {isDistributionEditing 
-                              ? 'Adjust the number of questions for each thinking skill level. Total should match your blueprint.'
-                              : 'This shows how many questions target each type of thinking skill based on Bloom\'s Taxonomy.'
-                            }
-                          </p>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {Object.entries(BloomLevels).map(([level, label]) => {
-                            const levelKey = `bloom_l${level.slice(1)}` as keyof typeof editableDistribution;
-                            const count = editableDistribution[levelKey];
-                            const descriptions = {
-                              'Remember': 'Recall facts and basic concepts',
-                              'Understand': 'Explain ideas and concepts',
-                              'Apply': 'Use information in new situations',
-                              'Analyze': 'Draw connections among ideas',
-                              'Evaluate': 'Justify decisions or opinions',
-                              'Create': 'Produce new or original work'
-                            };
-                            const levelNumber = level.slice(1);
-                            return (
-                              <div key={level} className="p-4 border rounded-lg bg-card hover:shadow-sm transition-shadow">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div>
-                                    <span className="font-medium text-lg">{label}</span>
-                                    <span className="text-xs text-muted-foreground ml-2">Level {levelNumber}</span>
-                                  </div>
-                                  {isDistributionEditing ? (
-                                    <Input
-                                      type="number"
-                                      min="0"
-                                      value={count}
-                                      onChange={(e) => setEditableDistribution(prev => ({
-                                        ...prev,
-                                        [levelKey]: parseInt(e.target.value) || 0
-                                      }))}
-                                      className="w-20 h-8 text-center"
-                                    />
-                                  ) : (
-                                    <Badge variant="secondary" className="text-sm font-medium">{count} questions</Badge>
-                                  )}
-                                </div>
-                                <p className="text-sm text-muted-foreground">{descriptions[label as keyof typeof descriptions]}</p>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        
-                        {isDistributionEditing && (
-                          <div className={`p-3 border rounded-lg ${(() => {
-                            const totalQuestions = Object.values(editableDistribution).slice(0, 6).reduce((sum, val) => sum + val, 0);
-                            const blueprintTotal = blueprint?.total_questions || 0;
-                            const isExceeding = totalQuestions > blueprintTotal;
-                            
-                            if (isExceeding) {
-                              return 'bg-red-50 border-red-200';
-                            } else if (totalQuestions < blueprintTotal) {
-                              return 'bg-amber-50 border-amber-200';
-                            } else {
-                              return 'bg-green-50 border-green-200';
-                            }
-                          })()}`}>
-                            {(() => {
-                              const totalQuestions = Object.values(editableDistribution).slice(0, 6).reduce((sum, val) => sum + val, 0);
-                              const blueprintTotal = blueprint?.total_questions || 0;
-                              const isExceeding = totalQuestions > blueprintTotal;
-                              
-                              return (
-                                <div className="flex items-start space-x-2">
-                                  <span className={`${isExceeding ? 'text-red-600' : totalQuestions < blueprintTotal ? 'text-amber-600' : 'text-green-600'}`}>
-                                    {isExceeding ? '⚠️' : totalQuestions < blueprintTotal ? '📊' : '✅'}
-                                  </span>
-                                  <div>
-                                    <p className={`text-sm font-medium ${isExceeding ? 'text-red-700' : totalQuestions < blueprintTotal ? 'text-amber-700' : 'text-green-700'}`}>
-                                      <strong>Current Total:</strong> {totalQuestions} questions 
-                                      {blueprint && ` (Blueprint Limit: ${blueprintTotal})`}
-                                    </p>
-                                    {isExceeding ? (
-                                      <p className="text-xs text-red-600 mt-1">
-                                        ❌ <strong>Cannot proceed:</strong> You have exceeded the blueprint limit by {totalQuestions - blueprintTotal} questions. Please reduce the total to {blueprintTotal} or less.
-                                      </p>
-                                    ) : totalQuestions < blueprintTotal ? (
-                                      <p className="text-xs text-amber-600 mt-1">
-                                        ⚡ You can add {blueprintTotal - totalQuestions} more questions to reach the blueprint target, or proceed with fewer questions.
-                                      </p>
-                                    ) : (
-                                      <p className="text-xs text-green-600 mt-1">
-                                        ✅ Perfect! Your distribution matches the blueprint exactly. You can proceed to the next step.
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-                })()}
-              </>
-            )}
-
-            <div className="flex justify-between pt-4">
-              <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
-                <ChevronLeft className="w-4 h-4" />
-                <span>Previous</span>
-              </Button>
-              <Button 
-                onClick={nextStep}
-                disabled={!canProceedToStep4()}
-                className="flex items-center space-x-2"
-              >
-                <span>Next: Manage Sections</span>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {currentStep === 4 && (
-        <Card className="animate-fade-in">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
               <span>Section Management & Generation</span>
             </CardTitle>
             <p className="text-muted-foreground">Organize your assessment into labeled sections and generate the final document.</p>
