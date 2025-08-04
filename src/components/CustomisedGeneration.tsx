@@ -206,7 +206,9 @@ const CustomisedGeneration = () => {
   };
 
   const canProceedToStep5 = () => {
-    return sections.some(section => section.questionTypes.length > 0);
+    const hasValidSections = sections.some(section => section.questionTypes.length > 0);
+    const hasTotalQuestions = getTotalQuestions() > 0;
+    return hasValidSections && hasTotalQuestions;
   };
 
   const canProceedToStep6 = () => {
