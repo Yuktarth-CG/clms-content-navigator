@@ -232,7 +232,6 @@ const CustomisedGeneration = () => {
       // Generate questions based on question type configs
       section.questionTypeConfigs.forEach(config => {
         for (let i = 0; i < config.count; i++) {
-      
           questions.push({
             id: `question-${questionNumber}`,
             questionNumber,
@@ -259,7 +258,7 @@ const CustomisedGeneration = () => {
     
     console.log('🔍 [CustomisedGeneration] Generated questions:', questions);
     return questions;
-  }, [sections, formData.mode, formData.chapters, formData.title]);
+  }, [sections, formData.title, formData.chapters, formData.subject, formData.grade]);
 
   const handleQuestionAction = (questionId: string, action: 'move-up' | 'move-down' | 'replace' | 'edit') => {
     // Handle question actions in preview
