@@ -178,172 +178,205 @@ const ChapterLOSelector: React.FC<ChapterLOSelectorProps> = ({
   }
   return <div className="space-y-6">
       {/* Selection Mode */}
-      <Card>
-        <CardHeader>
-          <CardTitle>How would you like to choose content?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RadioGroup value={mode} onValueChange={(value: 'chapters' | 'learningOutcomes') => onModeChange(value)}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="chapters" id="chapters" />
-              <Label htmlFor="chapters" className="flex items-center space-x-2">
-                <BookOpen className="w-4 h-4" />
-                <span>Choose by Chapters</span>
-              </Label>
+      <div className="space-y-4">
+        <Label className="text-base font-medium">How would you like to choose content?</Label>
+        <RadioGroup 
+          value={mode} 
+          onValueChange={(value: 'chapters' | 'learningOutcomes') => onModeChange(value)}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+          <Label htmlFor="chapters-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+            <RadioGroupItem value="chapters" id="chapters-option" />
+            <div className="flex items-center space-x-3">
+              <BookOpen className="w-5 h-5 text-blue-600" />
+              <div>
+                <div className="font-medium">By Chapters</div>
+                <div className="text-sm text-muted-foreground">Pick chapters from your syllabus</div>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="learningOutcomes" id="learningOutcomes" />
-              <Label htmlFor="learningOutcomes" className="flex items-center space-x-2">
-                <Target className="w-4 h-4" />
-                <span>Choose by Learning Outcomes</span>
-              </Label>
+          </Label>
+          <Label htmlFor="los-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+            <RadioGroupItem value="learningOutcomes" id="los-option" />
+            <div className="flex items-center space-x-3">
+              <Target className="w-5 h-5 text-green-600" />
+              <div>
+                <div className="font-medium">By Learning Outcomes</div>
+                <div className="text-sm text-muted-foreground">Pick specific learning outcomes to test</div>
+              </div>
             </div>
-          </RadioGroup>
-        </CardContent>
-      </Card>
+          </Label>
+        </RadioGroup>
+      </div>
 
       {/* Chapter Selection */}
-      {mode === 'chapters' && <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Choose Chapters</span>
-              <Badge variant="outline">{selectedChapters.length} selected</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search chapters..." value={chapterSearch} onChange={e => setChapterSearch(e.target.value)} className="pl-9" />
+      {mode === 'chapters' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <BookOpen className="w-5 h-5 text-blue-600" />
+              <Label className="text-base font-medium">Select Chapters</Label>
+              <Badge variant="outline" className="text-xs">
+                {selectedChapters.length} selected
+              </Badge>
             </div>
-
-            <div className="grid gap-4">
-              {filteredChapters.map(chapter => <Collapsible key={chapter.id} open={expandedChapters.has(chapter.id)} onOpenChange={() => handleChapterExpand(chapter.id)}>
-                  <div className="border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center space-x-3 p-3">
-                      <Checkbox id={chapter.id} checked={selectedChapters.includes(chapter.id)} onCheckedChange={checked => handleChapterToggle(chapter.id, !!checked)} />
-                      <div className="flex-1">
-                        <Label htmlFor={chapter.id} className="font-medium cursor-pointer">
-                          {chapter.name}
-                        </Label>
-                        <p className="text-sm text-muted-foreground">{chapter.description}</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {chapter.questionCount} questions
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {chapter.learningOutcomes.length} skills
-                          </Badge>
-                        </div>
+            <Input
+              placeholder="Search chapters..."
+              value={chapterSearch}
+              onChange={(e) => setChapterSearch(e.target.value)}
+              className="max-w-xs"
+            />
+          </div>
+          <div className="grid gap-3">
+            {filteredChapters.map(chapter => (
+              <Collapsible key={chapter.id} open={expandedChapters.has(chapter.id)} onOpenChange={() => handleChapterExpand(chapter.id)}>
+                <div className="border rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center space-x-3 p-3">
+                    <CollapsibleTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-8 h-8 p-0 hover:bg-muted border-muted-foreground/20"
+                      >
+                        {expandedChapters.has(chapter.id) ? (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <span className="sr-only">Toggle skills</span>
+                      </Button>
+                    </CollapsibleTrigger>
+                    <div className="flex-1">
+                      <div className="font-medium">{chapter.name}</div>
+                      <div className="text-sm text-muted-foreground">{chapter.description}</div>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Badge variant="secondary" className="text-xs">
+                          {chapter.questionCount} questions available
+                        </Badge>
                       </div>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="outline" size="sm" className="w-8 h-8 p-0 hover:bg-muted border-muted-foreground/20">
-                          {expandedChapters.has(chapter.id) ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                          <span className="sr-only">Toggle skills</span>
-                        </Button>
-                      </CollapsibleTrigger>
                     </div>
-                    <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                      <div className="px-3 pb-3 border-t bg-muted/30">
-                        <div className="text-xs font-medium text-muted-foreground mt-2 mb-1">
-                          Related Skills:
-                        </div>
-                        {mockLearningOutcomes.filter(lo => chapter.learningOutcomes.includes(lo.id)).map(lo => <div key={lo.id} className="flex justify-between text-xs mb-1 p-1 rounded hover:bg-muted/50">
-                              <span>{lo.code}: {lo.title}</span>
-                              <span>{lo.questionCount} questions</span>
-                            </div>)}
-                      </div>
-                    </CollapsibleContent>
+                    <input
+                      type="checkbox"
+                      id={chapter.id}
+                      checked={selectedChapters.includes(chapter.id)}
+                      onChange={(e) => handleChapterToggle(chapter.id, e.target.checked)}
+                      className="w-4 h-4"
+                    />
                   </div>
-                </Collapsible>)}
-            </div>
-
-            {/* Show related skills summary */}
-            {relatedLOs.length > 0 && <div className="pt-4 border-t">
-                
-                <div className="grid gap-2">
-                  {relatedLOs.map(lo => <div key={lo.id} className="p-2 bg-muted/50 rounded text-sm">
-                      <span className="font-medium">{lo.code}:</span> {lo.title}
-                      <Badge variant="outline" className="ml-2 text-xs">
-                        {lo.questionCount} questions
-                      </Badge>
-                    </div>)}
+                  <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                    <div className="px-3 pb-3 border-t bg-muted/30">
+                      <div className="text-xs font-medium text-muted-foreground mt-2 mb-1">
+                        Related Skills:
+                      </div>
+                      {mockLearningOutcomes
+                        .filter(lo => chapter.learningOutcomes.includes(lo.id))
+                        .map(lo => (
+                          <div key={lo.id} className="flex items-center justify-between text-xs mb-1 p-2 rounded hover:bg-muted/50">
+                            <div className="flex items-center space-x-2 flex-1">
+                              <input
+                                type="checkbox"
+                                id={`${chapter.id}-${lo.id}`}
+                                checked={selectedLearningOutcomes.includes(lo.id)}
+                                onChange={(e) => handleLOToggle(lo.id, e.target.checked)}
+                                className="w-3 h-3"
+                              />
+                              <span>{lo.code}: {lo.title}</span>
+                            </div>
+                            <span className="text-muted-foreground">{lo.questionCount} questions</span>
+                          </div>
+                        ))}
+                    </div>
+                  </CollapsibleContent>
                 </div>
-              </div>}
-          </CardContent>
-        </Card>}
+              </Collapsible>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Learning Outcome Selection */}
-      {mode === 'learningOutcomes' && <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Choose Learning Outcomes</span>
-              <Badge variant="outline">{selectedLearningOutcomes.length} selected</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search learning outcomes..." value={loSearch} onChange={e => setLoSearch(e.target.value)} className="pl-9" />
+      {mode === 'learningOutcomes' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Target className="w-5 h-5 text-green-600" />
+              <Label className="text-base font-medium">Select Learning Outcomes</Label>
+              <Badge variant="outline" className="text-xs">
+                {selectedLearningOutcomes.length} selected
+              </Badge>
             </div>
-
-            <div className="grid gap-4">
-              {filteredLOs.map(lo => <Collapsible key={lo.id} open={expandedLOs.has(lo.id)} onOpenChange={() => handleLOExpand(lo.id)}>
-                  <div className="border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center space-x-3 p-3">
-                      <Checkbox id={lo.id} checked={selectedLearningOutcomes.includes(lo.id)} onCheckedChange={checked => handleLOToggle(lo.id, !!checked)} />
-                      <div className="flex-1">
-                        <Label htmlFor={lo.id} className="font-medium cursor-pointer">
-                          {lo.code}: {lo.title}
-                        </Label>
-                        <p className="text-sm text-muted-foreground">{lo.description}</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {lo.questionCount} questions
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {lo.chapters.length} topics
-                          </Badge>
-                        </div>
+            <Input
+              placeholder="Search learning outcomes..."
+              value={loSearch}
+              onChange={(e) => setLoSearch(e.target.value)}
+              className="max-w-xs"
+            />
+          </div>
+          <div className="grid gap-3">
+            {filteredLOs.map(lo => (
+              <Collapsible key={lo.id} open={expandedLOs.has(lo.id)} onOpenChange={() => handleLOExpand(lo.id)}>
+                <div className="border rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center space-x-3 p-3">
+                    <CollapsibleTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-8 h-8 p-0 hover:bg-muted border-muted-foreground/20"
+                      >
+                        {expandedLOs.has(lo.id) ? (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <span className="sr-only">Toggle topics</span>
+                      </Button>
+                    </CollapsibleTrigger>
+                    <div className="flex-1">
+                      <div className="font-medium">{lo.code}: {lo.title}</div>
+                      <div className="text-sm text-muted-foreground">{lo.description}</div>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Badge variant="secondary" className="text-xs">
+                          {lo.questionCount} questions available
+                        </Badge>
                       </div>
-                      <CollapsibleTrigger asChild>
-                        <Button variant="outline" size="sm" className="w-8 h-8 p-0 hover:bg-muted border-muted-foreground/20">
-                          {expandedLOs.has(lo.id) ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                          <span className="sr-only">Toggle topics</span>
-                        </Button>
-                      </CollapsibleTrigger>
                     </div>
-                    <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                      <div className="px-3 pb-3 border-t bg-muted/30">
-                        <div className="text-xs font-medium text-muted-foreground mt-2 mb-1">
-                          Related Topics:
-                        </div>
-                        {mockChapters.filter(ch => lo.chapters.includes(ch.id)).map(ch => <div key={ch.id} className="flex justify-between text-xs mb-1 p-1 rounded hover:bg-muted/50">
-                              <span>{ch.name}</span>
-                              <span>{ch.questionCount} questions</span>
-                            </div>)}
-                      </div>
-                    </CollapsibleContent>
+                    <input
+                      type="checkbox"
+                      id={lo.id}
+                      checked={selectedLearningOutcomes.includes(lo.id)}
+                      onChange={(e) => handleLOToggle(lo.id, e.target.checked)}
+                      className="w-4 h-4"
+                    />
                   </div>
-                </Collapsible>)}
-            </div>
-
-            {/* Show related topics summary */}
-            {relatedChapters.length > 0 && <div className="pt-4 border-t">
-                <h4 className="font-medium mb-2 flex items-center space-x-2">
-                  <ChevronRight className="w-4 h-4" />
-                  <span>Topics Covered by Selected Skills</span>
-                </h4>
-                <div className="grid gap-2">
-                  {relatedChapters.map(chapter => <div key={chapter.id} className="p-2 bg-muted/50 rounded text-sm">
-                      <span className="font-medium">{chapter.name}</span>
-                      <Badge variant="outline" className="ml-2 text-xs">
-                        {chapter.questionCount} questions
-                      </Badge>
-                    </div>)}
+                  <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                    <div className="px-3 pb-3 border-t bg-muted/30">
+                      <div className="text-xs font-medium text-muted-foreground mt-2 mb-1">
+                        Related Topics:
+                      </div>
+                      {mockChapters
+                        .filter(ch => lo.chapters.includes(ch.id))
+                        .map(ch => (
+                          <div key={ch.id} className="flex items-center justify-between text-xs mb-1 p-2 rounded hover:bg-muted/50">
+                            <div className="flex items-center space-x-2 flex-1">
+                              <input
+                                type="checkbox"
+                                id={`${lo.id}-${ch.id}`}
+                                checked={selectedChapters.includes(ch.id)}
+                                onChange={(e) => handleChapterToggle(ch.id, e.target.checked)}
+                                className="w-3 h-3"
+                              />
+                              <span>{ch.name}</span>
+                            </div>
+                            <span className="text-muted-foreground">{ch.questionCount} questions</span>
+                          </div>
+                        ))}
+                    </div>
+                  </CollapsibleContent>
                 </div>
-              </div>}
-          </CardContent>
-        </Card>}
+              </Collapsible>
+            ))}
+          </div>
+        </div>
+      )}
     </div>;
 };
 export default ChapterLOSelector;
