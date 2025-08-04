@@ -676,7 +676,8 @@ const AutomatedGeneration = () => {
               <div className="flex justify-between text-xs">
                 <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>Blueprint & Info</span>
                 <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
-                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Sections & Generate</span>
+                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Distribution</span>
+                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Sections & Generate</span>
               </div>
               <Progress value={stepProgress} className="h-2" />
             </div>
