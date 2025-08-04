@@ -80,7 +80,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ sections, onSectionsChang
             <div className="flex items-center space-x-4">
               <div className="font-medium w-24">{section.title}</div>
               <Input
-                placeholder="Enter section label (e.g., Multiple Choice)"
+                placeholder="Very Short Answer Questions"
                 value={section.label}
                 onChange={(e) => updateSection(section.id, 'label', e.target.value)}
                 className="flex-1"
