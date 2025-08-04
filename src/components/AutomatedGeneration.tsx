@@ -227,13 +227,18 @@ const AutomatedGeneration = () => {
         {
           id: 'sample-3',
           name: 'Less questions on CLMS test',
-          total_questions: 25,
-          total_marks: 50,
-          duration: 60,
+          total_questions: 15,
+          total_marks: 30,
+          duration: 45,
           allowed_question_types: ['MCQ', 'FITB'] as QuestionType[],
-          bloom_l1: 15,
-          bloom_l2: 8,
-          bloom_l3: 2,
+          difficulty_l1: 6,
+          difficulty_l2: 5,
+          difficulty_l3: 3,
+          difficulty_l4: 1,
+          difficulty_l5: 0,
+          bloom_l1: 0,
+          bloom_l2: 0,
+          bloom_l3: 0,
           bloom_l4: 0,
           bloom_l5: 0,
           bloom_l6: 0,
@@ -421,11 +426,21 @@ const AutomatedGeneration = () => {
 
   const canProceedToStep4 = () => {
     const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-    const totalBloomQuestions = blueprint ? 
-      blueprint.bloom_l1 + blueprint.bloom_l2 + blueprint.bloom_l3 + 
-      blueprint.bloom_l4 + blueprint.bloom_l5 + blueprint.bloom_l6 : 0;
+    if (!blueprint) return false;
     
-    return totalBloomQuestions > 0;
+    const isClmsBlueprint = blueprint.name === 'Less questions on CLMS test';
+    
+    if (isClmsBlueprint) {
+      const totalDifficultyQuestions = 
+        (blueprint.difficulty_l1 || 0) + (blueprint.difficulty_l2 || 0) + (blueprint.difficulty_l3 || 0) + 
+        (blueprint.difficulty_l4 || 0) + (blueprint.difficulty_l5 || 0);
+      return totalDifficultyQuestions > 0;
+    } else {
+      const totalBloomQuestions = 
+        blueprint.bloom_l1 + blueprint.bloom_l2 + blueprint.bloom_l3 + 
+        blueprint.bloom_l4 + blueprint.bloom_l5 + blueprint.bloom_l6;
+      return totalBloomQuestions > 0;
+    }
   };
 
   const canProceedToStep5 = () => {
@@ -498,38 +513,71 @@ const AutomatedGeneration = () => {
     const blueprint = blueprints.find(b => b.id === selectedBlueprint);
     if (!blueprint) return [];
     
-    const bloomLevels = [
-      { level: 'L1', count: blueprint.bloom_l1, name: 'Remember' },
-      { level: 'L2', count: blueprint.bloom_l2, name: 'Understand' },
-      { level: 'L3', count: blueprint.bloom_l3, name: 'Apply' },
-      { level: 'L4', count: blueprint.bloom_l4, name: 'Analyze' },
-      { level: 'L5', count: blueprint.bloom_l5, name: 'Evaluate' },
-      { level: 'L6', count: blueprint.bloom_l6, name: 'Create' }
-    ];
+    const isClmsBlueprint = blueprint.name === 'Less questions on CLMS test';
     
-    bloomLevels.forEach(bloom => {
-      for (let i = 0; i < bloom.count; i++) {
-        const questionType = blueprint.allowed_question_types[i % blueprint.allowed_question_types.length] || 'MCQ';
-        questions.push({
-          id: `question-${questionNumber}`,
-          questionNumber,
-          questionStem: `Sample ${bloom.name} level question ${i + 1} - This is a placeholder question for ${questionType} type focusing on ${bloom.name} cognitive level.`,
-          questionType,
-          bloomLevel: parseInt(bloom.level.substring(1)),
-          marks: blueprint.mode === 'SA' ? (bloom.level === 'L1' || bloom.level === 'L2' ? 1 : 2) : 1,
-          chapter: formData.chapters[0] || 'Sample Chapter',
-          topic: 'Sample Topic',
-          options: questionType === 'MCQ' ? [
-            'Option A - Sample answer choice',
-            'Option B - Another choice',
-            'Option C - Third option',
-            'Option D - Fourth option'
-          ] : undefined,
-          answer: questionType === 'MCQ' ? 'Option A' : 'Sample Answer'
-        });
-        questionNumber++;
-      }
-    });
+    if (isClmsBlueprint) {
+      // Use difficulty levels for CLMS blueprint
+      const difficultyLevels = [
+        { level: 'L1', count: blueprint.difficulty_l1 || 0, name: 'Very Easy' },
+        { level: 'L2', count: blueprint.difficulty_l2 || 0, name: 'Easy' },
+        { level: 'L3', count: blueprint.difficulty_l3 || 0, name: 'Medium' },
+        { level: 'L4', count: blueprint.difficulty_l4 || 0, name: 'Hard' },
+        { level: 'L5', count: blueprint.difficulty_l5 || 0, name: 'Very Hard' }
+      ];
+      
+      difficultyLevels.forEach(difficulty => {
+        for (let i = 0; i < difficulty.count; i++) {
+          const questionType = blueprint.allowed_question_types[i % blueprint.allowed_question_types.length] || 'MCQ';
+          questions.push({
+            id: `q${questionNumber}`,
+            questionNumber: questionNumber++,
+            questionType,
+            questionText: `Sample ${questionType} question ${questionNumber - 1} (${difficulty.name} level)`,
+            options: questionType === 'MCQ' ? ['Option A', 'Option B', 'Option C', 'Option D'] : undefined,
+            correctAnswer: questionType === 'MCQ' ? 'Option A' : 'Sample answer',
+            difficultyLevel: difficulty.level,
+            marks: questionType === 'MCQ' ? 1 : questionType === 'FITB' ? 2 : 3,
+            bloomLevel: 'L1',
+            addedBy: 'System',
+            addedAt: new Date().toISOString()
+          });
+        }
+      });
+    } else {
+      // Use Bloom's taxonomy for other blueprints
+      const bloomLevels = [
+        { level: 'L1', count: blueprint.bloom_l1, name: 'Remember' },
+        { level: 'L2', count: blueprint.bloom_l2, name: 'Understand' },
+        { level: 'L3', count: blueprint.bloom_l3, name: 'Apply' },
+        { level: 'L4', count: blueprint.bloom_l4, name: 'Analyze' },
+        { level: 'L5', count: blueprint.bloom_l5, name: 'Evaluate' },
+        { level: 'L6', count: blueprint.bloom_l6, name: 'Create' }
+      ];
+      
+      bloomLevels.forEach(bloom => {
+        for (let i = 0; i < bloom.count; i++) {
+          const questionType = blueprint.allowed_question_types[i % blueprint.allowed_question_types.length] || 'MCQ';
+          questions.push({
+            id: `question-${questionNumber}`,
+            questionNumber,
+            questionStem: `Sample ${bloom.name} level question ${i + 1} - This is a placeholder question for ${questionType} type focusing on ${bloom.name} cognitive level.`,
+            questionType,
+            bloomLevel: parseInt(bloom.level.substring(1)),
+            marks: blueprint.mode === 'SA' ? (bloom.level === 'L1' || bloom.level === 'L2' ? 1 : 2) : 1,
+            chapter: formData.chapters[0] || 'Sample Chapter',
+            topic: 'Sample Topic',
+            options: questionType === 'MCQ' ? [
+              'Option A - Sample answer choice',
+              'Option B - Another choice',
+              'Option C - Third option',
+              'Option D - Fourth option'
+            ] : undefined,
+            answer: questionType === 'MCQ' ? 'Option A' : 'Sample Answer'
+          });
+          questionNumber++;
+        }
+      });
+    }
     
     return questions;
   }, [selectedBlueprint, blueprints, formData.title, formData.chapters]);
@@ -1172,23 +1220,43 @@ const AutomatedGeneration = () => {
                 </div>
 
                 {/* Conditionally show Bloom's Taxonomy or Difficulty Distribution */}
-                {(!formData.distributionMethod || formData.distributionMethod === 'bloom') && (
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-muted-foreground">Bloom's Taxonomy Distribution (from Blueprint)</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {Object.entries(BloomLevels).map(([level, label]) => {
-                        const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                        const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
-                        return (
-                          <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
-                            <span className="font-medium">{label}</span>
-                            <Badge variant="outline" className="text-xs">{count}</Badge>
-                          </div>
-                        );
-                      })}
+                {(() => {
+                  const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                  const isClmsBlueprint = blueprint?.name === 'Less questions on CLMS test';
+                  const showDifficulty = formData.distributionMethod === 'difficulty' || isClmsBlueprint;
+                  
+                  return !showDifficulty ? (
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-muted-foreground">Bloom's Taxonomy Distribution (from Blueprint)</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {Object.entries(BloomLevels).map(([level, label]) => {
+                          const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                          return (
+                            <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
+                              <span className="font-medium">{label}</span>
+                              <Badge variant="outline" className="text-xs">{count}</Badge>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-muted-foreground">Difficulty Level Distribution (from Blueprint)</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {Object.entries(DifficultyLevels).map(([level, label]) => {
+                          const count = blueprint ? blueprint[`difficulty_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                          return (
+                            <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
+                              <span className="font-medium">{label}</span>
+                              <Badge variant="outline" className="text-xs">{count}</Badge>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {formData.distributionMethod === 'difficulty' && (
                   <div className="space-y-3">
