@@ -770,61 +770,12 @@ const CustomisedGeneration = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               {selectedBlueprint && (
-                <div className="space-y-6">
-                  <div className="flex items-center space-x-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    <Label className="text-base font-medium">Question Distribution</Label>
-                  </div>
-                  
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="font-semibold text-blue-800 mb-2">📊 Bloom's Taxonomy Distribution</h4>
-                    <p className="text-sm text-blue-700">
-                      Adjust the number of questions for each thinking skill level. The total must match your selected blueprint.
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-4">
-                      {Object.entries(BloomLevels).map(([level, label]) => {
-                        const fieldName = `bloom${level}` as keyof typeof formData;
-                        const value = formData[fieldName] as number;
-                        const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                        const maxValue = blueprint ? blueprint.total_questions : 50;
-                        
-                        return (
-                          <div key={level} className="flex items-center justify-between space-x-4">
-                            <Label className="text-sm font-medium flex-1">{label} (Level {level.slice(1)})</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              max={maxValue}
-                              value={value}
-                              onChange={(e) => {
-                                const newValue = parseInt(e.target.value) || 0;
-                                handleBloomChange(level as keyof typeof BloomLevels, [newValue]);
-                              }}
-                              className="w-20 h-9 text-center"
-                            />
-                          </div>
-                        );
-                      })}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <BookOpen className="w-5 h-5 text-primary" />
+                      <Label className="text-base font-medium">Question Distribution</Label>
                     </div>
-                  </div>
-
-                  <div className={`p-4 rounded-lg border ${(() => {
-                    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                    if (!blueprint) return 'bg-muted/50';
-                    
-                    const totalQuestions = formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
-                    
-                    if (totalQuestions > blueprint.total_questions) {
-                      return 'bg-red-50 border-red-200';
-                    } else if (totalQuestions < blueprint.total_questions) {
-                      return 'bg-yellow-50 border-yellow-200';
-                    } else {
-                      return 'bg-green-50 border-green-200';
-                    }
-                  })()}`}>
                     {(() => {
                       const blueprint = blueprints.find(b => b.id === selectedBlueprint);
                       if (!blueprint) return null;
@@ -832,27 +783,71 @@ const CustomisedGeneration = () => {
                       const totalQuestions = formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
                       
                       return (
-                        <div className="text-center">
-                          <div className={`text-lg font-semibold mb-2 ${totalQuestions > blueprint.total_questions ? 'text-red-700' : totalQuestions < blueprint.total_questions ? 'text-yellow-700' : 'text-green-700'}`}>
-                            {totalQuestions} / {blueprint.total_questions} Questions
-                          </div>
-                          {totalQuestions > blueprint.total_questions ? (
-                            <p className="text-red-600 text-sm">
-                              ⚠️ Total exceeds blueprint by {totalQuestions - blueprint.total_questions} questions. Please reduce from other levels.
-                            </p>
-                          ) : totalQuestions < blueprint.total_questions ? (
-                            <p className="text-yellow-600 text-sm">
-                              📊 {blueprint.total_questions - totalQuestions} more questions needed
-                            </p>
-                          ) : (
-                            <p className="text-green-600 text-sm">
-                              ✅ Perfect! Matches blueprint exactly
-                            </p>
-                          )}
+                        <div className={`px-3 py-1 rounded-md text-sm font-medium ${
+                          totalQuestions > blueprint.total_questions 
+                            ? 'bg-red-100 text-red-700' 
+                            : totalQuestions < blueprint.total_questions 
+                            ? 'bg-yellow-100 text-yellow-700' 
+                            : 'bg-green-100 text-green-700'
+                        }`}>
+                          {totalQuestions} / {blueprint.total_questions}
                         </div>
                       );
                     })()}
                   </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {Object.entries(BloomLevels).map(([level, label]) => {
+                      const fieldName = `bloom${level}` as keyof typeof formData;
+                      const value = formData[fieldName] as number;
+                      const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                      const maxValue = blueprint ? blueprint.total_questions : 50;
+                      
+                      return (
+                        <div key={level} className="flex items-center justify-between space-x-2">
+                          <Label className="text-sm flex-1">L{level.slice(1)} {label.split(' ')[0]}</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max={maxValue}
+                            value={value}
+                            onChange={(e) => {
+                              const newValue = parseInt(e.target.value) || 0;
+                              handleBloomChange(level as keyof typeof BloomLevels, [newValue]);
+                            }}
+                            className="w-16 h-8 text-center text-sm"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {(() => {
+                    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                    if (!blueprint) return null;
+                    
+                    const totalQuestions = formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
+                    
+                    if (totalQuestions > blueprint.total_questions) {
+                      return (
+                        <p className="text-red-600 text-sm text-center">
+                          ⚠️ Total exceeds blueprint by {totalQuestions - blueprint.total_questions} questions. Please reduce from other levels.
+                        </p>
+                      );
+                    } else if (totalQuestions < blueprint.total_questions) {
+                      return (
+                        <p className="text-yellow-600 text-sm text-center">
+                          📊 {blueprint.total_questions - totalQuestions} more questions needed
+                        </p>
+                      );
+                    } else {
+                      return (
+                        <p className="text-green-600 text-sm text-center">
+                          ✅ Perfect! Matches blueprint exactly
+                        </p>
+                      );
+                    }
+                  })()}
                 </div>
               )}
 
