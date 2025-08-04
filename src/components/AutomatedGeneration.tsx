@@ -712,14 +712,14 @@ const AutomatedGeneration = () => {
 
             <Collapsible open={isHeaderSectionOpen} onOpenChange={setIsHeaderSectionOpen}>
               <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
-                  <Label className="text-base font-medium">Header & Instructions</Label>
+                <div className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50">
+                  <Label className="text-sm font-medium">Header & Instructions</Label>
                   <Button variant="ghost" size="sm">
                     <ChevronDown className="w-4 h-4" />
                   </Button>
                 </div>
               </CollapsibleTrigger>
-              <CollapsibleContent className="p-4 border border-t-0 rounded-b-lg space-y-4">
+              <CollapsibleContent className="p-3 border border-t-0 rounded-b-lg space-y-4">
                 <StudentDetailsForm
                   show={showStudentDetails}
                   onToggle={setShowStudentDetails}

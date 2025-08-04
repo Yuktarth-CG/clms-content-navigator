@@ -30,14 +30,14 @@ const AdditionalLinesEditor: React.FC<AdditionalLinesEditorProps> = ({ lines, on
   return (
     <Collapsible>
       <CollapsibleTrigger asChild>
-        <div className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
-          <Label className="text-base font-medium">Add Additional Lines</Label>
+        <div className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50">
+          <Label className="text-sm font-medium">Add Additional Lines</Label>
           <Button variant="ghost" size="sm">
             <ChevronDown className="w-4 h-4" />
           </Button>
         </div>
       </CollapsibleTrigger>
-      <CollapsibleContent className="p-4 border border-t-0 rounded-b-lg">
+      <CollapsibleContent className="p-3 border border-t-0 rounded-b-lg">
         <div className="space-y-4">
           {lines.map((line, index) => (
             <div key={index} className="flex items-center space-x-2">
