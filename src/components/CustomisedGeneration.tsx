@@ -134,6 +134,11 @@ const CustomisedGeneration = () => {
     setBlueprintPage(1);
   }, [formData.mode]);
 
+  // Debug: Log blueprints when they change
+  useEffect(() => {
+    console.log('🔍 [CustomisedGeneration] Available blueprints:', blueprints.map(b => ({ id: b.id, name: b.name })));
+  }, [blueprints]);
+
   // Auto-populate sections when blueprint is selected
   useEffect(() => {
     if (selectedBlueprint) {
@@ -419,6 +424,7 @@ const CustomisedGeneration = () => {
   };
 
   const nextStep = () => {
+    alert(`NextStep called! Current step: ${currentStep}, Target step: ${currentStep + 1}`);
     console.log('🚀 [CustomisedGeneration] NextStep called - Current step:', currentStep);
     console.log('🚀 [CustomisedGeneration] Selected blueprint ID:', selectedBlueprint);
     
