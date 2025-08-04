@@ -311,9 +311,14 @@ const CustomisedGeneration = () => {
   };
 
   const canProceedToStep6 = () => {
+    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+    if (!blueprint) return false;
+    
     const hasValidSections = sections.some(section => section.questionTypeConfigs.length > 0);
-    const hasTotalQuestions = getTotalQuestions() > 0;
-    return hasValidSections && hasTotalQuestions;
+    const totalSectionQuestions = getTotalQuestions();
+    const validSectionCount = totalSectionQuestions === blueprint.total_questions;
+    
+    return hasValidSections && validSectionCount;
   };
 
   const canProceedToStep7 = () => {
