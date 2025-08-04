@@ -1151,22 +1151,6 @@ const AutomatedGeneration = () => {
           <CardContent className="space-y-6">
             {selectedBlueprint && (
               <>
-                {/* Blueprint Information */}
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Selected Blueprint Distribution</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                    {Object.entries(BloomLevels).map(([level, label]) => {
-                      const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                      const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
-                      return (
-                        <div key={level} className="flex justify-between">
-                          <span>{label}:</span>
-                          <span className="font-medium">{count} questions</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
 
                 {/* Distribution Method Selection */}
                 <div className="space-y-4 mb-6">
