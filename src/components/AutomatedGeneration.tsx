@@ -1084,7 +1084,7 @@ const AutomatedGeneration = () => {
                             <div className="text-sm text-muted-foreground">{chapter.description}</div>
                             <div className="flex items-center space-x-2 mt-1">
                               <Badge variant="secondary" className="text-xs">
-                                {chapter.questionCount} questions
+                                45 questions available
                               </Badge>
                               <Badge variant="outline" className="text-xs">
                                 {chapter.learningOutcomes.length} skills
