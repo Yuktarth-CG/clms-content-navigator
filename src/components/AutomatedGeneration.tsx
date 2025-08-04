@@ -540,8 +540,21 @@ const AutomatedGeneration = () => {
     return sections.length > 0 && sections.every(s => s.label.trim() !== '' && s.questionTypeConfigs.length > 0);
   };
 
+  const getTotalQuestions = () => {
+    return sections.reduce((total, section) => {
+      return total + section.questionTypeConfigs.reduce((sectionTotal, config) => sectionTotal + config.count, 0);
+    }, 0);
+  };
+
   const canGenerate = () => {
-    return selectedBlueprint && canProceedToStep2() && canProceedToStep3() && canProceedToStep4() && canProceedToStep5();
+    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+    if (!blueprint) return false;
+    
+    const totalSectionQuestions = getTotalQuestions();
+    const validSectionCount = totalSectionQuestions === blueprint.total_questions;
+    
+    return selectedBlueprint && canProceedToStep2() && canProceedToStep3() && canProceedToStep4() && 
+           canProceedToStep5() && validSectionCount;
   };
 
   const nextStep = () => {
@@ -1414,6 +1427,56 @@ const AutomatedGeneration = () => {
             <p className="text-muted-foreground">Organize your assessment into labeled sections and generate the final document.</p>
           </CardHeader>
           <CardContent>
+            {/* Section validation feedback */}
+            {selectedBlueprint && (
+              <div className={`p-4 rounded-lg border text-center mb-6 ${(() => {
+                const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                if (!blueprint) return 'bg-muted/50';
+                
+                const totalSectionQuestions = getTotalQuestions();
+                
+                if (totalSectionQuestions > blueprint.total_questions) {
+                  return 'bg-red-50 border-red-200';
+                } else if (totalSectionQuestions < blueprint.total_questions) {
+                  return 'bg-yellow-50 border-yellow-200';
+                } else {
+                  return 'bg-green-50 border-green-200';
+                }
+              })()}`}>
+                {(() => {
+                  const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                  if (!blueprint) return null;
+                  
+                  const totalSectionQuestions = getTotalQuestions();
+                  
+                  return (
+                    <div>
+                      <div className={`text-lg font-semibold mb-2 ${
+                        totalSectionQuestions > blueprint.total_questions ? 'text-red-700' : 
+                        totalSectionQuestions < blueprint.total_questions ? 'text-yellow-700' : 
+                        'text-green-700'
+                      }`}>
+                        {totalSectionQuestions} / {blueprint.total_questions} Questions in Sections
+                      </div>
+                      {totalSectionQuestions > blueprint.total_questions ? (
+                        <p className="text-red-600 text-sm">
+                          ⚠️ Sections exceed blueprint by {totalSectionQuestions - blueprint.total_questions} questions. Please reduce question counts.
+                        </p>
+                      ) : totalSectionQuestions < blueprint.total_questions ? (
+                        <p className="text-yellow-600 text-sm">
+                          📊 {blueprint.total_questions - totalSectionQuestions} more questions needed in sections
+                        </p>
+                      ) : (
+                        <p className="text-green-600 text-sm">
+                          ✅ Perfect! Section totals match blueprint exactly
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+            
             <SectionEditor sections={sections} onSectionsChange={setSections} />
             <div className="flex justify-between pt-4 mt-4">
               <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
