@@ -507,7 +507,8 @@ const AutomatedGeneration = () => {
     const questions = [];
     let questionNumber = 1;
     
-    if (!formData.title || !selectedBlueprint) {
+    // Only generate questions if we're in step 3 or later AND have required data
+    if (!formData.title || !selectedBlueprint || currentStep < 3) {
       return [];
     }
     
@@ -581,7 +582,7 @@ const AutomatedGeneration = () => {
     }
     
     return questions;
-  }, [selectedBlueprint, blueprints, formData.title, formData.chapters]);
+  }, [selectedBlueprint, blueprints, formData.title, formData.chapters, currentStep]);
 
   const handleQuestionAction = (questionId: string, action: 'move-up' | 'move-down' | 'replace' | 'edit') => {
     console.log('Question action:', { questionId, action });
