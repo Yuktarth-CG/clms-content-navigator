@@ -1153,7 +1153,7 @@ const AutomatedGeneration = () => {
               <>
 
                 {/* Distribution Method Selection */}
-                <div className="space-y-4 mb-6">
+                <div className="space-y-3 mb-4">
                   <Label className="text-base font-medium">Choose Distribution Method</Label>
                   <RadioGroup
                     value={formData.distributionMethod || 'bloom'}
@@ -1171,63 +1171,61 @@ const AutomatedGeneration = () => {
                   </RadioGroup>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6">
-                  {/* Conditionally show Bloom's Taxonomy or Difficulty Distribution */}
-                  {(!formData.distributionMethod || formData.distributionMethod === 'bloom') && (
-                    <div className="space-y-4">
-                      <Label className="text-base font-medium">Bloom's Taxonomy Distribution (from Blueprint)</Label>
-                      <div className="space-y-3">
-                        {Object.entries(BloomLevels).map(([level, label]) => {
-                          const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                          const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
-                          return (
-                            <div key={level} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
-                              <span className="font-medium">{label}</span>
-                              <Badge variant="outline">{count} questions</Badge>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {formData.distributionMethod === 'difficulty' && (
-                    <div className="space-y-4">
-                      <Label className="text-base font-medium">Difficulty Level Distribution</Label>
-                      <div className="space-y-4">
-                        {Object.entries(DifficultyLevels).map(([level, label]) => (
-                          <div key={level} className="space-y-2">
-                            <div className="flex justify-between">
-                              <Label htmlFor={`difficulty-${level}`}>{label}</Label>
-                              <span className="text-sm text-muted-foreground">
-                                {difficultyDistribution[`difficulty${level}` as keyof typeof difficultyDistribution]}
-                              </span>
-                            </div>
-                            <Slider
-                              id={`difficulty-${level}`}
-                              min={0}
-                              max={50}
-                              step={1}
-                              value={[difficultyDistribution[`difficulty${level}` as keyof typeof difficultyDistribution]]}
-                              onValueChange={(value) => {
-                                const fieldName = `difficulty${level}` as keyof typeof difficultyDistribution;
-                                setDifficultyDistribution(prev => ({ ...prev, [fieldName]: value[0] }));
-                              }}
-                              className="w-full"
-                            />
+                {/* Conditionally show Bloom's Taxonomy or Difficulty Distribution */}
+                {(!formData.distributionMethod || formData.distributionMethod === 'bloom') && (
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-muted-foreground">Bloom's Taxonomy Distribution (from Blueprint)</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {Object.entries(BloomLevels).map(([level, label]) => {
+                        const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                        const count = blueprint ? blueprint[`bloom_l${level.slice(1)}` as keyof Blueprint] as number : 0;
+                        return (
+                          <div key={level} className="flex items-center justify-between p-2 border rounded bg-muted/20 text-sm">
+                            <span className="font-medium">{label}</span>
+                            <Badge variant="outline" className="text-xs">{count}</Badge>
                           </div>
-                        ))}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Total Questions by Difficulty: {
-                          difficultyDistribution.difficultyL1 + difficultyDistribution.difficultyL2 + 
-                          difficultyDistribution.difficultyL3 + difficultyDistribution.difficultyL4 + 
-                          difficultyDistribution.difficultyL5
-                        }
-                      </div>
+                        );
+                      })}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+
+                {formData.distributionMethod === 'difficulty' && (
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-muted-foreground">Difficulty Level Distribution</Label>
+                    <div className="space-y-3">
+                      {Object.entries(DifficultyLevels).map(([level, label]) => (
+                        <div key={level} className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <Label htmlFor={`difficulty-${level}`} className="text-sm">{label}</Label>
+                            <span className="text-muted-foreground text-xs">
+                              {difficultyDistribution[`difficulty${level}` as keyof typeof difficultyDistribution]}
+                            </span>
+                          </div>
+                          <Slider
+                            id={`difficulty-${level}`}
+                            min={0}
+                            max={50}
+                            step={1}
+                            value={[difficultyDistribution[`difficulty${level}` as keyof typeof difficultyDistribution]]}
+                            onValueChange={(value) => {
+                              const fieldName = `difficulty${level}` as keyof typeof difficultyDistribution;
+                              setDifficultyDistribution(prev => ({ ...prev, [fieldName]: value[0] }));
+                            }}
+                            className="w-full h-2"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Total Questions: {
+                        difficultyDistribution.difficultyL1 + difficultyDistribution.difficultyL2 + 
+                        difficultyDistribution.difficultyL3 + difficultyDistribution.difficultyL4 + 
+                        difficultyDistribution.difficultyL5
+                      }
+                    </div>
+                  </div>
+                )}
               </>
             )}
 
