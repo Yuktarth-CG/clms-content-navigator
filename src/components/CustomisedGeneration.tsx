@@ -19,7 +19,8 @@ import {
   Target, 
   CheckCircle, 
   BookTemplate,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from 'lucide-react';
 import PDFPreview from './PDFPreview';
 import ChapterLOSelector from './ChapterLOSelector';
@@ -70,7 +71,7 @@ const CustomisedGeneration = () => {
     duration: ''
   });
 
-  const totalSteps = 5;
+  const totalSteps = 4;
   const stepProgress = (currentStep / totalSteps) * 100;
 
   // Update allowed question types from sections
@@ -252,24 +253,23 @@ const CustomisedGeneration = () => {
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
-                <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>Configuration</span>
-                <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Basic Info</span>
-                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
-                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Sections</span>
-                <span className={currentStep >= 5 ? "text-primary font-medium" : "text-muted-foreground"}>Generate</span>
+                <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>Setup</span>
+                <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
+                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Sections</span>
+                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Generate</span>
               </div>
               <Progress value={stepProgress} className="h-2" />
             </div>
           </CardHeader>
         </Card>
 
-        {/* Step 1: Assessment Configuration */}
+        {/* Step 1: Assessment Configuration & Basic Information */}
         {currentStep === 1 && (
           <Card className="animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">1</div>
-                <span>Assessment Configuration</span>
+                <span>Assessment Configuration & Basic Information</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -298,71 +298,13 @@ const CustomisedGeneration = () => {
 
               <Separator />
 
-              {/* Marks and Duration */}
+              {/* Basic Information */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
-                  <Calculator className="w-5 h-5 text-green-600" />
-                  <Label className="text-base font-medium">Assessment Parameters</Label>
+                  <FileText className="w-5 h-5 text-primary" />
+                  <Label className="text-base font-medium">Basic Information</Label>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="totalMarks" className="flex items-center space-x-1">
-                      <span>Total Marks</span>
-                      {formData.mode === 'SA' && <span className="text-destructive">*</span>}
-                    </Label>
-                    <Input
-                      id="totalMarks"
-                      type="number"
-                      min="1"
-                      placeholder="e.g., 100"
-                      value={formData.totalMarks}
-                      onChange={(e) => setFormData(prev => ({ ...prev, totalMarks: e.target.value }))}
-                      className="h-11"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="duration" className="flex items-center space-x-1">
-                      <span>Duration (minutes)</span>
-                      {formData.mode === 'SA' && <span className="text-destructive">*</span>}
-                    </Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      min="1"
-                      placeholder="e.g., 90"
-                      value={formData.duration}
-                      onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
-                      className="h-11"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <Button 
-                  onClick={nextStep}
-                  disabled={!canProceedToStep2()}
-                  className="flex items-center space-x-2"
-                >
-                  <span>Next: Basic Information</span>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Step 2: Basic Information */}
-        {currentStep === 2 && (
-          <Card className="animate-fade-in">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">2</div>
-                <span>Basic Information</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 gap-6">
+                
                 <div className="space-y-2">
                   <Label htmlFor="title" className="flex items-center space-x-1">
                     <span>Assessment Title</span>
@@ -376,6 +318,7 @@ const CustomisedGeneration = () => {
                     className="h-11"
                   />
                 </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="grade" className="flex items-center space-x-1">
@@ -429,11 +372,49 @@ const CustomisedGeneration = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between pt-4">
-                <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Back</span>
-                </Button>
+              <Separator />
+
+              {/* Marks and Duration */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Calculator className="w-5 h-5 text-green-600" />
+                  <Label className="text-base font-medium">Assessment Parameters</Label>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="totalMarks" className="flex items-center space-x-1">
+                      <span>Total Marks</span>
+                      {formData.mode === 'SA' && <span className="text-destructive">*</span>}
+                    </Label>
+                    <Input
+                      id="totalMarks"
+                      type="number"
+                      min="1"
+                      placeholder="e.g., 100"
+                      value={formData.totalMarks}
+                      onChange={(e) => setFormData(prev => ({ ...prev, totalMarks: e.target.value }))}
+                      className="h-11"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="duration" className="flex items-center space-x-1">
+                      <span>Duration (minutes)</span>
+                      {formData.mode === 'SA' && <span className="text-destructive">*</span>}
+                    </Label>
+                    <Input
+                      id="duration"
+                      type="number"
+                      min="1"
+                      placeholder="e.g., 90"
+                      value={formData.duration}
+                      onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
+                      className="h-11"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
                 <Button 
                   onClick={nextStep}
                   disabled={!canProceedToStep3()}
@@ -447,12 +428,12 @@ const CustomisedGeneration = () => {
           </Card>
         )}
 
-        {/* Step 3: Content Selection */}
-        {currentStep === 3 && (
+        {/* Step 2: Content Selection */}
+        {currentStep === 2 && (
           <Card className="animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">2</div>
                 <span>Content Selection</span>
               </CardTitle>
             </CardHeader>
@@ -484,12 +465,12 @@ const CustomisedGeneration = () => {
           </Card>
         )}
 
-        {/* Step 4: Section Management */}
-        {currentStep === 4 && (
+        {/* Step 3: Section Management */}
+        {currentStep === 3 && (
           <Card className="animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
                 <span>Section Management</span>
               </CardTitle>
             </CardHeader>
@@ -517,12 +498,12 @@ const CustomisedGeneration = () => {
           </Card>
         )}
 
-        {/* Step 5: Generate */}
-        {currentStep === 5 && (
+        {/* Step 4: Generate */}
+        {currentStep === 4 && (
           <Card className="animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">5</div>
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
                 <span>Final Review & Generate</span>
               </CardTitle>
             </CardHeader>
