@@ -112,6 +112,7 @@ export interface AssessmentFormData {
   learning_outcomes: string[];
   blueprint_id?: string;
   allowed_question_types: QuestionType[];
+  distributionMethod?: 'blooms' | 'difficulty';
   bloom_l1: number;
   bloom_l2: number;
   bloom_l3: number;

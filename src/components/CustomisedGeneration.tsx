@@ -48,6 +48,7 @@ const CustomisedGeneration = () => {
     chapters: [] as string[],
     learningOutcomes: [] as string[],
     allowedQuestionTypes: [] as QuestionType[],
+    distributionMethod: 'blooms' as 'blooms' | 'difficulty',
     bloomL1: 0,
     bloomL2: 0,
     bloomL3: 0,
@@ -549,65 +550,94 @@ const CustomisedGeneration = () => {
 
               <Separator />
 
-              {/* Bloom's Taxonomy Distribution */}
+              {/* Distribution Method Selection */}
               <div className="space-y-4">
-                <Label className="text-base font-medium">Bloom's Taxonomy Distribution</Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {Object.entries(BloomLevels).map(([level, label]) => (
-                    <div key={level} className="space-y-2">
-                      <Label htmlFor={`bloom-${level}`}>{label}</Label>
-                      <Input
-                        id={`bloom-${level}`}
-                        type="number"
-                        min="0"
-                        value={formData[`bloom${level}` as keyof typeof formData] || 0}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value) || 0;
-                          handleBloomChange(level as keyof typeof BloomLevels, [value]);
-                        }}
-                        placeholder="0"
-                      />
+                <Label className="text-base font-medium">Question Distribution Method</Label>
+                
+                <RadioGroup 
+                  value={formData.distributionMethod || 'blooms'} 
+                  onValueChange={(value: 'blooms' | 'difficulty') => setFormData(prev => ({ ...prev, distributionMethod: value }))}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
+                  <Label htmlFor="blooms-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="blooms" id="blooms-option" />
+                    <div>
+                      <div className="font-medium">Bloom's Taxonomy</div>
+                      <div className="text-sm text-muted-foreground">Distribute questions by cognitive levels</div>
                     </div>
-                  ))}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Total Questions: {getTotalQuestions()}
-                </div>
+                  </Label>
+                  <Label htmlFor="difficulty-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="difficulty" id="difficulty-option" />
+                    <div>
+                      <div className="font-medium">Difficulty Levels</div>
+                      <div className="text-sm text-muted-foreground">Distribute questions by difficulty (1-5)</div>
+                    </div>
+                  </Label>
+                </RadioGroup>
               </div>
 
               <Separator />
 
-              {/* Difficulty Level Distribution */}
-              <div className="space-y-4">
-                <Label className="text-base font-medium">Difficulty Level Distribution</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Object.entries(DifficultyLevels).map(([level, label]) => (
-                    <div key={level} className="space-y-3">
-                      <div className="flex justify-between">
-                        <Label htmlFor={`difficulty-${level}`}>{label}</Label>
-                        <span className="text-sm text-muted-foreground">
-                          {formData[`difficulty${level}` as keyof typeof formData] || 0}
-                        </span>
+              {/* Conditional Distribution Display */}
+              {(!formData.distributionMethod || formData.distributionMethod === 'blooms') && (
+                <div className="space-y-4">
+                  <Label className="text-base font-medium">Bloom's Taxonomy Distribution</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {Object.entries(BloomLevels).map(([level, label]) => (
+                      <div key={level} className="space-y-2">
+                        <Label htmlFor={`bloom-${level}`}>{label}</Label>
+                        <Input
+                          id={`bloom-${level}`}
+                          type="number"
+                          min="0"
+                          value={formData[`bloom${level}` as keyof typeof formData] || 0}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value) || 0;
+                            handleBloomChange(level as keyof typeof BloomLevels, [value]);
+                          }}
+                          placeholder="0"
+                        />
                       </div>
-                      <Slider
-                        id={`difficulty-${level}`}
-                        min={0}
-                        max={50}
-                        step={1}
-                        value={[formData[`difficulty${level}` as keyof typeof formData] as number || 0]}
-                        onValueChange={(value) => {
-                          const fieldName = `difficulty${level}` as keyof typeof formData;
-                          setFormData(prev => ({ ...prev, [fieldName]: value[0] }));
-                        }}
-                        className="w-full"
-                      />
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Total Questions: {getTotalQuestions()}
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  Total Questions by Difficulty: {getTotalDifficultyQuestions()}
+              )}
+
+              {formData.distributionMethod === 'difficulty' && (
+                <div className="space-y-4">
+                  <Label className="text-base font-medium">Difficulty Level Distribution</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Object.entries(DifficultyLevels).map(([level, label]) => (
+                      <div key={level} className="space-y-3">
+                        <div className="flex justify-between">
+                          <Label htmlFor={`difficulty-${level}`}>{label}</Label>
+                          <span className="text-sm text-muted-foreground">
+                            {formData[`difficulty${level}` as keyof typeof formData] || 0}
+                          </span>
+                        </div>
+                        <Slider
+                          id={`difficulty-${level}`}
+                          min={0}
+                          max={50}
+                          step={1}
+                          value={[formData[`difficulty${level}` as keyof typeof formData] as number || 0]}
+                          onValueChange={(value) => {
+                            const fieldName = `difficulty${level}` as keyof typeof formData;
+                            setFormData(prev => ({ ...prev, [fieldName]: value[0] }));
+                          }}
+                          className="w-full"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Total Questions by Difficulty: {getTotalDifficultyQuestions()}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {hasQuestionCountExceeded() && (
                 <Alert>
