@@ -812,17 +812,18 @@ const CustomisedGeneration = () => {
                         const maxValue = blueprint ? blueprint.total_questions : 50;
                         
                         return (
-                          <div key={level} className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <Label className="text-sm font-medium">{label} (Level {level.slice(1)})</Label>
-                              <Badge variant="outline">{value} questions</Badge>
-                            </div>
-                            <Slider
-                              value={[value]}
-                              onValueChange={(val) => handleBloomChange(level as keyof typeof BloomLevels, val)}
+                          <div key={level} className="flex items-center justify-between space-x-4">
+                            <Label className="text-sm font-medium flex-1">{label} (Level {level.slice(1)})</Label>
+                            <Input
+                              type="number"
+                              min="0"
                               max={maxValue}
-                              step={1}
-                              className="w-full"
+                              value={value}
+                              onChange={(e) => {
+                                const newValue = parseInt(e.target.value) || 0;
+                                handleBloomChange(level as keyof typeof BloomLevels, [newValue]);
+                              }}
+                              className="w-20 h-9 text-center"
                             />
                           </div>
                         );
