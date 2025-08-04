@@ -273,31 +273,6 @@ const CustomisedGeneration = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Assessment Mode */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Target className="w-5 h-5 text-primary" />
-                  <Label className="text-base font-medium">Assessment Type</Label>
-                </div>
-                
-                <RadioGroup 
-                  value={formData.mode} 
-                  onValueChange={(value: AssessmentMode) => setFormData(prev => ({ ...prev, mode: value }))}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                >
-                  <Label htmlFor="fa-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                    <RadioGroupItem value="FA" id="fa-option" />
-                    <div className="font-medium">Formative Assessment (FA)/ Practice</div>
-                  </Label>
-                  <Label htmlFor="sa-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                    <RadioGroupItem value="SA" id="sa-option" />
-                    <div className="font-medium">Summative Assessment (SA)/ Evaluative</div>
-                  </Label>
-                </RadioGroup>
-              </div>
-
-              <Separator />
-
               {/* Basic Information */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
@@ -370,6 +345,31 @@ const CustomisedGeneration = () => {
                     </Select>
                   </div>
                 </div>
+              </div>
+
+              <Separator />
+
+              {/* Assessment Mode */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Target className="w-5 h-5 text-primary" />
+                  <Label className="text-base font-medium">Assessment Type</Label>
+                </div>
+                
+                <RadioGroup 
+                  value={formData.mode} 
+                  onValueChange={(value: AssessmentMode) => setFormData(prev => ({ ...prev, mode: value }))}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
+                  <Label htmlFor="fa-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="FA" id="fa-option" />
+                    <div className="font-medium">Formative Assessment (FA)/ Practice</div>
+                  </Label>
+                  <Label htmlFor="sa-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <RadioGroupItem value="SA" id="sa-option" />
+                    <div className="font-medium">Summative Assessment (SA)/ Evaluative</div>
+                  </Label>
+                </RadioGroup>
               </div>
 
               <Separator />
