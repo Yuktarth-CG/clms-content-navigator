@@ -295,6 +295,12 @@ const CustomisedGeneration = () => {
     }, 0);
   };
 
+  const getTotalMarks = () => {
+    return sections.reduce((total, section) => {
+      return total + section.questionTypeConfigs.reduce((sectionTotal, config) => sectionTotal + (config.count * config.marks), 0);
+    }, 0);
+  };
+
   const getTotalDifficultyQuestions = () => {
     return formData.difficultyL1 + formData.difficultyL2 + formData.difficultyL3 + 
            formData.difficultyL4 + formData.difficultyL5;
@@ -1123,6 +1129,7 @@ const CustomisedGeneration = () => {
                     if (!blueprint) return null;
                     
                     const totalSectionQuestions = getTotalQuestions();
+                    const totalSectionMarks = getTotalMarks();
                     
                     return (
                       <div>
@@ -1131,7 +1138,7 @@ const CustomisedGeneration = () => {
                           totalSectionQuestions < blueprint.total_questions ? 'text-yellow-700' : 
                           'text-green-700'
                         }`}>
-                          {totalSectionQuestions} / {blueprint.total_questions} Questions in Sections
+                          {totalSectionQuestions} / {blueprint.total_questions} Questions | {totalSectionMarks} Marks
                         </div>
                         {totalSectionQuestions > blueprint.total_questions ? (
                           <p className="text-red-600 text-sm">

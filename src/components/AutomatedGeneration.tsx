@@ -546,6 +546,12 @@ const AutomatedGeneration = () => {
     }, 0);
   };
 
+  const getTotalMarks = () => {
+    return sections.reduce((total, section) => {
+      return total + section.questionTypeConfigs.reduce((sectionTotal, config) => sectionTotal + (config.count * config.marks), 0);
+    }, 0);
+  };
+
   const canGenerate = () => {
     const blueprint = blueprints.find(b => b.id === selectedBlueprint);
     if (!blueprint) return false;
@@ -1448,6 +1454,7 @@ const AutomatedGeneration = () => {
                   if (!blueprint) return null;
                   
                   const totalSectionQuestions = getTotalQuestions();
+                  const totalSectionMarks = getTotalMarks();
                   
                   return (
                     <div>
@@ -1456,7 +1463,7 @@ const AutomatedGeneration = () => {
                         totalSectionQuestions < blueprint.total_questions ? 'text-yellow-700' : 
                         'text-green-700'
                       }`}>
-                        {totalSectionQuestions} / {blueprint.total_questions} Questions in Sections
+                        {totalSectionQuestions} / {blueprint.total_questions} Questions | {totalSectionMarks} Marks
                       </div>
                       {totalSectionQuestions > blueprint.total_questions ? (
                         <p className="text-red-600 text-sm">
