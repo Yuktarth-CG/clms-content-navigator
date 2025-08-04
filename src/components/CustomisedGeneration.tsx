@@ -65,7 +65,7 @@ const CustomisedGeneration = () => {
     duration: ''
   });
 
-  const totalSteps = 4;
+  const totalSteps = 5;
   const stepProgress = (currentStep / totalSteps) * 100;
 
   // Fetch blueprints when component mounts
@@ -250,6 +250,10 @@ const CustomisedGeneration = () => {
     return formData.allowedQuestionTypes.length > 0 && getTotalQuestions() > 0;
   };
 
+  const canProceedToStep6 = () => {
+    return canProceedToStep5();
+  };
+
   const hasQuestionCountExceeded = () => {
     const total = getTotalQuestions();
     return total > 100;
@@ -293,7 +297,8 @@ const CustomisedGeneration = () => {
                 <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>Configuration</span>
                 <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>Basic Info</span>
                 <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>Content</span>
-                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Questions & Generate</span>
+                <span className={currentStep >= 4 ? "text-primary font-medium" : "text-muted-foreground"}>Questions</span>
+                <span className={currentStep >= 5 ? "text-primary font-medium" : "text-muted-foreground"}>Generate</span>
               </div>
               <Progress value={stepProgress} className="h-2" />
             </div>
@@ -527,22 +532,25 @@ const CustomisedGeneration = () => {
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
-                <span>Question Setup & Generate</span>
+                <span>Question Setup</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Allowed Question Types */}
               <div className="space-y-4">
-                <Label className="text-base font-medium">Allowed Question Types</Label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-2">
+                  <Target className="w-5 h-5 text-primary" />
+                  <Label className="text-base font-medium">Allowed Question Types</Label>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {Object.entries(QuestionTypeLabels).map(([type, label]) => (
-                    <div key={type} className="flex items-center space-x-2">
+                    <div key={type} className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                       <Checkbox
                         id={type}
                         checked={formData.allowedQuestionTypes.includes(type as QuestionType)}
                         onCheckedChange={(checked) => handleQuestionTypeChange(type as QuestionType, !!checked)}
                       />
-                      <Label htmlFor={type} className="cursor-pointer">{label}</Label>
+                      <Label htmlFor={type} className="cursor-pointer text-sm">{label}</Label>
                     </div>
                   ))}
                 </div>
@@ -550,29 +558,63 @@ const CustomisedGeneration = () => {
 
               <Separator />
 
+              {/* Blueprint Selection Section */}
+              {blueprints.length > 0 && (
+                <>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <BookTemplate className="w-5 h-5 text-blue-600" />
+                      <Label className="text-base font-medium">Use Blueprint Template</Label>
+                      <Badge variant="secondary" className="text-xs">Optional</Badge>
+                    </div>
+                    <Select value={selectedTemplate} onValueChange={applyBlueprint}>
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Select a blueprint template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {blueprints.map(blueprint => (
+                          <SelectItem key={blueprint.id} value={blueprint.id}>
+                            {blueprint.name} - {blueprint.total_questions} questions
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {selectedTemplate && (
+                      <Alert>
+                        <CheckCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          Blueprint template applied! The question distribution has been updated.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                  <Separator />
+                </>
+              )}
+
               {/* Distribution Method Selection */}
               <div className="space-y-4">
-                <Label className="text-base font-medium">Question Distribution Method</Label>
-                
-                <RadioGroup 
-                  value={formData.distributionMethod || 'blooms'} 
-                  onValueChange={(value: 'blooms' | 'difficulty') => setFormData(prev => ({ ...prev, distributionMethod: value }))}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                >
-                  <Label htmlFor="blooms-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                    <RadioGroupItem value="blooms" id="blooms-option" />
-                    <div>
-                      <div className="font-medium">Bloom's Taxonomy</div>
-                      <div className="text-sm text-muted-foreground">Distribute questions by cognitive levels</div>
-                    </div>
-                  </Label>
-                  <Label htmlFor="difficulty-option" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                    <RadioGroupItem value="difficulty" id="difficulty-option" />
-                    <div>
-                      <div className="font-medium">Difficulty Levels</div>
-                      <div className="text-sm text-muted-foreground">Distribute questions by difficulty (1-5)</div>
-                    </div>
-                  </Label>
+                <div className="flex items-center space-x-2">
+                  <Calculator className="w-5 h-5 text-green-600" />
+                  <Label className="text-base font-medium">Distribution Method</Label>
+                </div>
+                <RadioGroup value={formData.distributionMethod} onValueChange={(value: 'blooms' | 'difficulty') => setFormData(prev => ({ ...prev, distributionMethod: value }))}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Label htmlFor="blooms-method" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="blooms" id="blooms-method" />
+                      <div>
+                        <div className="font-medium">Bloom's Taxonomy</div>
+                        <div className="text-sm text-muted-foreground">Distribute by cognitive levels</div>
+                      </div>
+                    </Label>
+                    <Label htmlFor="difficulty-method" className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="difficulty" id="difficulty-method" />
+                      <div>
+                        <div className="font-medium">Difficulty Levels</div>
+                        <div className="text-sm text-muted-foreground">Distribute by question difficulty</div>
+                      </div>
+                    </Label>
+                  </div>
                 </RadioGroup>
               </div>
 
@@ -582,6 +624,9 @@ const CustomisedGeneration = () => {
               {(!formData.distributionMethod || formData.distributionMethod === 'blooms') && (
                 <div className="space-y-4">
                   <Label className="text-base font-medium">Bloom's Taxonomy Distribution</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Specify the number of questions for each Bloom's Taxonomy level.
+                  </p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {Object.entries(BloomLevels).map(([level, label]) => (
                       <div key={level} className="space-y-2">
@@ -595,7 +640,7 @@ const CustomisedGeneration = () => {
                             const value = parseInt(e.target.value) || 0;
                             handleBloomChange(level as keyof typeof BloomLevels, [value]);
                           }}
-                          placeholder="0"
+                          placeholder={`e.g., ${level === 'L1' ? '4' : '2'}`}
                         />
                       </div>
                     ))}
@@ -647,6 +692,49 @@ const CustomisedGeneration = () => {
                   </AlertDescription>
                 </Alert>
               )}
+
+              <div className="flex justify-between pt-4">
+                <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </Button>
+                <Button
+                  onClick={nextStep}
+                  disabled={!canProceedToStep5()}
+                  className="flex items-center space-x-2"
+                >
+                  <span>Next: Generate</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 5: Generate */}
+        {currentStep === 5 && (
+          <Card className="animate-fade-in">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">5</div>
+                <span>Final Review & Generate</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <Label className="text-base font-medium">Assessment Summary</Label>
+                <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                  <div><strong>Title:</strong> {formData.title}</div>
+                  <div><strong>Grade:</strong> Grade {formData.grade}</div>
+                  <div><strong>Subject:</strong> {formData.subject}</div>
+                  <div><strong>Assessment Mode:</strong> {formData.mode}</div>
+                  <div><strong>Total Questions:</strong> {getTotalQuestions()}</div>
+                  {formData.totalMarks && <div><strong>Total Marks:</strong> {formData.totalMarks}</div>}
+                  {formData.duration && <div><strong>Duration:</strong> {formData.duration} minutes</div>}
+                  <div><strong>Question Types:</strong> {formData.allowedQuestionTypes.map(type => QuestionTypeLabels[type]).join(', ')}</div>
+                  <div><strong>Content:</strong> {contentType === 'chapters' ? `${formData.chapters.length} chapters selected` : `${formData.learningOutcomes.length} learning outcomes selected`}</div>
+                </div>
+              </div>
 
               <div className="flex justify-between pt-4">
                 <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
