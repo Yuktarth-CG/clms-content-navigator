@@ -15,7 +15,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Zap, FileText, Download, Send, AlertCircle, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Target, Info, CheckCircle, Search } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import PDFPreview, { ExtraField, AdditionalLine } from './PDFPreview';
-import ManualQuestionEntry from './ManualQuestionEntry';
+import QuestionShortageResolver from './QuestionShortageResolver';
 import StudentDetailsForm from './StudentDetailsForm';
 import GeneralInstructionsEditor from './GeneralInstructionsEditor';
 import AdditionalLinesEditor from './AdditionalLinesEditor';
@@ -313,11 +313,20 @@ const AutomatedGeneration = () => {
       setIsGenerated(true);
       
       const hasManualQuestions = addedManualQuestions.length > 0;
+      const hasDraftQuestions = addedManualQuestions.some(q => q.addedBy !== user?.id);
+      
+      let description = "Your assessment has been created and is ready for download.";
+      if (hasManualQuestions) {
+        if (hasDraftQuestions) {
+          description = `Your assessment has been created with ${addedManualQuestions.length} additional questions (including draft questions). Draft questions won't be added to CLMS until reviewed.`;
+        } else {
+          description = `Your assessment has been created with ${addedManualQuestions.length} manually added questions. Manual questions won't be added to CLMS.`;
+        }
+      }
+      
       toast({
         title: "Assessment Generated Successfully!",
-        description: hasManualQuestions 
-          ? `Your assessment has been created with ${addedManualQuestions.length} manually added questions. Manual questions won't be added to CLMS.`
-          : "Your assessment has been created and is ready for download.",
+        description
       });
     } catch (error) {
       toast({
@@ -1298,7 +1307,7 @@ const AutomatedGeneration = () => {
       )}
 
       {showManualEntry && shortage.length > 0 && (
-        <ManualQuestionEntry 
+        <QuestionShortageResolver 
           shortages={shortage}
           onSave={handleManualQuestionsSave}
           onCancel={handleManualQuestionsCancel}
