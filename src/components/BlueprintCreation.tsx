@@ -952,20 +952,44 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
           </div>
           <span className="font-medium">Basic Info</span>
         </div>
-        <div className={`w-4 h-0.5 ${currentStep === 'units' || currentStep === 'questions' ? 'bg-green-600' : 'bg-gray-300'}`}></div>
-        <div className={`flex items-center space-x-2 ${currentStep === 'units' ? 'text-blue-600' : currentStep === 'questions' ? 'text-green-600' : 'text-gray-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'units' ? 'bg-blue-100 text-blue-600' : currentStep === 'questions' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-            2
-          </div>
-          <span className="font-medium">Units</span>
-        </div>
-        <div className={`w-4 h-0.5 ${currentStep === 'questions' ? 'bg-green-600' : 'bg-gray-300'}`}></div>
-        <div className={`flex items-center space-x-2 ${currentStep === 'questions' ? 'text-blue-600' : 'text-gray-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'questions' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
-            3
-          </div>
-          <span className="font-medium">Questions</span>
-        </div>
+        
+        {sourceType === 'clms-library' ? (
+          // CLMS Library workflow: Basic Info → Barcode & Student Info → Content
+          <>
+            <div className="w-4 h-0.5 bg-gray-300"></div>
+            <div className="flex items-center space-x-2 text-gray-400">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium bg-gray-100 text-gray-400">
+                2
+              </div>
+              <span className="font-medium">Barcode & Student Info</span>
+            </div>
+            <div className="w-4 h-0.5 bg-gray-300"></div>
+            <div className="flex items-center space-x-2 text-gray-400">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium bg-gray-100 text-gray-400">
+                3
+              </div>
+              <span className="font-medium">Content</span>
+            </div>
+          </>
+        ) : (
+          // CSV workflow: Basic Info → Units → Questions
+          <>
+            <div className={`w-4 h-0.5 ${currentStep === 'units' || currentStep === 'questions' ? 'bg-green-600' : 'bg-gray-300'}`}></div>
+            <div className={`flex items-center space-x-2 ${currentStep === 'units' ? 'text-blue-600' : currentStep === 'questions' ? 'text-green-600' : 'text-gray-400'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'units' ? 'bg-blue-100 text-blue-600' : currentStep === 'questions' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+                2
+              </div>
+              <span className="font-medium">Units</span>
+            </div>
+            <div className={`w-4 h-0.5 ${currentStep === 'questions' ? 'bg-green-600' : 'bg-gray-300'}`}></div>
+            <div className={`flex items-center space-x-2 ${currentStep === 'questions' ? 'text-blue-600' : 'text-gray-400'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'questions' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
+                3
+              </div>
+              <span className="font-medium">Questions</span>
+            </div>
+          </>
+        )}
       </div>
 
       {currentStep === 'basic' && renderBasicStep()}
