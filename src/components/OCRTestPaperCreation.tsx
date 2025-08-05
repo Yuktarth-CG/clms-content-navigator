@@ -459,6 +459,25 @@ const OCRTestPaperCreation = () => {
   const [presetName, setPresetName] = useState('');
   const [presetDescription, setPresetDescription] = useState('');
   
+  // Generate default preset name based on current context
+  const generateDefaultPresetName = () => {
+    const parts = [];
+    
+    if (selectedGrade) parts.push(`Grade ${selectedGrade}`);
+    if (selectedSubject) parts.push(selectedSubject);
+    if (selectedMedium && selectedMedium !== 'English') parts.push(selectedMedium);
+    
+    // Add current date
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-GB', { 
+      day: '2-digit', 
+      month: 'short' 
+    });
+    
+    const baseName = parts.length > 0 ? parts.join(' ') : 'Question Config';
+    return `${baseName} - ${dateStr}`;
+  };
+  
   // Barcode configuration
   const [barcodeConfig, setBarcodeConfig] = useState({
     topLeft: '',
@@ -2202,7 +2221,11 @@ const OCRTestPaperCreation = () => {
 
         <Dialog open={showSavePresetDialog} onOpenChange={setShowSavePresetDialog}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="flex items-center space-x-2">
+            <Button variant="outline" className="flex items-center space-x-2"
+                    onClick={() => {
+                      setPresetName(generateDefaultPresetName());
+                      setPresetDescription('');
+                    }}>
               <Save className="w-4 h-4" />
               <span>Save as Preset</span>
             </Button>
