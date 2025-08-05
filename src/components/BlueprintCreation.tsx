@@ -12,7 +12,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, X, Save, AlertTriangle, CheckCircle, ArrowRight, Search } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Blueprint, UnitDistribution, QuestionTypeDistribution, BloomsTaxonomyLevel, QuestionType, BloomsTaxonomyLabels, QuestionTypeLabels, LanguageSupport } from '@/types/ocr';
-
 interface LearningOutcome {
   id: string;
   code: string;
@@ -24,7 +23,6 @@ interface LearningOutcome {
   name: string;
   description: string;
 }
-
 interface Chapter {
   id: string;
   name: string;
@@ -41,142 +39,154 @@ interface Chapter {
 }
 
 // Mock LO data based on the image
-const mockLearningOutcomes: LearningOutcome[] = [
-  {
-    id: 'lo1',
-    code: 'UPM514',
-    grade: 5,
-    subject: 'Maths',
-    medium: 'Hindi',
-    chapter: 'क्षेत्रफल | Area',
-    topic: 'शब्द समस्याएं | Word Problems',
-    name: 'UPM514',
-    description: 'M511-बच्चे एक वर्ग की परिधि, त्रिज्या और व्यास ज्ञात कर सकते हैं और वर्ग, आयत का क्षेत्रफल ज्ञात कर सकते हैं । इसके अतिरिक्त बच्चे 3D आकृतियों का आयतन निकाल पाते हैं।'
-  },
-  {
-    id: 'lo2',
-    code: 'UPM813',
-    grade: 8,
-    subject: 'Maths',
-    medium: 'Hindi',
-    chapter: 'बैंकिंग | Banking',
-    topic: 'बैंक | Bank',
-    name: 'UPM813',
-    description: 'M812-बच्चा बैंकिंग संबंधी सामान्य जानकारी रखता है।'
-  },
-  {
-    id: 'lo3',
-    code: 'MPB1207',
-    grade: 12,
-    subject: 'Biology',
-    medium: 'English',
-    chapter: 'Ecosystem',
-    topic: 'Ecosystem Structure',
-    name: 'MPB1207',
-    description: 'पारितंत्र संरचना एवं क्रियाशीलता, उत्पादकता, अपaghटन के बारे में जानना ।'
-  },
-  {
-    id: 'lo4',
-    code: 'FLNM172',
-    grade: 1,
-    subject: 'Maths',
-    medium: 'English',
-    chapter: 'Shapes and Space',
-    topic: 'Use spatial words (above and below)',
-    name: 'FLNM172',
-    description: 'Uses spatial words like top, bottom, on, under, inside, outside, above, below, near, far, before, after, right, left, and middle'
-  },
-  {
-    id: 'lo5',
-    code: 'HPS327',
-    grade: 3,
-    subject: 'EVS',
-    medium: 'English',
-    chapter: 'Foods We Eat',
-    topic: 'Identify on the basis of features',
-    name: 'HPS327',
-    description: 'Describes need of food for people of different age groups; animals and birds, availability of food and water and use of water at home and surroundings'
-  }
-];
+const mockLearningOutcomes: LearningOutcome[] = [{
+  id: 'lo1',
+  code: 'UPM514',
+  grade: 5,
+  subject: 'Maths',
+  medium: 'Hindi',
+  chapter: 'क्षेत्रफल | Area',
+  topic: 'शब्द समस्याएं | Word Problems',
+  name: 'UPM514',
+  description: 'M511-बच्चे एक वर्ग की परिधि, त्रिज्या और व्यास ज्ञात कर सकते हैं और वर्ग, आयत का क्षेत्रफल ज्ञात कर सकते हैं । इसके अतिरिक्त बच्चे 3D आकृतियों का आयतन निकाल पाते हैं।'
+}, {
+  id: 'lo2',
+  code: 'UPM813',
+  grade: 8,
+  subject: 'Maths',
+  medium: 'Hindi',
+  chapter: 'बैंकिंग | Banking',
+  topic: 'बैंक | Bank',
+  name: 'UPM813',
+  description: 'M812-बच्चा बैंकिंग संबंधी सामान्य जानकारी रखता है।'
+}, {
+  id: 'lo3',
+  code: 'MPB1207',
+  grade: 12,
+  subject: 'Biology',
+  medium: 'English',
+  chapter: 'Ecosystem',
+  topic: 'Ecosystem Structure',
+  name: 'MPB1207',
+  description: 'पारितंत्र संरचना एवं क्रियाशीलता, उत्पादकता, अपaghटन के बारे में जानना ।'
+}, {
+  id: 'lo4',
+  code: 'FLNM172',
+  grade: 1,
+  subject: 'Maths',
+  medium: 'English',
+  chapter: 'Shapes and Space',
+  topic: 'Use spatial words (above and below)',
+  name: 'FLNM172',
+  description: 'Uses spatial words like top, bottom, on, under, inside, outside, above, below, near, far, before, after, right, left, and middle'
+}, {
+  id: 'lo5',
+  code: 'HPS327',
+  grade: 3,
+  subject: 'EVS',
+  medium: 'English',
+  chapter: 'Foods We Eat',
+  topic: 'Identify on the basis of features',
+  name: 'HPS327',
+  description: 'Describes need of food for people of different age groups; animals and birds, availability of food and water and use of water at home and surroundings'
+}];
 
 // Mock chapters data based on the uploaded image
-const mockChapters: Chapter[] = [
-  {
-    id: 'ch1',
-    name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
-    description: 'Chapter about basic mathematical concepts',
-    grade: 5,
-    subject: 'Mathematics',
-    medium: 'Hindi',
-    questionCounts: { easy: 13, medium: 12, hard: 10 },
-    totalQuestions: 35
+const mockChapters: Chapter[] = [{
+  id: 'ch1',
+  name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
+  description: 'Chapter about basic mathematical concepts',
+  grade: 5,
+  subject: 'Mathematics',
+  medium: 'Hindi',
+  questionCounts: {
+    easy: 13,
+    medium: 12,
+    hard: 10
   },
-  {
-    id: 'ch2', 
-    name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
-    description: 'Chapter about algebra and basic operations',
-    grade: 5,
-    subject: 'Mathematics', 
-    medium: 'Hindi',
-    questionCounts: { easy: 13, medium: 12, hard: 10 },
-    totalQuestions: 35
+  totalQuestions: 35
+}, {
+  id: 'ch2',
+  name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
+  description: 'Chapter about algebra and basic operations',
+  grade: 5,
+  subject: 'Mathematics',
+  medium: 'Hindi',
+  questionCounts: {
+    easy: 13,
+    medium: 12,
+    hard: 10
   },
-  {
-    id: 'ch3',
-    name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet', 
-    description: 'Chapter about geometry and shapes',
-    grade: 5,
-    subject: 'Mathematics',
-    medium: 'Hindi',
-    questionCounts: { easy: 13, medium: 12, hard: 10 },
-    totalQuestions: 35
+  totalQuestions: 35
+}, {
+  id: 'ch3',
+  name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
+  description: 'Chapter about geometry and shapes',
+  grade: 5,
+  subject: 'Mathematics',
+  medium: 'Hindi',
+  questionCounts: {
+    easy: 13,
+    medium: 12,
+    hard: 10
   },
-  {
-    id: 'ch4',
-    name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
-    description: 'Chapter about fractions and decimals',
-    grade: 5,
-    subject: 'Mathematics',
-    medium: 'Hindi', 
-    questionCounts: { easy: 13, medium: 12, hard: 10 },
-    totalQuestions: 35
+  totalQuestions: 35
+}, {
+  id: 'ch4',
+  name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
+  description: 'Chapter about fractions and decimals',
+  grade: 5,
+  subject: 'Mathematics',
+  medium: 'Hindi',
+  questionCounts: {
+    easy: 13,
+    medium: 12,
+    hard: 10
   },
-  {
-    id: 'ch5',
-    name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
-    description: 'Chapter about word problems',
-    grade: 5,
-    subject: 'Mathematics',
-    medium: 'Hindi',
-    questionCounts: { easy: 13, medium: 12, hard: 10 },
-    totalQuestions: 35
+  totalQuestions: 35
+}, {
+  id: 'ch5',
+  name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
+  description: 'Chapter about word problems',
+  grade: 5,
+  subject: 'Mathematics',
+  medium: 'Hindi',
+  questionCounts: {
+    easy: 13,
+    medium: 12,
+    hard: 10
   },
-  {
-    id: 'ch6',
-    name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
-    description: 'Chapter about measurement and time',
-    grade: 5,
-    subject: 'Mathematics',
-    medium: 'Hindi',
-    questionCounts: { easy: 13, medium: 12, hard: 10 },
-    totalQuestions: 35
+  totalQuestions: 35
+}, {
+  id: 'ch6',
+  name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
+  description: 'Chapter about measurement and time',
+  grade: 5,
+  subject: 'Mathematics',
+  medium: 'Hindi',
+  questionCounts: {
+    easy: 13,
+    medium: 12,
+    hard: 10
   },
-  {
-    id: 'ch7',
-    name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
-    description: 'Chapter about data handling',
-    grade: 5,
-    subject: 'Mathematics',
-    medium: 'Hindi',
-    questionCounts: { easy: 13, medium: 12, hard: 10 },
-    totalQuestions: 35
-  }
-];
-
+  totalQuestions: 35
+}, {
+  id: 'ch7',
+  name: 'Lorem ipsum dolor sit amet, consectetur Lorem ipsum dolor sit amet',
+  description: 'Chapter about data handling',
+  grade: 5,
+  subject: 'Mathematics',
+  medium: 'Hindi',
+  questionCounts: {
+    easy: 13,
+    medium: 12,
+    hard: 10
+  },
+  totalQuestions: 35
+}];
 interface EnhancedQuestionTypeDistribution extends QuestionTypeDistribution {
   bloomsLevel?: BloomsTaxonomyLevel;
 }
-
 interface BlueprintCreationProps {
   supportedLanguages: LanguageSupport[];
   onSave: (blueprint: Blueprint) => void;
@@ -186,7 +196,6 @@ interface BlueprintCreationProps {
   initialBlueprint?: Partial<Blueprint>;
   sourceType?: 'csv' | 'clms-library'; // New prop to determine question type filtering
 }
-
 const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
   supportedLanguages,
   onSave,
@@ -209,7 +218,6 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
     questionTypeDistribution: [],
     ...initialBlueprint
   });
-
   const [selectedBlueprint, setSelectedBlueprint] = useState<string>('');
   const [enhancedQuestionTypes, setEnhancedQuestionTypes] = useState<EnhancedQuestionTypeDistribution[]>([]);
   const [currentStep, setCurrentStep] = useState<'basic' | 'units' | 'questions'>('basic');
@@ -221,35 +229,27 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
 
   // Calculate total marks from units
   const totalUnitsMarks = blueprint.unitDistribution?.reduce((sum, unit) => sum + (unit.marks || 0), 0) || 0;
-  
+
   // Calculate total marks from question types
   const totalQuestionMarks = enhancedQuestionTypes.reduce((sum, qType) => sum + (qType.totalMarks || 0), 0);
-
   useEffect(() => {
     // Auto-calculate total marks for question types
-    setEnhancedQuestionTypes(prev => 
-      prev.map(qType => ({
-        ...qType,
-        totalMarks: (qType.totalCount || 0) * (qType.marksPerQuestion || 0)
-      }))
-    );
+    setEnhancedQuestionTypes(prev => prev.map(qType => ({
+      ...qType,
+      totalMarks: (qType.totalCount || 0) * (qType.marksPerQuestion || 0)
+    })));
   }, [enhancedQuestionTypes.length]);
-
   const addUnitDistribution = () => {
     setBlueprint(prev => ({
       ...prev,
-      unitDistribution: [
-        ...(prev.unitDistribution || []),
-        {
-          loCode: '',
-          unitName: '',
-          marks: 0,
-          questionTypes: []
-        }
-      ]
+      unitDistribution: [...(prev.unitDistribution || []), {
+        loCode: '',
+        unitName: '',
+        marks: 0,
+        questionTypes: []
+      }]
     }));
   };
-
   const updateUnitDistribution = (index: number, field: keyof UnitDistribution, value: any) => {
     setBlueprint(prev => ({
       ...prev,
@@ -257,77 +257,72 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
         if (i === index) {
           if (field === 'loCode') {
             const selectedLO = mockLearningOutcomes.find(lo => lo.code === value);
-            return { 
-              ...unit, 
+            return {
+              ...unit,
               [field]: value,
               unitName: selectedLO ? `${selectedLO.chapter} - ${selectedLO.topic}` : ''
             };
           }
-          return { ...unit, [field]: value };
+          return {
+            ...unit,
+            [field]: value
+          };
         }
         return unit;
       }) || []
     }));
   };
-
   const removeUnitDistribution = (index: number) => {
     setBlueprint(prev => ({
       ...prev,
       unitDistribution: prev.unitDistribution?.filter((_, i) => i !== index) || []
     }));
   };
-
   const addQuestionTypeDistribution = () => {
-    setEnhancedQuestionTypes(prev => [
-      ...prev,
-      {
-        type: 'VSA',
-        totalCount: 0,
-        totalMarks: 0,
-        marksPerQuestion: 1,
-        bloomsLevel: 1
-      }
-    ]);
+    setEnhancedQuestionTypes(prev => [...prev, {
+      type: 'VSA',
+      totalCount: 0,
+      totalMarks: 0,
+      marksPerQuestion: 1,
+      bloomsLevel: 1
+    }]);
   };
-
   const updateQuestionTypeDistribution = (index: number, field: keyof EnhancedQuestionTypeDistribution, value: any) => {
-    setEnhancedQuestionTypes(prev => 
-      prev.map((qType, i) => {
-        if (i === index) {
-          const updated = { ...qType, [field]: value };
-          if (field === 'totalCount' || field === 'marksPerQuestion') {
-            updated.totalMarks = (updated.totalCount || 0) * (updated.marksPerQuestion || 0);
-          }
-          return updated;
+    setEnhancedQuestionTypes(prev => prev.map((qType, i) => {
+      if (i === index) {
+        const updated = {
+          ...qType,
+          [field]: value
+        };
+        if (field === 'totalCount' || field === 'marksPerQuestion') {
+          updated.totalMarks = (updated.totalCount || 0) * (updated.marksPerQuestion || 0);
         }
-        return qType;
-      })
-    );
+        return updated;
+      }
+      return qType;
+    }));
   };
-
   const removeQuestionTypeDistribution = (index: number) => {
     setEnhancedQuestionTypes(prev => prev.filter((_, i) => i !== index));
   };
 
-  
   // Filter question types based on source type
   const getAvailableQuestionTypes = () => {
     if (sourceType === 'clms-library') {
       // Only MCQ and Reading Comprehension for CLMS Library
-      return Object.entries(QuestionTypeLabels).filter(([type]) => 
-        type === 'MCQ' || type === 'RC'
-      );
+      return Object.entries(QuestionTypeLabels).filter(([type]) => type === 'MCQ' || type === 'RC');
     }
     // All question types for CSV upload
     return Object.entries(QuestionTypeLabels);
   };
-
   const handleSave = () => {
     if (!blueprint.name || !blueprint.courseName || isLoadedBlueprint) return;
-    
+
     // Convert enhanced question types to regular format for blueprint
-    const questionTypeDistribution = enhancedQuestionTypes.map(({ bloomsLevel, ...rest }) => rest);
-    
+    const questionTypeDistribution = enhancedQuestionTypes.map(({
+      bloomsLevel,
+      ...rest
+    }) => rest);
     const completeBlueprint: Blueprint = {
       ...blueprint,
       id: `bp-${Date.now()}`,
@@ -336,10 +331,8 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
       updatedAt: new Date().toISOString(),
       questionTypeDistribution
     } as Blueprint;
-    
     onSave(completeBlueprint);
   };
-
   const handleLoad = (blueprintId: string) => {
     setSelectedBlueprint(blueprintId);
     setIsLoadedBlueprint(true);
@@ -354,18 +347,13 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
       })) || []);
     }
   };
-
   const canProceedToUnits = () => {
     return blueprint.name && blueprint.courseName && blueprint.totalMarks;
   };
-
   const canProceedToQuestions = () => {
-    return blueprint.unitDistribution && blueprint.unitDistribution.length > 0 && 
-           blueprint.unitDistribution.every(unit => unit.loCode && unit.marks > 0);
+    return blueprint.unitDistribution && blueprint.unitDistribution.length > 0 && blueprint.unitDistribution.every(unit => unit.loCode && unit.marks > 0);
   };
-
-  const renderBasicStep = () => (
-    <div className="space-y-8">
+  const renderBasicStep = () => <div className="space-y-8">
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Main Assessment Details - Takes up 2 columns */}
         <div className="xl:col-span-2">
@@ -379,24 +367,19 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
               <div className="space-y-4">
                 <div>
                   <Label className="text-sm font-medium">Assessment Name (Header 1) <span className="text-destructive">*</span></Label>
-                  <Input
-                    value={blueprint.name}
-                    onChange={(e) => setBlueprint(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="e.g., Grade 9 Mathematics Mid-term Assessment"
-                    className="mt-1"
-                  />
+                  <Input value={blueprint.name} onChange={e => setBlueprint(prev => ({
+                  ...prev,
+                  name: e.target.value
+                }))} placeholder="e.g., Grade 9 Mathematics Mid-term Assessment" className="mt-1" />
                   <p className="text-xs text-muted-foreground mt-1">💡 This will appear as the main title on your test paper</p>
                 </div>
                 
                 <div>
                   <Label className="text-sm font-medium">Assessment Description</Label>
-                  <Textarea
-                    value={blueprint.description}
-                    onChange={(e) => setBlueprint(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Brief description to help other teachers understand when to use this template"
-                    rows={2}
-                    className="mt-1"
-                  />
+                  <Textarea value={blueprint.description} onChange={e => setBlueprint(prev => ({
+                  ...prev,
+                  description: e.target.value
+                }))} placeholder="Brief description to help other teachers understand when to use this template" rows={2} className="mt-1" />
                   <p className="text-xs text-muted-foreground mt-1">📝 Internal note - won't appear on the test paper</p>
                 </div>
               </div>
@@ -407,23 +390,19 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium">Class Name (Header 2) <span className="text-destructive">*</span></Label>
-                    <Input
-                      value={blueprint.courseCode}
-                      onChange={(e) => setBlueprint(prev => ({ ...prev, courseCode: e.target.value }))}
-                      placeholder="e.g., Class 9-A, Grade 10"
-                      className="mt-1"
-                    />
+                    <Input value={blueprint.courseCode} onChange={e => setBlueprint(prev => ({
+                    ...prev,
+                    courseCode: e.target.value
+                  }))} placeholder="e.g., Class 9-A, Grade 10" className="mt-1" />
                     <p className="text-xs text-muted-foreground mt-1">📚 Will appear below the main title</p>
                   </div>
                   
                   <div>
                     <Label className="text-sm font-medium">Subject Name (Header 3) <span className="text-destructive">*</span></Label>
-                    <Input
-                      value={blueprint.courseName}
-                      onChange={(e) => setBlueprint(prev => ({ ...prev, courseName: e.target.value }))}
-                      placeholder="e.g., Mathematics, Science, English"
-                      className="mt-1"
-                    />
+                    <Input value={blueprint.courseName} onChange={e => setBlueprint(prev => ({
+                    ...prev,
+                    courseName: e.target.value
+                  }))} placeholder="e.g., Mathematics, Science, English" className="mt-1" />
                     <p className="text-xs text-muted-foreground mt-1">📖 Subject name for the test paper</p>
                   </div>
                 </div>
@@ -435,43 +414,35 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label className="text-sm font-medium">Duration (minutes)</Label>
-                    <Input
-                      type="number"
-                      value={blueprint.duration}
-                      onChange={(e) => setBlueprint(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                      placeholder="90"
-                      className="mt-1"
-                    />
+                    <Input type="number" value={blueprint.duration} onChange={e => setBlueprint(prev => ({
+                    ...prev,
+                    duration: parseInt(e.target.value)
+                  }))} placeholder="90" className="mt-1" />
                     <p className="text-xs text-muted-foreground mt-1">⏰ How long students have to complete</p>
                   </div>
                   
                   <div>
                     <Label className="text-sm font-medium">Total Marks</Label>
-                    <Input
-                      type="number"
-                      value={blueprint.totalMarks}
-                      onChange={(e) => setBlueprint(prev => ({ ...prev, totalMarks: parseInt(e.target.value) }))}
-                      placeholder="100"
-                      className="mt-1"
-                    />
+                    <Input type="number" value={blueprint.totalMarks} onChange={e => setBlueprint(prev => ({
+                    ...prev,
+                    totalMarks: parseInt(e.target.value)
+                  }))} placeholder="100" className="mt-1" />
                     <p className="text-xs text-muted-foreground mt-1">🏆 Maximum score possible</p>
                   </div>
                   
                   <div>
                     <Label className="text-sm font-medium">Language</Label>
-                    <Select 
-                      value={blueprint.language} 
-                      onValueChange={(value) => setBlueprint(prev => ({ ...prev, language: value }))}
-                    >
+                    <Select value={blueprint.language} onValueChange={value => setBlueprint(prev => ({
+                    ...prev,
+                    language: value
+                  }))}>
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
                       <SelectContent className="bg-background border shadow-lg z-50">
-                        {supportedLanguages.map(lang => (
-                          <SelectItem key={lang.code} value={lang.code}>
+                        {supportedLanguages.map(lang => <SelectItem key={lang.code} value={lang.code}>
                             {lang.nativeName} ({lang.name})
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground mt-1">🌐 Test paper language</p>
@@ -517,11 +488,9 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
                     <SelectValue placeholder="Choose from your saved templates" />
                   </SelectTrigger>
                   <SelectContent className="bg-background border shadow-lg z-50">
-                    {savedBlueprints.map(bp => (
-                      <SelectItem key={bp.id} value={bp.id}>
+                    {savedBlueprints.map(bp => <SelectItem key={bp.id} value={bp.id}>
                         {bp.name}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground mt-1">📂 Previously saved assessment templates</p>
@@ -535,58 +504,35 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
       {/* Action Buttons */}
       <div className="flex justify-between items-center pt-6 border-t">
         <div className="flex items-center space-x-2">
-          {!canProceedToUnits() && (
-            <Alert className="max-w-md">
+          {!canProceedToUnits() && <Alert className="max-w-md">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-sm">
                 Complete required fields (marked with *) to continue
               </AlertDescription>
-            </Alert>
-          )}
+            </Alert>}
         </div>
         
         <div className="flex space-x-3">
-          <Button
-            variant="outline"
-            onClick={handleSave}
-            disabled={!blueprint.name || !blueprint.courseName || isLoadedBlueprint}
-            className="flex items-center space-x-2"
-          >
-            <Save className="w-4 h-4" />
-            <span>Save Template</span>
-          </Button>
           
-          <Button
-            onClick={() => onProceed ? onProceed() : setCurrentStep('units')}
-            disabled={!canProceedToUnits()}
-            className="flex items-center space-x-2"
-          >
+          
+          <Button onClick={() => onProceed ? onProceed() : setCurrentStep('units')} disabled={!canProceedToUnits()} className="flex items-center space-x-2">
             <span>Next: Choose Course Content</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 
   // Filter chapters based on search term and selected only option
   const filteredChapters = mockChapters.filter(chapter => {
-    const matchesSearch = chapter.name.toLowerCase().includes(chapterSearchTerm.toLowerCase()) ||
-                         chapter.description.toLowerCase().includes(chapterSearchTerm.toLowerCase());
+    const matchesSearch = chapter.name.toLowerCase().includes(chapterSearchTerm.toLowerCase()) || chapter.description.toLowerCase().includes(chapterSearchTerm.toLowerCase());
     const matchesSelectedFilter = !showSelectedOnly || selectedChapters.includes(chapter.id);
     return matchesSearch && matchesSelectedFilter;
   });
-
   const handleChapterSelection = (chapterId: string, checked: boolean) => {
-    setSelectedChapters(prev => 
-      checked 
-        ? [...prev, chapterId]
-        : prev.filter(id => id !== chapterId)
-    );
+    setSelectedChapters(prev => checked ? [...prev, chapterId] : prev.filter(id => id !== chapterId));
   };
-
-  const renderChapterSelection = () => (
-    <div className="space-y-4">
+  const renderChapterSelection = () => <div className="space-y-4">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold">Chapters</h3>
@@ -595,33 +541,19 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="show-selected"
-            checked={showSelectedOnly}
-            onCheckedChange={(checked) => setShowSelectedOnly(checked as boolean)}
-          />
+          <Checkbox id="show-selected" checked={showSelectedOnly} onCheckedChange={checked => setShowSelectedOnly(checked as boolean)} />
           <Label htmlFor="show-selected" className="text-sm">Show selected chapters</Label>
         </div>
       </div>
 
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search here"
-          value={chapterSearchTerm}
-          onChange={(e) => setChapterSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+        <Input placeholder="Search here" value={chapterSearchTerm} onChange={e => setChapterSearchTerm(e.target.value)} className="pl-10" />
       </div>
 
       <div className="space-y-2 max-h-96 overflow-y-auto">
-        {filteredChapters.map((chapter) => (
-          <div key={chapter.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
-            <Checkbox
-              id={`chapter-${chapter.id}`}
-              checked={selectedChapters.includes(chapter.id)}
-              onCheckedChange={(checked) => handleChapterSelection(chapter.id, checked as boolean)}
-            />
+        {filteredChapters.map(chapter => <div key={chapter.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
+            <Checkbox id={`chapter-${chapter.id}`} checked={selectedChapters.includes(chapter.id)} onCheckedChange={checked => handleChapterSelection(chapter.id, checked as boolean)} />
             <div className="flex-1 min-w-0">
               <Label htmlFor={`chapter-${chapter.id}`} className="cursor-pointer">
                 <div className="font-medium truncate">{chapter.name}</div>
@@ -644,29 +576,20 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
                 </Badge>
               </div>
             </div>
-          </div>
-        ))}
+          </div>)}
       </div>
-    </div>
-  );
-
-  const renderLOSelection = () => (
-    <div className="space-y-4">
-      {blueprint.unitDistribution?.map((unit, index) => (
-        <div key={index} className="border rounded-lg p-4">
+    </div>;
+  const renderLOSelection = () => <div className="space-y-4">
+      {blueprint.unitDistribution?.map((unit, index) => <div key={index} className="border rounded-lg p-4">
           <div className="grid grid-cols-12 gap-2 items-center mb-3">
             <div className="col-span-5">
               <Label className="text-xs text-gray-600">Learning Outcome (LO)</Label>
-              <Select 
-                value={unit.loCode} 
-                onValueChange={(value) => updateUnitDistribution(index, 'loCode', value)}
-              >
+              <Select value={unit.loCode} onValueChange={value => updateUnitDistribution(index, 'loCode', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Learning Outcome" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockLearningOutcomes.map(lo => (
-                    <SelectItem key={lo.id} value={lo.code}>
+                  {mockLearningOutcomes.map(lo => <SelectItem key={lo.id} value={lo.code}>
                       <div>
                         <div className="font-medium">{lo.code}</div>
                         <div className="text-sm text-gray-600">
@@ -676,31 +599,19 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
                           {lo.chapter} - {lo.topic}
                         </div>
                       </div>
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             
             <div className="col-span-4">
               <Label className="text-xs text-gray-600">Unit Name (Auto-populated)</Label>
-              <Input
-                placeholder="Unit Name"
-                value={unit.unitName}
-                onChange={(e) => updateUnitDistribution(index, 'unitName', e.target.value)}
-                className="bg-gray-50"
-              />
+              <Input placeholder="Unit Name" value={unit.unitName} onChange={e => updateUnitDistribution(index, 'unitName', e.target.value)} className="bg-gray-50" />
             </div>
             
             <div className="col-span-2">
               <Label className="text-xs text-gray-600">Marks</Label>
-              <Input
-                type="number"
-                placeholder="Marks"
-                value={unit.marks}
-                onChange={(e) => updateUnitDistribution(index, 'marks', parseInt(e.target.value) || 0)}
-                min="0"
-              />
+              <Input type="number" placeholder="Marks" value={unit.marks} onChange={e => updateUnitDistribution(index, 'marks', parseInt(e.target.value) || 0)} min="0" />
             </div>
             
             <div className="col-span-1">
@@ -710,12 +621,10 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
             </div>
           </div>
 
-          {unit.loCode && (
-            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+          {unit.loCode && <div className="mt-3 p-3 bg-blue-50 rounded-lg">
               {(() => {
-                const selectedLO = mockLearningOutcomes.find(lo => lo.code === unit.loCode);
-                return selectedLO ? (
-                  <div className="text-sm">
+          const selectedLO = mockLearningOutcomes.find(lo => lo.code === unit.loCode);
+          return selectedLO ? <div className="text-sm">
                     <div className="font-semibold text-blue-800 mb-1">
                       {selectedLO.name} - {selectedLO.topic}
                     </div>
@@ -725,32 +634,24 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
                     <div className="text-blue-600 text-xs">
                       {selectedLO.description}
                     </div>
-                  </div>
-                ) : null;
-              })()}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderUnitsStep = () => (
-    <div className="space-y-6">
+                  </div> : null;
+        })()}
+            </div>}
+        </div>)}
+    </div>;
+  const renderUnitsStep = () => <div className="space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Unit-wise Distribution</CardTitle>
-            {selectionMode === 'los' && (
-              <Button variant="outline" size="sm" onClick={addUnitDistribution}>
+            {selectionMode === 'los' && <Button variant="outline" size="sm" onClick={addUnitDistribution}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Unit
-              </Button>
-            )}
+              </Button>}
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs value={selectionMode} onValueChange={(value) => setSelectionMode(value as 'chapters' | 'los')}>
+          <Tabs value={selectionMode} onValueChange={value => setSelectionMode(value as 'chapters' | 'los')}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="chapters">Choose by Chapters</TabsTrigger>
               <TabsTrigger value="los">Choose by LOs</TabsTrigger>
@@ -768,43 +669,32 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
       </Card>
 
       {/* Marks validation alert */}
-      {totalUnitsMarks !== blueprint.totalMarks && blueprint.unitDistribution && blueprint.unitDistribution.length > 0 && (
-        <Alert variant={totalUnitsMarks < (blueprint.totalMarks || 0) ? "destructive" : "default"}>
+      {totalUnitsMarks !== blueprint.totalMarks && blueprint.unitDistribution && blueprint.unitDistribution.length > 0 && <Alert variant={totalUnitsMarks < (blueprint.totalMarks || 0) ? "destructive" : "default"}>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             Unit marks total ({totalUnitsMarks}) {totalUnitsMarks < (blueprint.totalMarks || 0) ? 'is less than' : 'does not match'} the blueprint total marks ({blueprint.totalMarks}). 
             {totalUnitsMarks < (blueprint.totalMarks || 0) && ' Please add more units or increase marks.'}
           </AlertDescription>
-        </Alert>
-      )}
+        </Alert>}
 
       {/* Success alert */}
-      {totalUnitsMarks === blueprint.totalMarks && blueprint.unitDistribution && blueprint.unitDistribution.length > 0 && (
-        <Alert>
+      {totalUnitsMarks === blueprint.totalMarks && blueprint.unitDistribution && blueprint.unitDistribution.length > 0 && <Alert>
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>
             Perfect! Unit marks total ({totalUnitsMarks}) matches the blueprint total marks.
           </AlertDescription>
-        </Alert>
-      )}
+        </Alert>}
 
       <div className="flex space-x-4">
         <Button variant="outline" onClick={() => setCurrentStep('basic')} className="flex-1">
           Back: Basic Info
         </Button>
-        <Button 
-          onClick={() => setCurrentStep('questions')} 
-          disabled={!canProceedToQuestions()}
-          className="flex-1"
-        >
+        <Button onClick={() => setCurrentStep('questions')} disabled={!canProceedToQuestions()} className="flex-1">
           Next: Question Types
         </Button>
       </div>
-    </div>
-  );
-
-  const renderQuestionsStep = () => (
-    <div className="space-y-6">
+    </div>;
+  const renderQuestionsStep = () => <div className="space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -817,77 +707,48 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {enhancedQuestionTypes.map((qType, index) => (
-              <div key={index} className="grid grid-cols-12 gap-2 items-center p-3 border rounded-lg">
+            {enhancedQuestionTypes.map((qType, index) => <div key={index} className="grid grid-cols-12 gap-2 items-center p-3 border rounded-lg">
                 <div className="col-span-2">
                   <Label className="text-xs text-gray-600">Question Type</Label>
-                  <Select 
-                    value={qType.type} 
-                    onValueChange={(value) => updateQuestionTypeDistribution(index, 'type', value as QuestionType)}
-                  >
+                  <Select value={qType.type} onValueChange={value => updateQuestionTypeDistribution(index, 'type', value as QuestionType)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {getAvailableQuestionTypes().map(([type, label]) => (
-                        <SelectItem key={type} value={type}>
+                      {getAvailableQuestionTypes().map(([type, label]) => <SelectItem key={type} value={type}>
                           {type} - {label}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="col-span-2">
                   <Label className="text-xs text-gray-600">Bloom's Level</Label>
-                  <Select 
-                    value={qType.bloomsLevel?.toString()} 
-                    onValueChange={(value) => updateQuestionTypeDistribution(index, 'bloomsLevel', parseInt(value) as BloomsTaxonomyLevel)}
-                  >
+                  <Select value={qType.bloomsLevel?.toString()} onValueChange={value => updateQuestionTypeDistribution(index, 'bloomsLevel', parseInt(value) as BloomsTaxonomyLevel)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select level" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(BloomsTaxonomyLabels).map(([level, label]) => (
-                        <SelectItem key={level} value={level}>
+                      {Object.entries(BloomsTaxonomyLabels).map(([level, label]) => <SelectItem key={level} value={level}>
                           L{level}: {label}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div className="col-span-2">
                   <Label className="text-xs text-gray-600">Question Count</Label>
-                  <Input
-                    type="number"
-                    placeholder="Count"
-                    value={qType.totalCount}
-                    onChange={(e) => updateQuestionTypeDistribution(index, 'totalCount', parseInt(e.target.value) || 0)}
-                    min="0"
-                  />
+                  <Input type="number" placeholder="Count" value={qType.totalCount} onChange={e => updateQuestionTypeDistribution(index, 'totalCount', parseInt(e.target.value) || 0)} min="0" />
                 </div>
                 
                 <div className="col-span-2">
                   <Label className="text-xs text-gray-600">Marks per Question</Label>
-                  <Input
-                    type="number"
-                    placeholder="Marks/Q"
-                    value={qType.marksPerQuestion}
-                    onChange={(e) => updateQuestionTypeDistribution(index, 'marksPerQuestion', parseInt(e.target.value) || 0)}
-                    min="1"
-                  />
+                  <Input type="number" placeholder="Marks/Q" value={qType.marksPerQuestion} onChange={e => updateQuestionTypeDistribution(index, 'marksPerQuestion', parseInt(e.target.value) || 0)} min="1" />
                 </div>
                 
                 <div className="col-span-2">
                   <Label className="text-xs text-gray-600">Total Marks</Label>
-                  <Input
-                    type="number"
-                    placeholder="Total Marks"
-                    value={qType.totalMarks}
-                    className="bg-gray-50"
-                    readOnly
-                  />
+                  <Input type="number" placeholder="Total Marks" value={qType.totalMarks} className="bg-gray-50" readOnly />
                 </div>
                 
                 <div className="col-span-2">
@@ -895,55 +756,43 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </CardContent>
       </Card>
 
       {/* Question marks validation alert */}
-      {totalQuestionMarks !== blueprint.totalMarks && enhancedQuestionTypes.length > 0 && (
-        <Alert variant={totalQuestionMarks < (blueprint.totalMarks || 0) ? "destructive" : "default"}>
+      {totalQuestionMarks !== blueprint.totalMarks && enhancedQuestionTypes.length > 0 && <Alert variant={totalQuestionMarks < (blueprint.totalMarks || 0) ? "destructive" : "default"}>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             Question type marks total ({totalQuestionMarks}) {totalQuestionMarks < (blueprint.totalMarks || 0) ? 'is less than' : 'does not match'} the blueprint total marks ({blueprint.totalMarks}). 
             {totalQuestionMarks < (blueprint.totalMarks || 0) && ' Please add more question types or increase marks.'}
           </AlertDescription>
-        </Alert>
-      )}
+        </Alert>}
 
       {/* Success alert */}
-      {totalQuestionMarks === blueprint.totalMarks && enhancedQuestionTypes.length > 0 && (
-        <Alert>
+      {totalQuestionMarks === blueprint.totalMarks && enhancedQuestionTypes.length > 0 && <Alert>
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>
             Perfect! Question type marks total ({totalQuestionMarks}) matches the blueprint total marks.
           </AlertDescription>
-        </Alert>
-      )}
+        </Alert>}
 
       <div className="flex space-x-4">
         <Button variant="outline" onClick={() => setCurrentStep('units')} className="flex-1">
           Back: Units
         </Button>
-        {!isLoadedBlueprint && (
-          <Button onClick={handleSave} disabled={!blueprint.name || !blueprint.courseName} className="flex-1">
+        {!isLoadedBlueprint && <Button onClick={handleSave} disabled={!blueprint.name || !blueprint.courseName} className="flex-1">
             <Save className="w-4 h-4 mr-2" />
             Save Blueprint
-          </Button>
-        )}
-        {isLoadedBlueprint && onProceed && (
-          <Button onClick={onProceed} className="flex-1">
+          </Button>}
+        {isLoadedBlueprint && onProceed && <Button onClick={onProceed} className="flex-1">
             <ArrowRight className="w-4 h-4 mr-2" />
             Proceed to Test Paper Creation
-          </Button>
-        )}
+          </Button>}
       </div>
-    </div>
-  );
-
-  return (
-    <div className="space-y-6">
+    </div>;
+  return <div className="space-y-6">
       {/* Step indicator */}
       <div className="flex items-center space-x-4 mb-6">
         <div className={`flex items-center space-x-2 ${currentStep === 'basic' ? 'text-blue-600' : currentStep === 'units' || currentStep === 'questions' ? 'text-green-600' : 'text-gray-400'}`}>
@@ -953,9 +802,9 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
           <span className="font-medium">Basic Info</span>
         </div>
         
-        {sourceType === 'clms-library' ? (
-          // CLMS Library workflow: Basic Info → Barcode & Student Info → Content
-          <>
+        {sourceType === 'clms-library' ?
+      // CLMS Library workflow: Basic Info → Barcode & Student Info → Content
+      <>
             <div className="w-4 h-0.5 bg-gray-300"></div>
             <div className="flex items-center space-x-2 text-gray-400">
               <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium bg-gray-100 text-gray-400">
@@ -970,10 +819,9 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
               </div>
               <span className="font-medium">Content</span>
             </div>
-          </>
-        ) : (
-          // CSV workflow: Basic Info → Units → Questions
-          <>
+          </> :
+      // CSV workflow: Basic Info → Units → Questions
+      <>
             <div className={`w-4 h-0.5 ${currentStep === 'units' || currentStep === 'questions' ? 'bg-green-600' : 'bg-gray-300'}`}></div>
             <div className={`flex items-center space-x-2 ${currentStep === 'units' ? 'text-blue-600' : currentStep === 'questions' ? 'text-green-600' : 'text-gray-400'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'units' ? 'bg-blue-100 text-blue-600' : currentStep === 'questions' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
@@ -988,8 +836,7 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
               </div>
               <span className="font-medium">Questions</span>
             </div>
-          </>
-        )}
+          </>}
       </div>
 
       {currentStep === 'basic' && renderBasicStep()}
@@ -997,15 +844,11 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
       {currentStep === 'questions' && renderQuestionsStep()}
 
       {/* Summary */}
-      {currentStep === 'questions' && (
-        <div className="text-sm text-gray-500 text-center">
+      {currentStep === 'questions' && <div className="text-sm text-gray-500 text-center">
           {enhancedQuestionTypes.reduce((sum, q) => sum + (q.totalCount || 0), 0)} total questions • {' '}
           {totalQuestionMarks} total marks • {' '}
           {blueprint.unitDistribution?.length || 0} units selected
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
-
 export default BlueprintCreation;
