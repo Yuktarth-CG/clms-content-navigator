@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -953,6 +953,40 @@ const OCRTestPaperCreation = () => {
         setStep('review');
       }
     }, 500);
+  };
+
+  // Helper functions for progress tracking
+  const getStepsForWorkflow = () => {
+    if (activeTab === 'csv') {
+      return [
+        { key: 'source', label: 'Upload CSV' },
+        { key: 'basic-info', label: 'Basic Info' },
+        { key: 'content', label: 'Content' },
+        { key: 'questions', label: 'Questions' },
+        { key: 'processing', label: 'Processing' },
+        { key: 'review', label: 'Review' }
+      ];
+    } else {
+      return [
+        { key: 'source', label: 'Source' },
+        { key: 'basic-info', label: 'Basic Info' },
+        { key: 'barcode-student', label: 'Barcode & Student' },
+        { key: 'content', label: 'Content' },
+        { key: 'questions', label: 'Questions' },
+        { key: 'processing', label: 'Processing' },
+        { key: 'review', label: 'Review' }
+      ];
+    }
+  };
+
+  const getStepNumber = () => {
+    const steps = getStepsForWorkflow();
+    const currentIndex = steps.findIndex(s => s.key === step);
+    return currentIndex + 1;
+  };
+
+  const getTotalSteps = () => {
+    return getStepsForWorkflow().length;
   };
 
   const totalPages = Math.ceil(totalQuestions / questionsPerPage);
@@ -1941,11 +1975,50 @@ const OCRTestPaperCreation = () => {
   return (
     <div className="p-6">
       <div className="max-w-4xl mx-auto">
+        {/* Progress Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Test Paper Generation</h1>
-          <p className="text-gray-600 mt-1">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold">Test Paper Generation</h1>
+            <Badge variant="outline" className="text-sm">
+              {activeTab === 'csv' ? 'CSV Upload' : 'CLMS Library'} Workflow
+            </Badge>
+          </div>
+          <p className="text-gray-600 mb-4">
             Create structured test papers from CSV files or blueprints using enhanced OCR templates
           </p>
+          
+          {/* Step Progress Bar */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="flex items-center justify-between text-sm mb-2">
+              <span className="font-medium">Progress</span>
+              <span className="text-gray-500">
+                Step {getStepNumber()} of {getTotalSteps()}
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              {getStepsForWorkflow().map((stepInfo, index) => (
+                <Fragment key={stepInfo.key}>
+                  <div className={`flex items-center space-x-2 ${
+                    getStepNumber() > index + 1 ? 'text-green-600' : 
+                    getStepNumber() === index + 1 ? 'text-blue-600' : 'text-gray-400'
+                  }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border-2 ${
+                      getStepNumber() > index + 1 ? 'bg-green-100 border-green-600' : 
+                      getStepNumber() === index + 1 ? 'bg-blue-100 border-blue-600' : 'bg-gray-100 border-gray-300'
+                    }`}>
+                      {getStepNumber() > index + 1 ? '✓' : index + 1}
+                    </div>
+                    <span className="font-medium hidden sm:block">{stepInfo.label}</span>
+                  </div>
+                  {index < getStepsForWorkflow().length - 1 && (
+                    <div className={`flex-1 h-0.5 ${
+                      getStepNumber() > index + 1 ? 'bg-green-600' : 'bg-gray-300'
+                    }`}></div>
+                  )}
+                </Fragment>
+              ))}
+            </div>
+          </div>
         </div>
 
         <Card>
