@@ -1290,7 +1290,7 @@ const OCRTestPaperCreation = () => {
           disabled={!canProceedToContent()}
           className="flex-1"
         >
-          Next
+          Next: Barcode & Student Info
         </Button>
       </div>
     </div>
