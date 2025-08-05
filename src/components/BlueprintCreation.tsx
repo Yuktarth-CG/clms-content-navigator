@@ -556,11 +556,17 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
           </Button>
           
           <Button
-            onClick={() => setCurrentStep('units')}
+            onClick={() => {
+              if (onProceed) {
+                onProceed();
+              } else {
+                setCurrentStep('units');
+              }
+            }}
             disabled={!canProceedToUnits()}
             className="flex items-center space-x-2"
           >
-            <span>Next: Choose Course Content</span>
+            <span>{onProceed ? 'Next: Assessment Details' : 'Next: Choose Course Content'}</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
