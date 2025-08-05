@@ -1050,6 +1050,16 @@ const OCRTestPaperCreation = () => {
               </SelectContent>
             </Select>
           </div>
+
+          <div className="flex space-x-4 pt-4">
+            <Button 
+              onClick={() => setStep('basic-info')}
+              disabled={!canProceedToBasicInfo()}
+              className="flex-1"
+            >
+              Next: Assessment Details
+            </Button>
+          </div>
         </TabsContent>
 
         <TabsContent value="blueprint" className="space-y-6">
@@ -1067,6 +1077,7 @@ const OCRTestPaperCreation = () => {
             savedBlueprints={savedBlueprints}
             initialBlueprint={currentBlueprint}
             sourceType="clms-library"
+            onProceed={() => setStep('basic-info')}
           />
         </TabsContent>
       </Tabs>
