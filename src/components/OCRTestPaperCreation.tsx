@@ -1334,6 +1334,27 @@ const OCRTestPaperCreation = () => {
     </div>
   );
 
+  const renderBasicInfoStepWithPreview = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-6">
+        {renderBasicInfoStep()}
+      </div>
+
+      <OCRTestPaperPreview
+        assessmentTitle={assessmentTitle}
+        selectedGrade={selectedGrade}
+        selectedSubject={selectedSubject}
+        selectedMedium={selectedMedium}
+        barcodeConfig={barcodeConfig}
+        includeStudentInfo={includeStudentInfo}
+        studentInfoConfig={studentInfoConfig}
+        duration={currentBlueprint.duration?.toString()}
+        totalMarks={currentBlueprint.totalMarks?.toString()}
+        className="sticky top-4"
+      />
+    </div>
+  );
+
   const renderContentStep = () => (
     <div className="space-y-6">
       <ChapterLOSelector
@@ -1845,6 +1866,36 @@ const OCRTestPaperCreation = () => {
     />
   );
 
+  const renderBarcodeStudentStepWithPreview = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-6">
+        <BarcodeStudentConfig
+          barcodeConfig={barcodeConfig}
+          setBarcodeConfig={setBarcodeConfig}
+          includeStudentInfo={includeStudentInfo}
+          setIncludeStudentInfo={setIncludeStudentInfo}
+          studentInfoConfig={studentInfoConfig}
+          setStudentInfoConfig={setStudentInfoConfig}
+          onBack={() => setStep('basic-info')}
+          onNext={() => setStep('content')}
+        />
+      </div>
+
+      <OCRTestPaperPreview
+        assessmentTitle={assessmentTitle}
+        selectedGrade={selectedGrade}
+        selectedSubject={selectedSubject}
+        selectedMedium={selectedMedium}
+        barcodeConfig={barcodeConfig}
+        includeStudentInfo={includeStudentInfo}
+        studentInfoConfig={studentInfoConfig}
+        duration={currentBlueprint.duration?.toString()}
+        totalMarks={currentBlueprint.totalMarks?.toString()}
+        className="sticky top-4"
+      />
+    </div>
+  );
+
   const renderContentStepWithPreview = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div className="space-y-6">
@@ -1991,8 +2042,8 @@ const OCRTestPaperCreation = () => {
                Current step: {step} | Active tab: {activeTab}
              </div>
               {step === 'source' && renderSourceStep()}
-              {step === 'basic-info' && renderBasicInfoStep()}
-              {step === 'barcode-student' && renderBarcodeStudentStep()}
+              {step === 'basic-info' && (activeTab === 'blueprint' ? renderBasicInfoStepWithPreview() : renderBasicInfoStep())}
+              {step === 'barcode-student' && renderBarcodeStudentStepWithPreview()}
               {step === 'content' && renderContentStepWithPreview()}
               {step === 'questions' && renderQuestionsStepWithPreview()}
               {step === 'processing' && renderProcessingStep()}
