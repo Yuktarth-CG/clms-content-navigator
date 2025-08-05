@@ -2151,7 +2151,7 @@ const OCRTestPaperCreation = () => {
                Current step: {step} | Active tab: {activeTab}
              </div>
               {step === 'source' && renderSourceStep()}
-              {step === 'basic-info' && (activeTab === 'blueprint' ? renderBasicInfoStepWithPreview() : renderBasicInfoStep())}
+              {step === 'basic-info' && renderBasicInfoStepWithPreview()}
               {step === 'barcode-student' && renderBarcodeStudentStepWithPreview()}
               {step === 'content' && renderContentStepWithPreview()}
               {step === 'questions' && renderQuestionsStepWithPreview()}
