@@ -1335,24 +1335,26 @@ const OCRTestPaperCreation = () => {
   );
 
   const renderBasicInfoStepWithPreview = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="space-y-6">
+    <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+      <div className="xl:col-span-3 space-y-6">
         {renderBasicInfoStep()}
       </div>
 
-      <OCRTestPaperPreview
-        assessmentTitle={assessmentTitle}
-        selectedGrade={selectedGrade}
-        selectedSubject={selectedSubject}
-        selectedMedium={selectedMedium}
-        barcodeConfig={barcodeConfig}
-        includeStudentInfo={includeStudentInfo}
-        studentInfoConfig={studentInfoConfig}
-        duration={currentBlueprint.duration?.toString()}
-        totalMarks={currentBlueprint.totalMarks?.toString()}
-        className="sticky top-4"
-        showQuestions={false} // Don't show questions in basic-info step
-      />
+      <div className="xl:col-span-2">
+        <OCRTestPaperPreview
+          assessmentTitle={assessmentTitle}
+          selectedGrade={selectedGrade}
+          selectedSubject={selectedSubject}
+          selectedMedium={selectedMedium}
+          barcodeConfig={barcodeConfig}
+          includeStudentInfo={includeStudentInfo}
+          studentInfoConfig={studentInfoConfig}
+          duration={currentBlueprint.duration?.toString()}
+          totalMarks={currentBlueprint.totalMarks?.toString()}
+          className="sticky top-4"
+          showQuestions={false} // Don't show questions in basic-info step
+        />
+      </div>
     </div>
   );
 
@@ -1868,14 +1870,14 @@ const OCRTestPaperCreation = () => {
   );
 
   const renderBarcodeStudentStepWithPreview = () => (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="text-center">
         <h2 className="text-2xl font-bold">Barcode & Student Information</h2>
         <p className="text-muted-foreground">Configure barcodes and student information section</p>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+        <div className="xl:col-span-3 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Barcode Configuration</CardTitle>
@@ -1986,26 +1988,28 @@ const OCRTestPaperCreation = () => {
           </div>
         </div>
 
-        <OCRTestPaperPreview
-          assessmentTitle={assessmentTitle}
-          selectedGrade={selectedGrade}
-          selectedSubject={selectedSubject}
-          selectedMedium={selectedMedium}
-          barcodeConfig={barcodeConfig}
-          includeStudentInfo={includeStudentInfo}
-          studentInfoConfig={studentInfoConfig}
-          duration={currentBlueprint.duration?.toString()}
-          totalMarks={currentBlueprint.totalMarks?.toString()}
-          className="sticky top-4"
-          showQuestions={false} // Don't show questions in barcode-student step
-        />
+        <div className="xl:col-span-2">
+          <OCRTestPaperPreview
+            assessmentTitle={assessmentTitle}
+            selectedGrade={selectedGrade}
+            selectedSubject={selectedSubject}
+            selectedMedium={selectedMedium}
+            barcodeConfig={barcodeConfig}
+            includeStudentInfo={includeStudentInfo}
+            studentInfoConfig={studentInfoConfig}
+            duration={currentBlueprint.duration?.toString()}
+            totalMarks={currentBlueprint.totalMarks?.toString()}
+            className="sticky top-4"
+            showQuestions={false} // Don't show questions in barcode-student step
+          />
+        </div>
       </div>
     </div>
   );
 
   const renderContentStepWithPreview = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="space-y-6">
+    <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+      <div className="xl:col-span-3 space-y-6">
         <ChapterLOSelector
           selectedChapters={selectedChapters}
           selectedLearningOutcomes={selectedLearningOutcomes}
@@ -2094,62 +2098,64 @@ const OCRTestPaperCreation = () => {
         </div>
       </div>
 
-      <OCRTestPaperPreview
-        assessmentTitle={assessmentTitle}
-        selectedGrade={selectedGrade}
-        selectedSubject={selectedSubject}
-        selectedMedium={selectedMedium}
-        barcodeConfig={barcodeConfig}
-        includeStudentInfo={includeStudentInfo}
-        studentInfoConfig={studentInfoConfig}
-        duration={currentBlueprint.duration?.toString()}
-        totalMarks={currentBlueprint.totalMarks?.toString()}
-        className="sticky top-4"
-        showQuestions={true} // Show questions in content step after content is selected
-      />
+      <div className="xl:col-span-2">
+        <OCRTestPaperPreview
+          assessmentTitle={assessmentTitle}
+          selectedGrade={selectedGrade}
+          selectedSubject={selectedSubject}
+          selectedMedium={selectedMedium}
+          barcodeConfig={barcodeConfig}
+          includeStudentInfo={includeStudentInfo}
+          studentInfoConfig={studentInfoConfig}
+          duration={currentBlueprint.duration?.toString()}
+          totalMarks={currentBlueprint.totalMarks?.toString()}
+          className="sticky top-4"
+          showQuestions={true} // Show questions in content step after content is selected
+        />
+      </div>
     </div>
   );
 
   const renderQuestionsStepWithPreview = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="space-y-6">
+    <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+      <div className="xl:col-span-3 space-y-6">
         {renderQuestionsStep()}
       </div>
 
-      <OCRTestPaperPreview
-        assessmentTitle={assessmentTitle}
-        selectedGrade={selectedGrade}
-        selectedSubject={selectedSubject}
-        selectedMedium={selectedMedium}
-        barcodeConfig={barcodeConfig}
-        includeStudentInfo={includeStudentInfo}
-        studentInfoConfig={studentInfoConfig}
-        duration={currentBlueprint.duration?.toString()}
-        totalMarks={currentBlueprint.totalMarks?.toString()}
-        className="sticky top-4"
-        showQuestions={true} // Show questions in questions step
-      />
+      <div className="xl:col-span-2">
+        <OCRTestPaperPreview
+          assessmentTitle={assessmentTitle}
+          selectedGrade={selectedGrade}
+          selectedSubject={selectedSubject}
+          selectedMedium={selectedMedium}
+          barcodeConfig={barcodeConfig}
+          includeStudentInfo={includeStudentInfo}
+          studentInfoConfig={studentInfoConfig}
+          duration={currentBlueprint.duration?.toString()}
+          totalMarks={currentBlueprint.totalMarks?.toString()}
+          className="sticky top-4"
+          showQuestions={true} // Show questions in questions step
+        />
+      </div>
     </div>
   );
 
   return (
-    <div className="p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
+    <div className="p-4 lg:p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold">Test Paper Generation</h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 mt-2">
             Create structured test papers from CSV files or blueprints using enhanced OCR templates
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Enhanced Test Paper Generation Workflow</CardTitle>
-          </CardHeader>
-           <CardContent>
-             <div className="mb-4 text-sm text-gray-500">
-               Current step: {step} | Active tab: {activeTab}
-             </div>
+        <div className="bg-white/50 backdrop-blur-sm border border-gray-200/50 rounded-xl shadow-sm">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-xl font-semibold text-gray-900">Enhanced Test Paper Generation Workflow</h2>
+            <p className="text-sm text-gray-500 mt-1">Current step: {step} | Active tab: {activeTab}</p>
+          </div>
+          <div className="p-6">
               {step === 'source' && renderSourceStep()}
               {step === 'basic-info' && renderBasicInfoStepWithPreview()}
               {step === 'barcode-student' && renderBarcodeStudentStepWithPreview()}
@@ -2158,8 +2164,8 @@ const OCRTestPaperCreation = () => {
               {step === 'processing' && renderProcessingStep()}
               {step === 'review' && renderReviewStep()}
               {step === 'complete' && renderCompleteStep()}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
