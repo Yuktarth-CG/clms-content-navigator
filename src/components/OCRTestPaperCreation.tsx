@@ -1867,32 +1867,147 @@ const OCRTestPaperCreation = () => {
   );
 
   const renderBarcodeStudentStepWithPreview = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="space-y-6">
-        <BarcodeStudentConfig
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold">Barcode & Student Information</h2>
+        <p className="text-muted-foreground">Configure barcodes and student information section</p>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Barcode Configuration</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Top Left Barcode</Label>
+                  <Input
+                    value={barcodeConfig.topLeft}
+                    onChange={(e) => setBarcodeConfig(prev => ({ ...prev, topLeft: e.target.value }))}
+                    placeholder="e.g., TL001"
+                  />
+                </div>
+                <div>
+                  <Label>Top Right Barcode</Label>
+                  <Input
+                    value={barcodeConfig.topRight}
+                    onChange={(e) => setBarcodeConfig(prev => ({ ...prev, topRight: e.target.value }))}
+                    placeholder="e.g., TR001"
+                  />
+                </div>
+                <div>
+                  <Label>Bottom Left Barcode</Label>
+                  <Input
+                    value={barcodeConfig.bottomLeft}
+                    onChange={(e) => setBarcodeConfig(prev => ({ ...prev, bottomLeft: e.target.value }))}
+                    placeholder="e.g., BL001"
+                  />
+                </div>
+                <div>
+                  <Label>Bottom Right Barcode</Label>
+                  <Input
+                    value={barcodeConfig.bottomRight}
+                    onChange={(e) => setBarcodeConfig(prev => ({ ...prev, bottomRight: e.target.value }))}
+                    placeholder="e.g., BR001"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Student Information Section</span>
+                <Switch
+                  checked={includeStudentInfo}
+                  onCheckedChange={setIncludeStudentInfo}
+                />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {includeStudentInfo && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Student Name Label</Label>
+                      <Input
+                        value={studentInfoConfig.nameLabel}
+                        onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, nameLabel: e.target.value }))}
+                        placeholder="Student Name"
+                      />
+                    </div>
+                    <div>
+                      <Label>Student Section Label</Label>
+                      <Input
+                        value={studentInfoConfig.sectionLabel}
+                        onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, sectionLabel: e.target.value }))}
+                        placeholder="Section"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Student Roll Label</Label>
+                      <Input
+                        value={studentInfoConfig.rollLabel}
+                        onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, rollLabel: e.target.value }))}
+                        placeholder="Roll No."
+                      />
+                    </div>
+                    <div>
+                      <Label>Student ID Box Count</Label>
+                      <Input
+                        type="number"
+                        value={studentInfoConfig.idBoxCount}
+                        onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, idBoxCount: parseInt(e.target.value) || 10 }))}
+                        placeholder="10"
+                        min="1"
+                        max="20"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label>Instruction Text</Label>
+                    <Textarea
+                      value={studentInfoConfig.instructionText}
+                      onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, instructionText: e.target.value }))}
+                      placeholder="Fill in your details clearly"
+                      rows={3}
+                    />
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="flex space-x-4">
+            <Button variant="outline" onClick={() => setStep('basic-info')} className="flex-1">
+              Back
+            </Button>
+            <Button onClick={() => setStep('content')} className="flex-1">
+              Next: Content Selection
+            </Button>
+          </div>
+        </div>
+
+        <OCRTestPaperPreview
+          assessmentTitle={assessmentTitle}
+          selectedGrade={selectedGrade}
+          selectedSubject={selectedSubject}
+          selectedMedium={selectedMedium}
           barcodeConfig={barcodeConfig}
-          setBarcodeConfig={setBarcodeConfig}
           includeStudentInfo={includeStudentInfo}
-          setIncludeStudentInfo={setIncludeStudentInfo}
           studentInfoConfig={studentInfoConfig}
-          setStudentInfoConfig={setStudentInfoConfig}
-          onBack={() => setStep('basic-info')}
-          onNext={() => setStep('content')}
+          duration={currentBlueprint.duration?.toString()}
+          totalMarks={currentBlueprint.totalMarks?.toString()}
+          className="sticky top-4"
         />
       </div>
-
-      <OCRTestPaperPreview
-        assessmentTitle={assessmentTitle}
-        selectedGrade={selectedGrade}
-        selectedSubject={selectedSubject}
-        selectedMedium={selectedMedium}
-        barcodeConfig={barcodeConfig}
-        includeStudentInfo={includeStudentInfo}
-        studentInfoConfig={studentInfoConfig}
-        duration={currentBlueprint.duration?.toString()}
-        totalMarks={currentBlueprint.totalMarks?.toString()}
-        className="sticky top-4"
-      />
     </div>
   );
 
