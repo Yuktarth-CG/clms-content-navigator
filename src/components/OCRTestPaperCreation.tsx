@@ -1351,6 +1351,7 @@ const OCRTestPaperCreation = () => {
         duration={currentBlueprint.duration?.toString()}
         totalMarks={currentBlueprint.totalMarks?.toString()}
         className="sticky top-4"
+        showQuestions={false} // Don't show questions in basic-info step
       />
     </div>
   );
@@ -2006,6 +2007,7 @@ const OCRTestPaperCreation = () => {
           duration={currentBlueprint.duration?.toString()}
           totalMarks={currentBlueprint.totalMarks?.toString()}
           className="sticky top-4"
+          showQuestions={false} // Don't show questions in barcode-student step
         />
       </div>
     </div>
@@ -2113,6 +2115,7 @@ const OCRTestPaperCreation = () => {
         duration={currentBlueprint.duration?.toString()}
         totalMarks={currentBlueprint.totalMarks?.toString()}
         className="sticky top-4"
+        showQuestions={true} // Show questions in content step after content is selected
       />
     </div>
   );
@@ -2134,6 +2137,7 @@ const OCRTestPaperCreation = () => {
         duration={currentBlueprint.duration?.toString()}
         totalMarks={currentBlueprint.totalMarks?.toString()}
         className="sticky top-4"
+        showQuestions={true} // Show questions in questions step
       />
     </div>
   );
