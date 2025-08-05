@@ -1186,7 +1186,9 @@ const OCRTestPaperCreation = () => {
     </div>
   );
 
-  const renderBasicInfoStep = () => (
+  const renderBasicInfoStep = () => {
+    console.log('[OCR DEBUG] Rendering Basic Info Step - NEW VERSION');
+    return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
@@ -1304,18 +1306,22 @@ const OCRTestPaperCreation = () => {
         </Button>
       </div>
     </div>
-  );
+    );
+  };
 
-  const renderBarcodeStudentStep = () => (
-    <BarcodeStudentConfig
-      barcodeConfig={barcodeConfig}
-      setBarcodeConfig={setBarcodeConfig}
-      includeStudentInfo={includeStudentInfo}
-      setIncludeStudentInfo={setIncludeStudentInfo}
-      studentFields={studentFields}
-      setStudentFields={setStudentFields}
-    />
-  );
+  const renderBarcodeStudentStep = () => {
+    console.log('[OCR DEBUG] Rendering Barcode Student Step');
+    return (
+      <BarcodeStudentConfig
+        barcodeConfig={barcodeConfig}
+        setBarcodeConfig={setBarcodeConfig}
+        includeStudentInfo={includeStudentInfo}
+        setIncludeStudentInfo={setIncludeStudentInfo}
+        studentFields={studentFields}
+        setStudentFields={setStudentFields}
+      />
+    );
+  };
 
   const renderContentStep = () => (
     <div className="space-y-6">
@@ -1816,6 +1822,10 @@ const OCRTestPaperCreation = () => {
   );
 
   const shouldShowSideBySide = ['barcode-student', 'content', 'questions'].includes(step);
+  
+  console.log('[OCR DEBUG] Current step:', step);
+  console.log('[OCR DEBUG] Should show side by side:', shouldShowSideBySide);
+  console.log('[OCR DEBUG] Active tab:', activeTab);
 
   return (
     <div className="p-6">
@@ -1836,8 +1846,8 @@ const OCRTestPaperCreation = () => {
               <div className="mb-4 text-sm text-gray-500">
                 Current step: {step} | Active tab: {activeTab}
               </div>
-              {step === 'source' && renderSourceStep()}
-              {step === 'basic-info' && renderBasicInfoStep()}
+              {step === 'source' && (() => { console.log('[OCR DEBUG] Rendering source step'); return renderSourceStep(); })()}
+              {step === 'basic-info' && (() => { console.log('[OCR DEBUG] Rendering basic-info step'); return renderBasicInfoStep(); })()}
               {step === 'processing' && renderProcessingStep()}
               {step === 'review' && renderReviewStep()}
               {step === 'complete' && renderCompleteStep()}
