@@ -893,7 +893,16 @@ const OCRTestPaperCreation = () => {
   };
 
   const canProceedToContent = () => {
-    return assessmentTitle && selectedGrade && selectedMedium && selectedSubject && selectedLayoutTemplate;
+    const isValid = assessmentTitle && selectedGrade && selectedMedium && selectedSubject && selectedLayoutTemplate;
+    console.log('[OCR DEBUG] canProceedToContent validation:', {
+      assessmentTitle: !!assessmentTitle,
+      selectedGrade: !!selectedGrade,
+      selectedMedium: !!selectedMedium,
+      selectedSubject: !!selectedSubject,
+      selectedLayoutTemplate: !!selectedLayoutTemplate,
+      overall: isValid
+    });
+    return isValid;
   };
 
   const canProceedToQuestions = () => {
