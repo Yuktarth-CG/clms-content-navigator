@@ -1064,6 +1064,7 @@ const OCRTestPaperCreation = () => {
             supportedLanguages={supportedLanguages}
             onSave={handleBlueprintSave}
             onLoad={handleBlueprintLoad}
+            onProceed={() => setStep('barcode-student')}
             savedBlueprints={savedBlueprints}
             initialBlueprint={currentBlueprint}
             sourceType="clms-library"

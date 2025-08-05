@@ -557,7 +557,7 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
           </Button>
           
           <Button
-            onClick={() => setCurrentStep('units')}
+            onClick={() => onProceed ? onProceed() : setCurrentStep('units')}
             disabled={!canProceedToUnits()}
             className="flex items-center space-x-2"
           >
