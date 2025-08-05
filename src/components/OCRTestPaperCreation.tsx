@@ -1203,6 +1203,41 @@ const OCRTestPaperCreation = () => {
             <p className="text-xs text-muted-foreground mt-1">Give your assessment template a descriptive name</p>
           </div>
           
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label>Duration (minutes)</Label>
+              <Input
+                type="number"
+                placeholder="90"
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground mt-1">How long students have to complete</p>
+            </div>
+            <div>
+              <Label>Total Marks</Label>
+              <Input
+                type="number"
+                placeholder="35"
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Maximum score possible</p>
+            </div>
+            <div>
+              <Label>Language</Label>
+              <Select value={selectedMedium} onValueChange={setSelectedMedium}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="English">English</SelectItem>
+                  <SelectItem value="Hindi">हिंदी (Hindi)</SelectItem>
+                  <SelectItem value="Regional">Regional Language</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">Test paper language</p>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Class Name (Header 2)</Label>
@@ -1238,45 +1273,20 @@ const OCRTestPaperCreation = () => {
           </div>
 
           <div>
-            <Label>Medium</Label>
-            <Select value={selectedMedium} onValueChange={setSelectedMedium}>
+            <Label>Paper Layout Template</Label>
+            <Select value={selectedLayoutTemplate} onValueChange={setSelectedLayoutTemplate}>
               <SelectTrigger>
-                <SelectValue placeholder="Select medium" />
+                <SelectValue placeholder="Choose how your test paper will look" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="English">English</SelectItem>
-                <SelectItem value="Hindi">Hindi</SelectItem>
-                <SelectItem value="Regional">Regional Language</SelectItem>
+                {layoutTemplates.map(template => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.name} - {template.description}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div>
-            <Label>Paper Layout Template</Label>
-            <div className="grid grid-cols-1 gap-4 mt-4">
-              {layoutTemplates.map(template => (
-                <Card 
-                  key={template.id} 
-                  className={`cursor-pointer transition-colors ${
-                    selectedLayoutTemplate === template.id ? 'ring-2 ring-blue-500' : ''
-                  }`}
-                  onClick={() => setSelectedLayoutTemplate(template.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-medium">{template.name}</h3>
-                      <div className="flex items-center space-x-1">
-                        <span className="text-xs text-gray-500">v{template.version}</span>
-                        {template.customizable && (
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Customizable</span>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">{template.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <p className="text-xs text-muted-foreground mt-1">Controls the overall appearance and spacing of your test paper</p>
           </div>
         </CardContent>
       </Card>
