@@ -2126,15 +2126,7 @@ const OCRTestPaperCreation = () => {
   );
 
   const renderQuestionConfigStep = () => (
-    <div className="space-y-8">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold">Question Configuration</h2>
-        <p className="text-muted-foreground">Configure question types, difficulty levels, counts and marks for each chapter</p>
-      </div>
-      
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
-        <div className="xl:col-span-3 space-y-6">
-          {selectedChapters.map(chapterId => {
+    <div className="space-y-6">
             const chapter = mockChapters.find(c => c.id === chapterId);
             if (!chapter) return null;
             
@@ -2339,8 +2331,14 @@ const OCRTestPaperCreation = () => {
    );
 
   const renderQuestionConfigStepWithPreview = () => (
-    <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
-      <div className="xl:col-span-3 space-y-6">
+    <div className="space-y-8">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold">Question Configuration</h2>
+        <p className="text-muted-foreground">Configure question types, difficulty levels, counts and marks for each chapter</p>
+      </div>
+      
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+        <div className="xl:col-span-3 space-y-6">
         {renderQuestionConfigStep()}
       </div>
 
