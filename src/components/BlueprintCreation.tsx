@@ -516,7 +516,7 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
           
           
           <Button onClick={() => onProceed ? onProceed() : setCurrentStep('units')} disabled={!canProceedToUnits()} className="flex items-center space-x-2">
-            <span>Next: Choose Course Content</span>
+            <span>{sourceType === 'clms-library' ? 'Next: Barcode & Student Info' : 'Next: Choose Course Content'}</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
