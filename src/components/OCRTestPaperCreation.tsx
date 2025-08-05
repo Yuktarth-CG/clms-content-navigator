@@ -1088,7 +1088,12 @@ const OCRTestPaperCreation = () => {
             sourceType="clms-library"
             onProceed={() => {
               console.log('[OCR DEBUG] onProceed callback triggered, switching to basic-info step');
+              console.log('[OCR DEBUG] Current step before change:', step);
+              console.log('[OCR DEBUG] Current tab before change:', activeTab);
               setStep('basic-info');
+              // Also reset the tab state to avoid confusion
+              setActiveTab('csv');
+              console.log('[OCR DEBUG] Step changed to basic-info, tab reset to csv');
             }}
           />
         </TabsContent>
