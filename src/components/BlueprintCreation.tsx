@@ -378,7 +378,7 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
               {/* Assessment Name & Description */}
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium">Assessment Blueprint Name (Header 1) <span className="text-destructive">*</span></Label>
+                  <Label className="text-sm font-medium">Assessment Name (Header 1) <span className="text-destructive">*</span></Label>
                   <Input
                     value={blueprint.name}
                     onChange={(e) => setBlueprint(prev => ({ ...prev, name: e.target.value }))}
