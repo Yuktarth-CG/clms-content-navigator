@@ -1920,13 +1920,7 @@ const OCRTestPaperCreation = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Student Information Section</span>
-                <Switch
-                  checked={includeStudentInfo}
-                  onCheckedChange={setIncludeStudentInfo}
-                />
-              </CardTitle>
+              <CardTitle>Student Information Section</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {includeStudentInfo && (
