@@ -557,9 +557,12 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
           
           <Button
             onClick={() => {
+              console.log('[BLUEPRINT DEBUG] Next button clicked, onProceed available:', !!onProceed);
               if (onProceed) {
+                console.log('[BLUEPRINT DEBUG] Calling onProceed callback');
                 onProceed();
               } else {
+                console.log('[BLUEPRINT DEBUG] No onProceed, going to units step');
                 setCurrentStep('units');
               }
             }}

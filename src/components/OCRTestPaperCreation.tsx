@@ -1077,7 +1077,10 @@ const OCRTestPaperCreation = () => {
             savedBlueprints={savedBlueprints}
             initialBlueprint={currentBlueprint}
             sourceType="clms-library"
-            onProceed={() => setStep('basic-info')}
+            onProceed={() => {
+              console.log('[OCR DEBUG] onProceed callback triggered, switching to basic-info step');
+              setStep('basic-info');
+            }}
           />
         </TabsContent>
       </Tabs>
