@@ -439,6 +439,25 @@ const OCRTestPaperCreation = () => {
     questionCount: number;
     marksPerQuestion: number;
   }[]>>({});
+
+  // Preset management states
+  const [savedPresets, setSavedPresets] = useState<{
+    id: string;
+    name: string;
+    description?: string;
+    config: Record<string, {
+      questionType: string;
+      difficultyLevel: 'easy' | 'medium' | 'hard';
+      questionCount: number;
+      marksPerQuestion: number;
+    }[]>;
+    createdAt: string;
+    updatedAt: string;
+  }[]>([]);
+  const [showSavePresetDialog, setShowSavePresetDialog] = useState(false);
+  const [showLoadPresetDialog, setShowLoadPresetDialog] = useState(false);
+  const [presetName, setPresetName] = useState('');
+  const [presetDescription, setPresetDescription] = useState('');
   
   // Barcode configuration
   const [barcodeConfig, setBarcodeConfig] = useState({
@@ -2130,6 +2149,119 @@ const OCRTestPaperCreation = () => {
       <div className="text-center">
         <h2 className="text-2xl font-bold">Question Configuration</h2>
         <p className="text-muted-foreground">Configure question types, difficulty levels, counts and marks for each chapter</p>
+      </div>
+
+      {/* Preset Management Section */}
+      <div className="flex justify-center space-x-4">
+        <Dialog open={showLoadPresetDialog} onOpenChange={setShowLoadPresetDialog}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="flex items-center space-x-2">
+              <Upload className="w-4 h-4" />
+              <span>Load Preset</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Load Question Configuration Preset</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {savedPresets.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No saved presets found</p>
+                  <p className="text-sm">Create and save a configuration first</p>
+                </div>
+              ) : (
+                savedPresets.map(preset => (
+                  <Card key={preset.id} className="cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => {
+                          setChapterQuestionConfig(preset.config);
+                          setShowLoadPresetDialog(false);
+                        }}>
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold">{preset.name}</h3>
+                          {preset.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{preset.description}</p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Created: {new Date(preset.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Badge variant="secondary">
+                          {Object.keys(preset.config).length} chapters
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showSavePresetDialog} onOpenChange={setShowSavePresetDialog}>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="flex items-center space-x-2">
+              <Save className="w-4 h-4" />
+              <span>Save as Preset</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Save Question Configuration Preset</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="preset-name">Preset Name *</Label>
+                <Input
+                  id="preset-name"
+                  value={presetName}
+                  onChange={(e) => setPresetName(e.target.value)}
+                  placeholder="e.g., Grade 9 Science Mid-term"
+                />
+              </div>
+              <div>
+                <Label htmlFor="preset-description">Description (optional)</Label>
+                <Textarea
+                  id="preset-description"
+                  value={presetDescription}
+                  onChange={(e) => setPresetDescription(e.target.value)}
+                  placeholder="Brief description of this configuration..."
+                  rows={3}
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => {
+                  setShowSavePresetDialog(false);
+                  setPresetName('');
+                  setPresetDescription('');
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={() => {
+                  if (!presetName.trim()) return;
+                  
+                  const newPreset = {
+                    id: Date.now().toString(),
+                    name: presetName.trim(),
+                    description: presetDescription.trim() || undefined,
+                    config: { ...chapterQuestionConfig },
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                  };
+                  
+                  setSavedPresets(prev => [...prev, newPreset]);
+                  setShowSavePresetDialog(false);
+                  setPresetName('');
+                  setPresetDescription('');
+                }} disabled={!presetName.trim()}>
+                  Save Preset
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
       
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
