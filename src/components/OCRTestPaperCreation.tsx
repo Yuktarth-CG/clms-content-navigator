@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, Download, Eye, CheckCircle, Info, Search, Plus, Save, Edit, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
+import { Upload, FileText, Download, Eye, CheckCircle, Info, Search, Plus, Save, Edit, ArrowUp, ArrowDown, RefreshCw, X } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { CSVTemplate, PaperLayoutTemplate, OCRJob, LanguageSupport, Blueprint } from '@/types/ocr';
 import BlueprintCreation from './BlueprintCreation';
@@ -408,7 +408,7 @@ const sampleQuestions: QuestionPreview[] = [
 const OCRTestPaperCreation = () => {
   const { user, hasPermission } = useUser();
   const [activeTab, setActiveTab] = useState<'csv' | 'blueprint'>('csv');
-  const [step, setStep] = useState<'source' | 'basic-info' | 'barcode-student' | 'content' | 'questions' | 'processing' | 'review' | 'complete'>('source');
+  const [step, setStep] = useState<'source' | 'basic-info' | 'barcode-student' | 'content' | 'question-config' | 'questions' | 'processing' | 'review' | 'complete'>('source');
   
   // Basic info states
   const [assessmentTitle, setAssessmentTitle] = useState('');
@@ -431,6 +431,14 @@ const OCRTestPaperCreation = () => {
   const [contentMode, setContentMode] = useState<'chapters' | 'learningOutcomes'>('chapters');
   const [chapterQuestionCounts, setChapterQuestionCounts] = useState<Record<string, number>>({});
   const [loQuestionCounts, setLoQuestionCounts] = useState<Record<string, number>>({});
+  
+  // Question configuration for each chapter
+  const [chapterQuestionConfig, setChapterQuestionConfig] = useState<Record<string, {
+    questionType: string;
+    difficultyLevel: 'easy' | 'medium' | 'hard';
+    questionCount: number;
+    marksPerQuestion: number;
+  }[]>>({});
   
   // Barcode configuration
   const [barcodeConfig, setBarcodeConfig] = useState({
@@ -972,6 +980,7 @@ const OCRTestPaperCreation = () => {
         { key: 'basic-info', label: 'Basic Info' },
         { key: 'barcode-student', label: 'Barcode & Student' },
         { key: 'content', label: 'Content' },
+        { key: 'question-config', label: 'Question Config' },
         { key: 'questions', label: 'Questions' },
         { key: 'processing', label: 'Processing' },
         { key: 'review', label: 'Review' }
@@ -2092,8 +2101,8 @@ const OCRTestPaperCreation = () => {
           <Button variant="outline" onClick={() => setStep('barcode-student')} className="flex-1">
             Back
           </Button>
-          <Button onClick={() => setStep('questions')} className="flex-1">
-            Next: Questions
+          <Button onClick={() => setStep('question-config')} className="flex-1">
+            Next: Question Configuration
           </Button>
         </div>
       </div>
@@ -2111,6 +2120,243 @@ const OCRTestPaperCreation = () => {
           totalMarks={currentBlueprint.totalMarks?.toString()}
           className="sticky top-4"
           showQuestions={true} // Show questions in content step after content is selected
+        />
+      </div>
+    </div>
+  );
+
+  const renderQuestionConfigStep = () => (
+    <div className="space-y-8">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold">Question Configuration</h2>
+        <p className="text-muted-foreground">Configure question types, difficulty levels, counts and marks for each chapter</p>
+      </div>
+      
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+        <div className="xl:col-span-3 space-y-6">
+          {selectedChapters.map(chapterId => {
+            const chapter = mockChapters.find(c => c.id === chapterId);
+            if (!chapter) return null;
+            
+            const configs = chapterQuestionConfig[chapterId] || [];
+            
+            return (
+              <Card key={chapterId}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold truncate">{chapter.name}</h3>
+                      <p className="text-sm text-muted-foreground">Available: {chapter.questionCount} questions</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        const newConfig = [...configs, {
+                          questionType: 'MCQ',
+                          difficultyLevel: 'medium' as const,
+                          questionCount: 1,
+                          marksPerQuestion: 1
+                        }];
+                        setChapterQuestionConfig(prev => ({
+                          ...prev,
+                          [chapterId]: newConfig
+                        }));
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Question Set
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {configs.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>No question sets configured yet</p>
+                      <p className="text-sm">Click "Add Question Set" to get started</p>
+                    </div>
+                  ) : (
+                    configs.map((config, configIndex) => (
+                      <div key={configIndex} className="grid grid-cols-12 gap-3 items-center p-4 border rounded-lg">
+                        <div className="col-span-3">
+                          <Label className="text-xs text-gray-600">Question Type</Label>
+                          <Select 
+                            value={config.questionType} 
+                            onValueChange={(value) => {
+                              const newConfigs = [...configs];
+                              newConfigs[configIndex] = { ...config, questionType: value };
+                              setChapterQuestionConfig(prev => ({
+                                ...prev,
+                                [chapterId]: newConfigs
+                              }));
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="MCQ">MCQ</SelectItem>
+                              <SelectItem value="VSA">Very Short Answer</SelectItem>
+                              <SelectItem value="SA">Short Answer</SelectItem>
+                              <SelectItem value="LA">Long Answer</SelectItem>
+                              <SelectItem value="RC">Reading Comprehension</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="col-span-2">
+                          <Label className="text-xs text-gray-600">Difficulty</Label>
+                          <Select 
+                            value={config.difficultyLevel} 
+                            onValueChange={(value: 'easy' | 'medium' | 'hard') => {
+                              const newConfigs = [...configs];
+                              newConfigs[configIndex] = { ...config, difficultyLevel: value };
+                              setChapterQuestionConfig(prev => ({
+                                ...prev,
+                                [chapterId]: newConfigs
+                              }));
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="easy">Easy</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="hard">Hard</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="col-span-2">
+                          <Label className="text-xs text-gray-600">Count</Label>
+                          <Input
+                            type="number"
+                            value={config.questionCount}
+                            onChange={(e) => {
+                              const newConfigs = [...configs];
+                              newConfigs[configIndex] = { ...config, questionCount: parseInt(e.target.value) || 0 };
+                              setChapterQuestionConfig(prev => ({
+                                ...prev,
+                                [chapterId]: newConfigs
+                              }));
+                            }}
+                            min="1"
+                            max={Math.floor(chapter.questionCount / 3)} // Assume 1/3 available for each difficulty
+                          />
+                        </div>
+                        
+                        <div className="col-span-2">
+                          <Label className="text-xs text-gray-600">Marks/Q</Label>
+                          <Input
+                            type="number"
+                            value={config.marksPerQuestion}
+                            onChange={(e) => {
+                              const newConfigs = [...configs];
+                              newConfigs[configIndex] = { ...config, marksPerQuestion: parseInt(e.target.value) || 0 };
+                              setChapterQuestionConfig(prev => ({
+                                ...prev,
+                                [chapterId]: newConfigs
+                              }));
+                            }}
+                            min="1"
+                          />
+                        </div>
+                        
+                        <div className="col-span-2">
+                          <Label className="text-xs text-gray-600">Total Marks</Label>
+                          <div className="h-10 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                            {config.questionCount * config.marksPerQuestion}
+                          </div>
+                        </div>
+                        
+                        <div className="col-span-1">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              const newConfigs = configs.filter((_, i) => i !== configIndex);
+                              setChapterQuestionConfig(prev => ({
+                                ...prev,
+                                [chapterId]: newConfigs
+                              }));
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  
+                  {configs.length > 0 && (
+                    <div className="pt-4 border-t">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium">Chapter Total:</span>
+                        <div className="flex items-center space-x-4">
+                          <span>{configs.reduce((sum, c) => sum + c.questionCount, 0)} questions</span>
+                          <span className="font-semibold">{configs.reduce((sum, c) => sum + (c.questionCount * c.marksPerQuestion), 0)} marks</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+          
+          <div className="flex space-x-4">
+            <Button variant="outline" onClick={() => setStep('content')} className="flex-1">
+              Back: Content Selection
+            </Button>
+            <Button 
+              onClick={() => setStep('questions')} 
+              className="flex-1"
+              disabled={Object.keys(chapterQuestionConfig).length === 0}
+            >
+              Next: Review Questions
+            </Button>
+          </div>
+        </div>
+
+        <div className="xl:col-span-2">
+          <OCRTestPaperPreview
+            assessmentTitle={assessmentTitle}
+            selectedGrade={selectedGrade}
+            selectedSubject={selectedSubject}
+            selectedMedium={selectedMedium}
+            barcodeConfig={barcodeConfig}
+            includeStudentInfo={includeStudentInfo}
+            studentInfoConfig={studentInfoConfig}
+            duration={currentBlueprint.duration?.toString()}
+            totalMarks={currentBlueprint.totalMarks?.toString()}
+            className="sticky top-4"
+            showQuestions={true} // Show questions in question config step
+          />
+        </div>
+      </div>
+    </div>
+   );
+
+  const renderQuestionConfigStepWithPreview = () => (
+    <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+      <div className="xl:col-span-3 space-y-6">
+        {renderQuestionConfigStep()}
+      </div>
+
+      <div className="xl:col-span-2">
+        <OCRTestPaperPreview
+          assessmentTitle={assessmentTitle}
+          selectedGrade={selectedGrade}
+          selectedSubject={selectedSubject}
+          selectedMedium={selectedMedium}
+          barcodeConfig={barcodeConfig}
+          includeStudentInfo={includeStudentInfo}
+          studentInfoConfig={studentInfoConfig}
+          duration={currentBlueprint.duration?.toString()}
+          totalMarks={currentBlueprint.totalMarks?.toString()}
+          className="sticky top-4"
+          showQuestions={true} // Show questions in question config step
         />
       </div>
     </div>
@@ -2159,8 +2405,9 @@ const OCRTestPaperCreation = () => {
               {step === 'source' && renderSourceStep()}
               {step === 'basic-info' && renderBasicInfoStepWithPreview()}
               {step === 'barcode-student' && renderBarcodeStudentStepWithPreview()}
-              {step === 'content' && renderContentStepWithPreview()}
-              {step === 'questions' && renderQuestionsStepWithPreview()}
+               {step === 'content' && renderContentStepWithPreview()}
+               {step === 'question-config' && renderQuestionConfigStepWithPreview()}
+               {step === 'questions' && renderQuestionsStepWithPreview()}
               {step === 'processing' && renderProcessingStep()}
               {step === 'review' && renderReviewStep()}
               {step === 'complete' && renderCompleteStep()}
