@@ -11,15 +11,11 @@ import { Badge } from '@/components/ui/badge';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Upload, FileText, Download, Eye, CheckCircle, Info, Search, Plus, Save, Edit, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { CSVTemplate, PaperLayoutTemplate, OCRJob, LanguageSupport, Blueprint } from '@/types/ocr';
 import BlueprintCreation from './BlueprintCreation';
 import ChapterLOSelector from './ChapterLOSelector';
-import BarcodeStudentConfig from './BarcodeStudentConfig';
-import OCRTestPaperPreview from './OCRTestPaperPreview';
-import { ExtraField } from './StudentDetailsForm';
 
 interface QuestionPreview {
   id: string;
@@ -410,7 +406,7 @@ const sampleQuestions: QuestionPreview[] = [
 const OCRTestPaperCreation = () => {
   const { user, hasPermission } = useUser();
   const [activeTab, setActiveTab] = useState<'csv' | 'blueprint'>('csv');
-  const [step, setStep] = useState<'source' | 'basic-info' | 'barcode-student' | 'content' | 'questions' | 'processing' | 'review' | 'complete'>('source');
+  const [step, setStep] = useState<'source' | 'basic-info' | 'content' | 'questions' | 'processing' | 'review' | 'complete'>('source');
   
   // Basic info states
   const [assessmentTitle, setAssessmentTitle] = useState('');
@@ -444,11 +440,13 @@ const OCRTestPaperCreation = () => {
   
   // Student information configuration
   const [includeStudentInfo, setIncludeStudentInfo] = useState(false);
-  const [studentFields, setStudentFields] = useState<ExtraField[]>([
-    { label: 'Student Name', value: '' },
-    { label: 'Section', value: '' },
-    { label: 'Roll No.', value: '' }
-  ]);
+  const [studentInfoConfig, setStudentInfoConfig] = useState({
+    nameLabel: 'Student Name',
+    sectionLabel: 'Section',
+    rollLabel: 'Roll No.',
+    idBoxCount: 10,
+    instructionText: 'Fill in your details clearly'
+  });
   
   // Initialize with a demo blueprint
   const [savedBlueprints, setSavedBlueprints] = useState<Blueprint[]>([
@@ -893,16 +891,7 @@ const OCRTestPaperCreation = () => {
   };
 
   const canProceedToContent = () => {
-    const isValid = assessmentTitle && selectedGrade && selectedMedium && selectedSubject && selectedLayoutTemplate;
-    console.log('[OCR DEBUG] canProceedToContent validation:', {
-      assessmentTitle: !!assessmentTitle,
-      selectedGrade: !!selectedGrade,
-      selectedMedium: !!selectedMedium,
-      selectedSubject: !!selectedSubject,
-      selectedLayoutTemplate: !!selectedLayoutTemplate,
-      overall: isValid
-    });
-    return isValid;
+    return assessmentTitle && selectedGrade && selectedMedium && selectedSubject && selectedLayoutTemplate;
   };
 
   const canProceedToQuestions = () => {
@@ -1059,16 +1048,6 @@ const OCRTestPaperCreation = () => {
               </SelectContent>
             </Select>
           </div>
-
-          <div className="flex space-x-4 pt-4">
-            <Button 
-              onClick={() => setStep('basic-info')}
-              disabled={!canProceedToBasicInfo()}
-              className="flex-1"
-            >
-              Next: Assessment Details
-            </Button>
-          </div>
         </TabsContent>
 
         <TabsContent value="blueprint" className="space-y-6">
@@ -1086,15 +1065,6 @@ const OCRTestPaperCreation = () => {
             savedBlueprints={savedBlueprints}
             initialBlueprint={currentBlueprint}
             sourceType="clms-library"
-            onProceed={() => {
-              console.log('[OCR DEBUG] onProceed callback triggered, switching to basic-info step');
-              console.log('[OCR DEBUG] Current step before change:', step);
-              console.log('[OCR DEBUG] Current tab before change:', activeTab);
-              setStep('basic-info');
-              // Also reset the tab state to avoid confusion
-              setActiveTab('csv');
-              console.log('[OCR DEBUG] Step changed to basic-info, tab reset to csv');
-            }}
           />
         </TabsContent>
       </Tabs>
@@ -1214,111 +1184,205 @@ const OCRTestPaperCreation = () => {
     </div>
   );
 
-  const renderBasicInfoStep = () => {
-    console.log('[OCR DEBUG] Rendering Basic Info Step - NEW VERSION');
-    return (
+  const renderBasicInfoStep = () => (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Assessment Blueprint Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Assessment Blueprint Name (Header 1)</Label>
-            <Input
-              value={assessmentTitle}
-              onChange={(e) => setAssessmentTitle(e.target.value)}
-              placeholder="e.g., Grade 9 Mathematics Mid-term Assessment"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Give your assessment template a descriptive name</p>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Assessment Blueprint Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div>
-              <Label>Duration (minutes)</Label>
+              <Label>Assessment Blueprint Name (Header 1)</Label>
               <Input
-                type="number"
-                placeholder="90"
-                className="w-full"
+                value={assessmentTitle}
+                onChange={(e) => setAssessmentTitle(e.target.value)}
+                placeholder="e.g., Grade 9 Mathematics Mid-term Assessment"
               />
-              <p className="text-xs text-muted-foreground mt-1">How long students have to complete</p>
+              <p className="text-xs text-muted-foreground mt-1">Give your assessment template a descriptive name</p>
             </div>
-            <div>
-              <Label>Total Marks</Label>
-              <Input
-                type="number"
-                placeholder="35"
-                className="w-full"
-              />
-              <p className="text-xs text-muted-foreground mt-1">Maximum score possible</p>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Class Name (Header 2)</Label>
+                <Select value={selectedGrade?.toString() || ''} onValueChange={(value) => setSelectedGrade(parseInt(value))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
+                      <SelectItem key={grade} value={grade.toString()}>
+                        Grade {grade}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label>Subject Name (Header 3)</Label>
+                <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select subject" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Mathematics">Mathematics</SelectItem>
+                    <SelectItem value="Science">Science</SelectItem>
+                    <SelectItem value="English">English</SelectItem>
+                    <SelectItem value="Hindi">Hindi</SelectItem>
+                    <SelectItem value="Social Science">Social Science</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+
             <div>
-              <Label>Language</Label>
+              <Label>Medium</Label>
               <Select value={selectedMedium} onValueChange={setSelectedMedium}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select language" />
+                  <SelectValue placeholder="Select medium" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="English">English</SelectItem>
-                  <SelectItem value="Hindi">हिंदी (Hindi)</SelectItem>
+                  <SelectItem value="Hindi">Hindi</SelectItem>
                   <SelectItem value="Regional">Regional Language</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground mt-1">Test paper language</p>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Class Name (Header 2)</Label>
-              <Select value={selectedGrade?.toString() || ''} onValueChange={(value) => setSelectedGrade(parseInt(value))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select grade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
-                    <SelectItem key={grade} value={grade.toString()}>
-                      Grade {grade}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label>Subject Name (Header 3)</Label>
-              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Mathematics">Mathematics</SelectItem>
-                  <SelectItem value="Science">Science</SelectItem>
-                  <SelectItem value="English">English</SelectItem>
-                  <SelectItem value="Hindi">Hindi</SelectItem>
-                  <SelectItem value="Social Science">Social Science</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
-          <div>
-            <Label>Paper Layout Template</Label>
-            <Select value={selectedLayoutTemplate} onValueChange={setSelectedLayoutTemplate}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose how your test paper will look" />
-              </SelectTrigger>
-              <SelectContent>
+            <div>
+              <Label>Paper Layout Template</Label>
+              <div className="grid grid-cols-1 gap-4 mt-4">
                 {layoutTemplates.map(template => (
-                  <SelectItem key={template.id} value={template.id}>
-                    {template.name} - {template.description}
-                  </SelectItem>
+                  <Card 
+                    key={template.id} 
+                    className={`cursor-pointer transition-colors ${
+                      selectedLayoutTemplate === template.id ? 'ring-2 ring-blue-500' : ''
+                    }`}
+                    onClick={() => setSelectedLayoutTemplate(template.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium">{template.name}</h3>
+                        <div className="flex items-center space-x-1">
+                          <span className="text-xs text-gray-500">v{template.version}</span>
+                          {template.customizable && (
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Customizable</span>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+                    </CardContent>
+                  </Card>
                 ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground mt-1">Controls the overall appearance and spacing of your test paper</p>
-          </div>
-        </CardContent>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Barcode Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Top Left Barcode</Label>
+                <Input
+                  value={barcodeConfig.topLeft}
+                  onChange={(e) => setBarcodeConfig(prev => ({ ...prev, topLeft: e.target.value }))}
+                  placeholder="e.g., TL001"
+                />
+              </div>
+              <div>
+                <Label>Top Right Barcode</Label>
+                <Input
+                  value={barcodeConfig.topRight}
+                  onChange={(e) => setBarcodeConfig(prev => ({ ...prev, topRight: e.target.value }))}
+                  placeholder="e.g., TR001"
+                />
+              </div>
+              <div>
+                <Label>Bottom Left Barcode</Label>
+                <Input
+                  value={barcodeConfig.bottomLeft}
+                  onChange={(e) => setBarcodeConfig(prev => ({ ...prev, bottomLeft: e.target.value }))}
+                  placeholder="e.g., BL001"
+                />
+              </div>
+              <div>
+                <Label>Bottom Right Barcode</Label>
+                <Input
+                  value={barcodeConfig.bottomRight}
+                  onChange={(e) => setBarcodeConfig(prev => ({ ...prev, bottomRight: e.target.value }))}
+                  placeholder="e.g., BR001"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Student Information Section</span>
+            <Switch
+              checked={includeStudentInfo}
+              onCheckedChange={setIncludeStudentInfo}
+            />
+          </CardTitle>
+        </CardHeader>
+        {includeStudentInfo && (
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Student Name Label</Label>
+                <Input
+                  value={studentInfoConfig.nameLabel}
+                  onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, nameLabel: e.target.value }))}
+                  placeholder="Student Name"
+                />
+              </div>
+              <div>
+                <Label>Student Section Label</Label>
+                <Input
+                  value={studentInfoConfig.sectionLabel}
+                  onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, sectionLabel: e.target.value }))}
+                  placeholder="Section"
+                />
+              </div>
+              <div>
+                <Label>Student Roll Label</Label>
+                <Input
+                  value={studentInfoConfig.rollLabel}
+                  onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, rollLabel: e.target.value }))}
+                  placeholder="Roll No."
+                />
+              </div>
+              <div>
+                <Label>Student ID Box Count</Label>
+                <Input
+                  type="number"
+                  value={studentInfoConfig.idBoxCount}
+                  onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, idBoxCount: parseInt(e.target.value) || 10 }))}
+                  placeholder="10"
+                  min="5"
+                  max="20"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Instruction Text</Label>
+              <Textarea
+                value={studentInfoConfig.instructionText}
+                onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, instructionText: e.target.value }))}
+                placeholder="Fill in your details clearly"
+                rows={2}
+              />
+            </div>
+          </CardContent>
+        )}
       </Card>
 
       <div className="flex space-x-4">
@@ -1326,30 +1390,15 @@ const OCRTestPaperCreation = () => {
           Back
         </Button>
         <Button 
-          onClick={() => setStep('barcode-student')}
+          onClick={handleBasicInfoConfirm}
           disabled={!canProceedToContent()}
           className="flex-1"
         >
-          Next: Barcode & Student Info
+          Next
         </Button>
       </div>
     </div>
-    );
-  };
-
-  const renderBarcodeStudentStep = () => {
-    console.log('[OCR DEBUG] Rendering Barcode Student Step');
-    return (
-      <BarcodeStudentConfig
-        barcodeConfig={barcodeConfig}
-        setBarcodeConfig={setBarcodeConfig}
-        includeStudentInfo={includeStudentInfo}
-        setIncludeStudentInfo={setIncludeStudentInfo}
-        studentFields={studentFields}
-        setStudentFields={setStudentFields}
-      />
-    );
-  };
+  );
 
   const renderContentStep = () => (
     <div className="space-y-6">
@@ -1849,15 +1898,9 @@ const OCRTestPaperCreation = () => {
     </div>
   );
 
-  const shouldShowSideBySide = ['barcode-student', 'content', 'questions'].includes(step);
-  
-  console.log('[OCR DEBUG] Current step:', step);
-  console.log('[OCR DEBUG] Should show side by side:', shouldShowSideBySide);
-  console.log('[OCR DEBUG] Active tab:', activeTab);
-
   return (
     <div className="p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Test Paper Generation</h1>
           <p className="text-gray-600 mt-1">
@@ -1865,91 +1908,23 @@ const OCRTestPaperCreation = () => {
           </p>
         </div>
 
-        {!shouldShowSideBySide ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Enhanced Test Paper Generation Workflow</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4 text-sm text-gray-500">
-                Current step: {step} | Active tab: {activeTab}
-              </div>
-              {step === 'source' && (() => { console.log('[OCR DEBUG] Rendering source step'); return renderSourceStep(); })()}
-              {step === 'basic-info' && (() => { console.log('[OCR DEBUG] Rendering basic-info step'); return renderBasicInfoStep(); })()}
-              {step === 'processing' && renderProcessingStep()}
-              {step === 'review' && renderReviewStep()}
-              {step === 'complete' && renderCompleteStep()}
-            </CardContent>
-          </Card>
-        ) : (
-          <ResizablePanelGroup direction="horizontal" className="min-h-[600px] border rounded-lg">
-            <ResizablePanel defaultSize={50} minSize={30}>
-              <Card className="h-full border-0 rounded-r-none">
-                <CardHeader>
-                  <CardTitle>Configuration</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="mb-4 text-sm text-gray-500">
-                    Current step: {step} | Active tab: {activeTab}
-                  </div>
-                  {step === 'barcode-student' && (
-                    <div className="space-y-6">
-                      {renderBarcodeStudentStep()}
-                      <div className="flex space-x-4">
-                        <Button variant="outline" onClick={() => setStep('basic-info')} className="flex-1">
-                          Back
-                        </Button>
-                        <Button 
-                          onClick={() => setStep('content')}
-                          className="flex-1"
-                        >
-                          Next
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  {step === 'content' && (
-                    <div className="space-y-6">
-                      {renderContentStep()}
-                      <div className="flex space-x-4">
-                        <Button variant="outline" onClick={() => setStep('barcode-student')} className="flex-1">
-                          Back
-                        </Button>
-                        <Button 
-                          onClick={handleContentSelection}
-                          disabled={!canProceedToQuestions()}
-                          className="flex-1"
-                        >
-                          Generate Questions
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  {step === 'questions' && renderQuestionsStep()}
-                </CardContent>
-              </Card>
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={50} minSize={30}>
-              <Card className="h-full border-0 rounded-l-none">
-                <CardHeader>
-                  <CardTitle>Live Preview</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <OCRTestPaperPreview
-                    assessmentTitle={assessmentTitle}
-                    selectedGrade={selectedGrade}
-                    selectedSubject={selectedSubject}
-                    barcodeConfig={barcodeConfig}
-                    includeStudentInfo={includeStudentInfo}
-                    studentFields={studentFields}
-                    questions={questionPreviews.slice(0, 6)}
-                  />
-                </CardContent>
-              </Card>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        )}
+        <Card>
+          <CardHeader>
+            <CardTitle>Enhanced Test Paper Generation Workflow</CardTitle>
+          </CardHeader>
+           <CardContent>
+             <div className="mb-4 text-sm text-gray-500">
+               Current step: {step} | Active tab: {activeTab}
+             </div>
+             {step === 'source' && renderSourceStep()}
+             {step === 'basic-info' && renderBasicInfoStep()}
+             {step === 'content' && renderContentStep()}
+             {step === 'questions' && renderQuestionsStep()}
+             {step === 'processing' && renderProcessingStep()}
+             {step === 'review' && renderReviewStep()}
+             {step === 'complete' && renderCompleteStep()}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

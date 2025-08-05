@@ -531,6 +531,89 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
         </div>
       </div>
 
+      {/* Advanced Configuration */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Barcode Configuration */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold text-primary">📊 Barcode Configuration</CardTitle>
+            <p className="text-sm text-muted-foreground">Add tracking codes to your test paper (optional)</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium">Top Left Barcode</Label>
+                <Input placeholder="e.g., MATH001" className="mt-1" />
+                <p className="text-xs text-muted-foreground mt-1">🔍 Appears in top-left corner</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Top Right Barcode</Label>
+                <Input placeholder="e.g., V1.0" className="mt-1" />
+                <p className="text-xs text-muted-foreground mt-1">🔍 Appears in top-right corner</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Bottom Left Barcode</Label>
+                <Input placeholder="e.g., SCH001" className="mt-1" />
+                <p className="text-xs text-muted-foreground mt-1">🔍 Appears in bottom-left corner</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Bottom Right Barcode</Label>
+                <Input placeholder="e.g., 2024-Q1" className="mt-1" />
+                <p className="text-xs text-muted-foreground mt-1">🔍 Appears in bottom-right corner</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Student Information */}
+        <Card>
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-semibold text-primary">👥 Student Information Section</CardTitle>
+                <p className="text-sm text-muted-foreground">Add fields for student details on the test paper</p>
+              </div>
+              <Switch id="student-info" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50">
+              <div>
+                <Label className="text-sm font-medium">Student Name Label</Label>
+                <Input placeholder="Student Name" disabled className="mt-1" />
+                <p className="text-xs text-muted-foreground mt-1">👤 Label for name field</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Student Section Label</Label>
+                <Input placeholder="Section" disabled className="mt-1" />
+                <p className="text-xs text-muted-foreground mt-1">🏫 Label for section field</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Student Roll Label</Label>
+                <Input placeholder="Roll No." disabled className="mt-1" />
+                <p className="text-xs text-muted-foreground mt-1">🎫 Label for roll number</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Student ID Box Count</Label>
+                <Input type="number" min="5" max="20" placeholder="10" disabled className="mt-1" />
+                <p className="text-xs text-muted-foreground mt-1">📦 Number of boxes (5-20)</p>
+              </div>
+            </div>
+            
+            <div className="mt-4 opacity-50">
+              <Label className="text-sm font-medium">Instructions for Students</Label>
+              <Textarea 
+                placeholder="Fill in your details clearly in the boxes above..."
+                disabled
+                rows={2}
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">📋 Instructions that appear with student info section</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Action Buttons */}
       <div className="flex justify-between items-center pt-6 border-t">
         <div className="flex items-center space-x-2">
@@ -556,20 +639,11 @@ const BlueprintCreation: React.FC<BlueprintCreationProps> = ({
           </Button>
           
           <Button
-            onClick={() => {
-              console.log('[BLUEPRINT DEBUG] Next button clicked, onProceed available:', !!onProceed);
-              if (onProceed) {
-                console.log('[BLUEPRINT DEBUG] Calling onProceed callback');
-                onProceed();
-              } else {
-                console.log('[BLUEPRINT DEBUG] No onProceed, going to units step');
-                setCurrentStep('units');
-              }
-            }}
+            onClick={() => setCurrentStep('units')}
             disabled={!canProceedToUnits()}
             className="flex items-center space-x-2"
           >
-            <span>{onProceed ? 'Next: Assessment Details' : 'Next: Choose Course Content'}</span>
+            <span>Next: Choose Course Content</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
