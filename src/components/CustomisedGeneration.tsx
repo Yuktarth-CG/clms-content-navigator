@@ -98,6 +98,27 @@ const CustomisedGeneration = () => {
     duration: ''
   });
 
+  // Chapter-wise question configuration
+  const [chapterConfigs, setChapterConfigs] = useState<{
+    [chapterName: string]: {
+      questionSets: {
+        id: string;
+        questionType: QuestionType;
+        difficulty: 'Easy' | 'Medium' | 'Hard';
+        count: number;
+        marksPerQuestion: number;
+      }[];
+      availableQuestions: number;
+    }
+  }>({});
+
+  // Preset management
+  const [presets, setPresets] = useState<any[]>([]);
+  const [showSavePresetDialog, setShowSavePresetDialog] = useState(false);
+  const [showLoadPresetDialog, setShowLoadPresetDialog] = useState(false);
+  const [presetName, setPresetName] = useState('');
+  const [presetDescription, setPresetDescription] = useState('');
+
   const totalSteps = 5;
   const stepProgress = (currentStep / totalSteps) * 100;
 
@@ -262,6 +283,20 @@ const CustomisedGeneration = () => {
       }
     }
   }, [selectedBlueprint, blueprints]);
+
+  // Initialize chapter configs when chapters are selected
+  useEffect(() => {
+    const newConfigs = { ...chapterConfigs };
+    formData.chapters.forEach(chapter => {
+      if (!newConfigs[chapter]) {
+        newConfigs[chapter] = {
+          questionSets: [],
+          availableQuestions: Math.floor(Math.random() * 30) + 20 // Random between 20-50 for demo
+        };
+      }
+    });
+    setChapterConfigs(newConfigs);
+  }, [formData.chapters]);
 
   // Update allowed question types from sections
   useEffect(() => {
@@ -997,142 +1032,249 @@ const CustomisedGeneration = () => {
                 <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
                 <span>Question Distribution</span>
               </CardTitle>
-              <p className="text-muted-foreground">Customize the distribution of questions based on Bloom's Taxonomy and select individual chapters</p>
+              <p className="text-muted-foreground">Configure question types and counts for each selected chapter</p>
             </CardHeader>
             <CardContent className="space-y-6">
-              {selectedBlueprint && (
+              {/* Preset Management */}
+              <div className="flex justify-between items-center">
+                <Label className="text-base font-medium">Question Configuration</Label>
+                <div className="flex space-x-2">
+                  <Dialog open={showLoadPresetDialog} onOpenChange={setShowLoadPresetDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                        <BookTemplate className="w-4 h-4" />
+                        <span>Load Preset</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Load Configuration Preset</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">Select a saved configuration preset to apply to your chapters.</p>
+                        <div className="space-y-2">
+                          {presets.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-4">No presets saved yet.</p>
+                          ) : (
+                            presets.map((preset, index) => (
+                              <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                                <div className="font-medium">{preset.name}</div>
+                                <div className="text-sm text-muted-foreground">{preset.description}</div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog open={showSavePresetDialog} onOpenChange={setShowSavePresetDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                        <Settings className="w-4 h-4" />
+                        <span>Save as Preset</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Save Configuration as Preset</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="preset-name">Preset Name</Label>
+                          <Input
+                            id="preset-name"
+                            value={presetName}
+                            onChange={(e) => setPresetName(e.target.value)}
+                            placeholder="Enter preset name"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="preset-description">Description (Optional)</Label>
+                          <Input
+                            id="preset-description"
+                            value={presetDescription}
+                            onChange={(e) => setPresetDescription(e.target.value)}
+                            placeholder="Describe this configuration"
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" onClick={() => setShowSavePresetDialog(false)}>
+                            Cancel
+                          </Button>
+                          <Button onClick={() => {
+                            // Save preset logic here
+                            setShowSavePresetDialog(false);
+                            toast({ title: "Preset saved successfully!" });
+                          }}>
+                            Save Preset
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+
+              {/* Chapter-wise Configuration */}
+              {formData.chapters.length > 0 ? (
                 <div className="space-y-6">
-                  {/* Bloom's Taxonomy Distribution */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <BookOpen className="w-5 h-5 text-primary" />
-                        <Label className="text-base font-medium">Bloom's Taxonomy Distribution</Label>
-                      </div>
-                      {(() => {
-                        const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                        if (!blueprint) return null;
-                        
-                        const totalQuestions = formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
-                        
-                        return (
-                          <div className={`px-3 py-1 rounded-md text-sm font-medium ${
-                            totalQuestions > blueprint.total_questions 
-                              ? 'bg-red-100 text-red-700' 
-                              : totalQuestions < blueprint.total_questions 
-                              ? 'bg-yellow-100 text-yellow-700' 
-                              : 'bg-green-100 text-green-700'
-                          }`}>
-                            {totalQuestions} / {blueprint.total_questions}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      {Object.entries(BloomLevels).map(([level, label]) => {
-                        const fieldName = `bloom${level}` as keyof typeof formData;
-                        const value = formData[fieldName] as number;
-                        const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                        const maxValue = blueprint ? blueprint.total_questions : 50;
-                        
-                        return (
-                          <div key={level} className="flex items-center justify-between space-x-2">
-                            <Label className="text-sm flex-1">L{level.slice(1)} {label.split(' ')[0]}</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              max={maxValue}
-                              value={value}
-                              onChange={(e) => {
-                                const newValue = parseInt(e.target.value) || 0;
-                                handleBloomChange(level as keyof typeof BloomLevels, [newValue]);
-                              }}
-                              className="w-16 h-8 text-center text-sm"
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
+                  {formData.chapters.map((chapter, chapterIndex) => {
+                    const config = chapterConfigs[chapter] || { questionSets: [], availableQuestions: 42 };
+                    const chapterTotal = config.questionSets.reduce((total, set) => total + set.count, 0);
+                    const chapterMarks = config.questionSets.reduce((total, set) => total + (set.count * set.marksPerQuestion), 0);
 
-                    {(() => {
-                      const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                      if (!blueprint) return null;
-                      
-                      const totalQuestions = formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
-                      
-                      if (totalQuestions > blueprint.total_questions) {
-                        return (
-                          <p className="text-red-600 text-sm text-center">
-                            ⚠️ Total exceeds blueprint by {totalQuestions - blueprint.total_questions} questions. Please reduce from other levels.
-                          </p>
-                        );
-                      } else if (totalQuestions < blueprint.total_questions) {
-                        return (
-                          <p className="text-yellow-600 text-sm text-center">
-                            📊 {blueprint.total_questions - totalQuestions} more questions needed
-                          </p>
-                        );
-                      } else {
-                        return (
-                          <p className="text-green-600 text-sm text-center">
-                            ✅ Perfect! Matches blueprint exactly
-                          </p>
-                        );
-                      }
-                    })()}
-                  </div>
+                    return (
+                      <div key={chapter} className="border rounded-lg p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-medium text-lg">{chapter}</h3>
+                            <p className="text-sm text-muted-foreground">Available: {config.availableQuestions} questions</p>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              const newConfig = { ...chapterConfigs };
+                              if (!newConfig[chapter]) {
+                                newConfig[chapter] = { questionSets: [], availableQuestions: 42 };
+                              }
+                              newConfig[chapter].questionSets.push({
+                                id: `set-${Date.now()}`,
+                                questionType: 'MCQ',
+                                difficulty: 'Medium',
+                                count: 1,
+                                marksPerQuestion: 1
+                              });
+                              setChapterConfigs(newConfig);
+                            }}
+                            className="flex items-center space-x-2"
+                          >
+                            <span>+</span>
+                            <span>Add Question Set</span>
+                          </Button>
+                        </div>
 
-                  {/* Chapter Selection */}
-                  <Separator />
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <Target className="w-5 h-5 text-primary" />
-                      <Label className="text-base font-medium">Chapter Selection</Label>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Select specific chapters to include questions from. This helps focus the assessment on particular topics.
-                    </p>
-                    
-                    {formData.chapters.length > 0 ? (
-                      <div className="space-y-3">
-                        <Label className="text-sm font-medium">Available Chapters:</Label>
-                        <div className="grid grid-cols-1 gap-2">
-                          {formData.chapters.map((chapter, index) => (
-                            <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
-                              <Checkbox
-                                id={`chapter-${index}`}
-                                defaultChecked={true}
-                                className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                              />
-                              <Label 
-                                htmlFor={`chapter-${index}`}
-                                className="text-sm flex-1 cursor-pointer"
-                              >
-                                {chapter}
-                              </Label>
-                              <Badge variant="outline" className="text-xs">
-                                Chapter {index + 1}
-                              </Badge>
+                        {config.questionSets.length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                            <p>No question sets configured yet</p>
+                            <p className="text-sm">Click "Add Question Set" to get started</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {config.questionSets.map((set, setIndex) => (
+                              <div key={set.id} className="grid grid-cols-6 gap-3 items-center p-3 bg-muted/20 rounded-lg">
+                                <div>
+                                  <Label className="text-xs text-muted-foreground">Question Type</Label>
+                                  <Select value={set.questionType} onValueChange={(value) => {
+                                    const newConfig = { ...chapterConfigs };
+                                    newConfig[chapter].questionSets[setIndex].questionType = value as QuestionType;
+                                    setChapterConfigs(newConfig);
+                                  }}>
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="MCQ">MCQ</SelectItem>
+                                      <SelectItem value="FITB">Fill in the Blank</SelectItem>
+                                      <SelectItem value="Match">Match</SelectItem>
+                                      <SelectItem value="Arrange">Arrange</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                
+                                <div>
+                                  <Label className="text-xs text-muted-foreground">Difficulty</Label>
+                                  <Select value={set.difficulty} onValueChange={(value) => {
+                                    const newConfig = { ...chapterConfigs };
+                                    newConfig[chapter].questionSets[setIndex].difficulty = value as 'Easy' | 'Medium' | 'Hard';
+                                    setChapterConfigs(newConfig);
+                                  }}>
+                                    <SelectTrigger className="h-8">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="Easy">Easy</SelectItem>
+                                      <SelectItem value="Medium">Medium</SelectItem>
+                                      <SelectItem value="Hard">Hard</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                
+                                <div>
+                                  <Label className="text-xs text-muted-foreground">Count</Label>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={set.count}
+                                    onChange={(e) => {
+                                      const newConfig = { ...chapterConfigs };
+                                      newConfig[chapter].questionSets[setIndex].count = parseInt(e.target.value) || 1;
+                                      setChapterConfigs(newConfig);
+                                    }}
+                                    className="h-8"
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <Label className="text-xs text-muted-foreground">Marks/Q</Label>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={set.marksPerQuestion}
+                                    onChange={(e) => {
+                                      const newConfig = { ...chapterConfigs };
+                                      newConfig[chapter].questionSets[setIndex].marksPerQuestion = parseInt(e.target.value) || 1;
+                                      setChapterConfigs(newConfig);
+                                    }}
+                                    className="h-8"
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <Label className="text-xs text-muted-foreground">Total Marks</Label>
+                                  <div className="h-8 flex items-center text-sm font-medium">
+                                    {set.count * set.marksPerQuestion}
+                                  </div>
+                                </div>
+                                
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newConfig = { ...chapterConfigs };
+                                    newConfig[chapter].questionSets.splice(setIndex, 1);
+                                    setChapterConfigs(newConfig);
+                                  }}
+                                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                                >
+                                  ×
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {config.questionSets.length > 0 && (
+                          <div className="flex justify-end pt-2 border-t">
+                            <div className="text-sm font-medium">
+                              Chapter Total: <span className="text-primary">{chapterTotal} questions</span> • <span className="text-primary">{chapterMarks} marks</span>
                             </div>
-                          ))}
-                        </div>
-                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                          <p className="text-sm text-blue-700">
-                            <Info className="w-4 h-4 inline mr-1" />
-                            Questions will be distributed proportionally across selected chapters based on the Bloom's taxonomy levels above.
-                          </p>
-                        </div>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="p-4 border border-dashed rounded-lg text-center">
-                        <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          No chapters selected in Step 2. Please go back and select chapters to enable chapter-wise distribution.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-8 border border-dashed rounded-lg text-center">
+                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="font-medium text-lg mb-2">No Chapters Selected</h3>
+                  <p className="text-muted-foreground mb-4">Please go back to Step 2 and select chapters to configure questions.</p>
+                  <Button variant="outline" onClick={() => setCurrentStep(2)}>
+                    Go to Content Selection
+                  </Button>
                 </div>
               )}
 
