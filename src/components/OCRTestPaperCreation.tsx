@@ -1923,60 +1923,56 @@ const OCRTestPaperCreation = () => {
               <CardTitle>Student Information Section</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {includeStudentInfo && (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Student Name Label</Label>
-                      <Input
-                        value={studentInfoConfig.nameLabel}
-                        onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, nameLabel: e.target.value }))}
-                        placeholder="Student Name"
-                      />
-                    </div>
-                    <div>
-                      <Label>Student Section Label</Label>
-                      <Input
-                        value={studentInfoConfig.sectionLabel}
-                        onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, sectionLabel: e.target.value }))}
-                        placeholder="Section"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Student Roll Label</Label>
-                      <Input
-                        value={studentInfoConfig.rollLabel}
-                        onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, rollLabel: e.target.value }))}
-                        placeholder="Roll No."
-                      />
-                    </div>
-                    <div>
-                      <Label>Student ID Box Count</Label>
-                      <Input
-                        type="number"
-                        value={studentInfoConfig.idBoxCount}
-                        onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, idBoxCount: parseInt(e.target.value) || 10 }))}
-                        placeholder="10"
-                        min="1"
-                        max="20"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label>Instruction Text</Label>
-                    <Textarea
-                      value={studentInfoConfig.instructionText}
-                      onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, instructionText: e.target.value }))}
-                      placeholder="Fill in your details clearly"
-                      rows={3}
-                    />
-                  </div>
-                </>
-              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Student Name Label</Label>
+                  <Input
+                    value={studentInfoConfig.nameLabel}
+                    onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, nameLabel: e.target.value }))}
+                    placeholder="Student Name"
+                  />
+                </div>
+                <div>
+                  <Label>Student Section Label</Label>
+                  <Input
+                    value={studentInfoConfig.sectionLabel}
+                    onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, sectionLabel: e.target.value }))}
+                    placeholder="Section"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Student Roll Label</Label>
+                  <Input
+                    value={studentInfoConfig.rollLabel}
+                    onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, rollLabel: e.target.value }))}
+                    placeholder="Roll No."
+                  />
+                </div>
+                <div>
+                  <Label>Student ID Box Count</Label>
+                  <Input
+                    type="number"
+                    value={studentInfoConfig.idBoxCount}
+                    onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, idBoxCount: parseInt(e.target.value) || 10 }))}
+                    placeholder="10"
+                    min="1"
+                    max="20"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label>Instruction Text</Label>
+                <Textarea
+                  value={studentInfoConfig.instructionText}
+                  onChange={(e) => setStudentInfoConfig(prev => ({ ...prev, instructionText: e.target.value }))}
+                  placeholder="Fill in your details clearly"
+                  rows={3}
+                />
+              </div>
             </CardContent>
           </Card>
 
