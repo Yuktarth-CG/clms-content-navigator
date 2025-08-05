@@ -997,88 +997,142 @@ const CustomisedGeneration = () => {
                 <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
                 <span>Question Distribution</span>
               </CardTitle>
-              <p className="text-muted-foreground">Customize the distribution of questions based on Bloom's Taxonomy or Difficulty levels</p>
+              <p className="text-muted-foreground">Customize the distribution of questions based on Bloom's Taxonomy and select individual chapters</p>
             </CardHeader>
             <CardContent className="space-y-6">
               {selectedBlueprint && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <BookOpen className="w-5 h-5 text-primary" />
-                      <Label className="text-base font-medium">Question Distribution</Label>
+                <div className="space-y-6">
+                  {/* Bloom's Taxonomy Distribution */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                        <Label className="text-base font-medium">Bloom's Taxonomy Distribution</Label>
+                      </div>
+                      {(() => {
+                        const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                        if (!blueprint) return null;
+                        
+                        const totalQuestions = formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
+                        
+                        return (
+                          <div className={`px-3 py-1 rounded-md text-sm font-medium ${
+                            totalQuestions > blueprint.total_questions 
+                              ? 'bg-red-100 text-red-700' 
+                              : totalQuestions < blueprint.total_questions 
+                              ? 'bg-yellow-100 text-yellow-700' 
+                              : 'bg-green-100 text-green-700'
+                          }`}>
+                            {totalQuestions} / {blueprint.total_questions}
+                          </div>
+                        );
+                      })()}
                     </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      {Object.entries(BloomLevels).map(([level, label]) => {
+                        const fieldName = `bloom${level}` as keyof typeof formData;
+                        const value = formData[fieldName] as number;
+                        const blueprint = blueprints.find(b => b.id === selectedBlueprint);
+                        const maxValue = blueprint ? blueprint.total_questions : 50;
+                        
+                        return (
+                          <div key={level} className="flex items-center justify-between space-x-2">
+                            <Label className="text-sm flex-1">L{level.slice(1)} {label.split(' ')[0]}</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              max={maxValue}
+                              value={value}
+                              onChange={(e) => {
+                                const newValue = parseInt(e.target.value) || 0;
+                                handleBloomChange(level as keyof typeof BloomLevels, [newValue]);
+                              }}
+                              className="w-16 h-8 text-center text-sm"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+
                     {(() => {
                       const blueprint = blueprints.find(b => b.id === selectedBlueprint);
                       if (!blueprint) return null;
                       
                       const totalQuestions = formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
                       
-                      return (
-                        <div className={`px-3 py-1 rounded-md text-sm font-medium ${
-                          totalQuestions > blueprint.total_questions 
-                            ? 'bg-red-100 text-red-700' 
-                            : totalQuestions < blueprint.total_questions 
-                            ? 'bg-yellow-100 text-yellow-700' 
-                            : 'bg-green-100 text-green-700'
-                        }`}>
-                          {totalQuestions} / {blueprint.total_questions}
-                        </div>
-                      );
+                      if (totalQuestions > blueprint.total_questions) {
+                        return (
+                          <p className="text-red-600 text-sm text-center">
+                            ⚠️ Total exceeds blueprint by {totalQuestions - blueprint.total_questions} questions. Please reduce from other levels.
+                          </p>
+                        );
+                      } else if (totalQuestions < blueprint.total_questions) {
+                        return (
+                          <p className="text-yellow-600 text-sm text-center">
+                            📊 {blueprint.total_questions - totalQuestions} more questions needed
+                          </p>
+                        );
+                      } else {
+                        return (
+                          <p className="text-green-600 text-sm text-center">
+                            ✅ Perfect! Matches blueprint exactly
+                          </p>
+                        );
+                      }
                     })()}
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    {Object.entries(BloomLevels).map(([level, label]) => {
-                      const fieldName = `bloom${level}` as keyof typeof formData;
-                      const value = formData[fieldName] as number;
-                      const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                      const maxValue = blueprint ? blueprint.total_questions : 50;
-                      
-                      return (
-                        <div key={level} className="flex items-center justify-between space-x-2">
-                          <Label className="text-sm flex-1">L{level.slice(1)} {label.split(' ')[0]}</Label>
-                          <Input
-                            type="number"
-                            min="0"
-                            max={maxValue}
-                            value={value}
-                            onChange={(e) => {
-                              const newValue = parseInt(e.target.value) || 0;
-                              handleBloomChange(level as keyof typeof BloomLevels, [newValue]);
-                            }}
-                            className="w-16 h-8 text-center text-sm"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
 
-                  {(() => {
-                    const blueprint = blueprints.find(b => b.id === selectedBlueprint);
-                    if (!blueprint) return null;
+                  {/* Chapter Selection */}
+                  <Separator />
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Target className="w-5 h-5 text-primary" />
+                      <Label className="text-base font-medium">Chapter Selection</Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Select specific chapters to include questions from. This helps focus the assessment on particular topics.
+                    </p>
                     
-                    const totalQuestions = formData.bloomL1 + formData.bloomL2 + formData.bloomL3 + formData.bloomL4 + formData.bloomL5 + formData.bloomL6;
-                    
-                    if (totalQuestions > blueprint.total_questions) {
-                      return (
-                        <p className="text-red-600 text-sm text-center">
-                          ⚠️ Total exceeds blueprint by {totalQuestions - blueprint.total_questions} questions. Please reduce from other levels.
+                    {formData.chapters.length > 0 ? (
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium">Available Chapters:</Label>
+                        <div className="grid grid-cols-1 gap-2">
+                          {formData.chapters.map((chapter, index) => (
+                            <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
+                              <Checkbox
+                                id={`chapter-${index}`}
+                                defaultChecked={true}
+                                className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                              />
+                              <Label 
+                                htmlFor={`chapter-${index}`}
+                                className="text-sm flex-1 cursor-pointer"
+                              >
+                                {chapter}
+                              </Label>
+                              <Badge variant="outline" className="text-xs">
+                                Chapter {index + 1}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <p className="text-sm text-blue-700">
+                            <Info className="w-4 h-4 inline mr-1" />
+                            Questions will be distributed proportionally across selected chapters based on the Bloom's taxonomy levels above.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 border border-dashed rounded-lg text-center">
+                        <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          No chapters selected in Step 2. Please go back and select chapters to enable chapter-wise distribution.
                         </p>
-                      );
-                    } else if (totalQuestions < blueprint.total_questions) {
-                      return (
-                        <p className="text-yellow-600 text-sm text-center">
-                          📊 {blueprint.total_questions - totalQuestions} more questions needed
-                        </p>
-                      );
-                    } else {
-                      return (
-                        <p className="text-green-600 text-sm text-center">
-                          ✅ Perfect! Matches blueprint exactly
-                        </p>
-                      );
-                    }
-                  })()}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
