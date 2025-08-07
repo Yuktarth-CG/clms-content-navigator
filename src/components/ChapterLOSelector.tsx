@@ -15,37 +15,37 @@ const mockChapters = [{
   name: 'Photosynthesis',
   description: 'Process of photosynthesis in plants',
   questionCount: 42,
-  learningOutcomes: ['lo1', 'lo2']
+  learningOutcomes: ['lo1', 'lo2', 'lo3', 'lo4', 'lo5', 'lo6', 'lo7', 'lo8', 'lo9', 'lo10', 'lo11', 'lo12', 'lo13', 'lo14', 'lo15', 'lo16', 'lo17', 'lo18', 'lo19', 'lo20', 'lo21', 'lo22', 'lo23', 'lo24', 'lo25']
 }, {
   id: 'chapter2',
   name: 'Cell Structure',
   description: 'Basic structure and function of cells',
   questionCount: 35,
-  learningOutcomes: ['lo2', 'lo3']
+  learningOutcomes: ['lo2', 'lo3', 'lo6', 'lo9', 'lo12', 'lo15', 'lo18']
 }, {
   id: 'chapter3',
   name: 'Human Body Systems',
   description: 'Various systems in human body',
   questionCount: 48,
-  learningOutcomes: ['lo3', 'lo4']
+  learningOutcomes: ['lo3', 'lo4', 'lo7', 'lo10', 'lo13', 'lo16', 'lo19']
 }, {
   id: 'chapter4',
   name: 'Ecosystems',
   description: 'Environmental systems and interactions',
   questionCount: 33,
-  learningOutcomes: ['lo4', 'lo1']
+  learningOutcomes: ['lo4', 'lo1', 'lo8', 'lo11', 'lo14', 'lo17', 'lo20']
 }, {
   id: 'chapter5',
   name: 'Chemical Reactions',
   description: 'Basic chemical reactions and properties',
   questionCount: 27,
-  learningOutcomes: ['lo1', 'lo5']
+  learningOutcomes: ['lo1', 'lo5', 'lo9', 'lo12', 'lo15', 'lo21', 'lo22', 'lo23', 'lo24', 'lo25']
 }];
 const mockLearningOutcomes = [{
   id: 'lo1',
   code: 'LO001',
   title: 'Plant Biology Understanding',
-  description: 'Understand basic plant biology concepts',
+  description: 'Understand basic plant biology concepts and photosynthetic processes',
   questionCount: 38,
   chapters: ['chapter1', 'chapter4', 'chapter5']
 }, {
@@ -59,23 +59,163 @@ const mockLearningOutcomes = [{
   id: 'lo3',
   code: 'LO003',
   title: 'Body System Functions',
-  description: 'Understanding of human body systems',
+  description: 'Understanding of human body systems and their interactions',
   questionCount: 29,
-  chapters: ['chapter2', 'chapter3']
+  chapters: ['chapter1', 'chapter2', 'chapter3']
 }, {
   id: 'lo4',
   code: 'LO004',
   title: 'Environmental Interactions',
-  description: 'Understanding ecosystem interactions',
+  description: 'Understanding ecosystem interactions and environmental balance',
   questionCount: 36,
-  chapters: ['chapter3', 'chapter4']
+  chapters: ['chapter1', 'chapter3', 'chapter4']
 }, {
   id: 'lo5',
   code: 'LO005',
   title: 'Chemical Process Knowledge',
-  description: 'Understanding chemical reactions',
+  description: 'Understanding chemical reactions and molecular processes',
   questionCount: 22,
-  chapters: ['chapter5']
+  chapters: ['chapter1', 'chapter5']
+}, {
+  id: 'lo6',
+  code: 'LO006',
+  title: 'Membrane Transport',
+  description: 'Understand how substances move across cell membranes',
+  questionCount: 31,
+  chapters: ['chapter1', 'chapter2']
+}, {
+  id: 'lo7',
+  code: 'LO007',
+  title: 'Energy Metabolism',
+  description: 'Analyze cellular energy production and consumption pathways',
+  questionCount: 25,
+  chapters: ['chapter1', 'chapter3']
+}, {
+  id: 'lo8',
+  code: 'LO008',
+  title: 'Genetic Information Flow',
+  description: 'Trace the flow of genetic information from DNA to proteins',
+  questionCount: 33,
+  chapters: ['chapter1', 'chapter4']
+}, {
+  id: 'lo9',
+  code: 'LO009',
+  title: 'Enzyme Function',
+  description: 'Explain how enzymes catalyze biochemical reactions',
+  questionCount: 28,
+  chapters: ['chapter1', 'chapter2', 'chapter5']
+}, {
+  id: 'lo10',
+  code: 'LO010',
+  title: 'Homeostatic Regulation',
+  description: 'Describe how organisms maintain internal balance',
+  questionCount: 35,
+  chapters: ['chapter1', 'chapter3']
+}, {
+  id: 'lo11',
+  code: 'LO011',
+  title: 'Population Dynamics',
+  description: 'Analyze factors affecting population growth and decline',
+  questionCount: 27,
+  chapters: ['chapter1', 'chapter4']
+}, {
+  id: 'lo12',
+  code: 'LO012',
+  title: 'Molecular Bonding',
+  description: 'Understand different types of chemical bonds in biological systems',
+  questionCount: 24,
+  chapters: ['chapter1', 'chapter2', 'chapter5']
+}, {
+  id: 'lo13',
+  code: 'LO013',
+  title: 'Nervous System Function',
+  description: 'Explain how nerve cells transmit electrical and chemical signals',
+  questionCount: 30,
+  chapters: ['chapter1', 'chapter3']
+}, {
+  id: 'lo14',
+  code: 'LO014',
+  title: 'Food Web Analysis',
+  description: 'Analyze energy flow and nutrient cycling in ecosystems',
+  questionCount: 32,
+  chapters: ['chapter1', 'chapter4']
+}, {
+  id: 'lo15',
+  code: 'LO015',
+  title: 'pH and Buffer Systems',
+  description: 'Understand acid-base balance in biological systems',
+  questionCount: 26,
+  chapters: ['chapter1', 'chapter2', 'chapter5']
+}, {
+  id: 'lo16',
+  code: 'LO016',
+  title: 'Respiratory Physiology',
+  description: 'Explain gas exchange mechanisms in living organisms',
+  questionCount: 29,
+  chapters: ['chapter1', 'chapter3']
+}, {
+  id: 'lo17',
+  code: 'LO017',
+  title: 'Biodiversity Conservation',
+  description: 'Evaluate strategies for preserving biological diversity',
+  questionCount: 23,
+  chapters: ['chapter1', 'chapter4']
+}, {
+  id: 'lo18',
+  code: 'LO018',
+  title: 'Cell Division Processes',
+  description: 'Compare and contrast mitosis and meiosis',
+  questionCount: 34,
+  chapters: ['chapter1', 'chapter2']
+}, {
+  id: 'lo19',
+  code: 'LO019',
+  title: 'Circulatory System',
+  description: 'Analyze blood flow and cardiovascular function',
+  questionCount: 31,
+  chapters: ['chapter1', 'chapter3']
+}, {
+  id: 'lo20',
+  code: 'LO020',
+  title: 'Climate Change Impact',
+  description: 'Assess effects of climate change on ecosystems',
+  questionCount: 28,
+  chapters: ['chapter1', 'chapter4']
+}, {
+  id: 'lo21',
+  code: 'LO021',
+  title: 'Protein Structure',
+  description: 'Relate protein structure to biological function',
+  questionCount: 25,
+  chapters: ['chapter1', 'chapter5']
+}, {
+  id: 'lo22',
+  code: 'LO022',
+  title: 'Organic Compound Properties',
+  description: 'Identify characteristics of biological macromolecules',
+  questionCount: 27,
+  chapters: ['chapter1', 'chapter5']
+}, {
+  id: 'lo23',
+  code: 'LO023',
+  title: 'Reaction Kinetics',
+  description: 'Analyze factors affecting reaction rates in biological systems',
+  questionCount: 22,
+  chapters: ['chapter1', 'chapter5']
+}, {
+  id: 'lo24',
+  code: 'LO024',
+  title: 'Thermodynamics in Biology',
+  description: 'Apply thermodynamic principles to biological processes',
+  questionCount: 24,
+  chapters: ['chapter1', 'chapter5']
+}, {
+  id: 'lo25',
+  code: 'LO025',
+  title: 'Spectroscopy Applications',
+  description: 'Use spectroscopic techniques to analyze biological molecules',
+  questionCount: 20,
+  chapters: ['chapter1', 'chapter5']
 }];
 interface ChapterLOSelectorProps {
   selectedChapters: string[];
