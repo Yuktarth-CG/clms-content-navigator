@@ -265,25 +265,32 @@ const ChapterLOSelector: React.FC<ChapterLOSelectorProps> = ({
                   <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                     <div className="px-3 pb-3 border-t bg-muted/30">
                       <div className="text-xs font-medium text-muted-foreground mt-2 mb-1">
-                        Related Skills:
+                        Related Skills ({mockLearningOutcomes.filter(lo => chapter.learningOutcomes.includes(lo.id)).length}):
                       </div>
-                      {mockLearningOutcomes
-                        .filter(lo => chapter.learningOutcomes.includes(lo.id))
-                        .map(lo => (
-                          <div key={lo.id} className="flex items-center justify-between text-xs mb-1 p-2 rounded hover:bg-muted/50">
-                            <div className="flex items-center space-x-2 flex-1">
-                              <input
-                                type="checkbox"
-                                id={`${chapter.id}-${lo.id}`}
-                                checked={selectedLearningOutcomes.includes(lo.id)}
-                                onChange={(e) => handleLOToggle(lo.id, e.target.checked)}
-                                className="w-3 h-3"
-                              />
-                              <span>{lo.code}: {lo.title}</span>
+                      <div className="max-h-48 overflow-y-auto space-y-1 pr-2">
+                        {mockLearningOutcomes
+                          .filter(lo => chapter.learningOutcomes.includes(lo.id))
+                          .map(lo => (
+                            <div key={lo.id} className="flex items-start justify-between text-xs p-2 rounded hover:bg-muted/50 transition-colors">
+                              <div className="flex items-start space-x-2 flex-1 min-w-0">
+                                <input
+                                  type="checkbox"
+                                  id={`${chapter.id}-${lo.id}`}
+                                  checked={selectedLearningOutcomes.includes(lo.id)}
+                                  onChange={(e) => handleLOToggle(lo.id, e.target.checked)}
+                                  className="w-3 h-3 mt-0.5 flex-shrink-0"
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-medium truncate">{lo.code}: {lo.title}</div>
+                                  {lo.description && (
+                                    <div className="text-muted-foreground text-xs mt-0.5 line-clamp-2">{lo.description}</div>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="text-muted-foreground ml-2 flex-shrink-0">{lo.questionCount}q</span>
                             </div>
-                            <span className="text-muted-foreground">{lo.questionCount} questions</span>
-                          </div>
-                        ))}
+                          ))}
+                      </div>
                     </div>
                   </CollapsibleContent>
                 </div>
@@ -350,25 +357,32 @@ const ChapterLOSelector: React.FC<ChapterLOSelectorProps> = ({
                   <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                     <div className="px-3 pb-3 border-t bg-muted/30">
                       <div className="text-xs font-medium text-muted-foreground mt-2 mb-1">
-                        Related Topics:
+                        Related Topics ({mockChapters.filter(ch => lo.chapters.includes(ch.id)).length}):
                       </div>
-                      {mockChapters
-                        .filter(ch => lo.chapters.includes(ch.id))
-                        .map(ch => (
-                          <div key={ch.id} className="flex items-center justify-between text-xs mb-1 p-2 rounded hover:bg-muted/50">
-                            <div className="flex items-center space-x-2 flex-1">
-                              <input
-                                type="checkbox"
-                                id={`${lo.id}-${ch.id}`}
-                                checked={selectedChapters.includes(ch.id)}
-                                onChange={(e) => handleChapterToggle(ch.id, e.target.checked)}
-                                className="w-3 h-3"
-                              />
-                              <span>{ch.name}</span>
+                      <div className="max-h-48 overflow-y-auto space-y-1 pr-2">
+                        {mockChapters
+                          .filter(ch => lo.chapters.includes(ch.id))
+                          .map(ch => (
+                            <div key={ch.id} className="flex items-start justify-between text-xs p-2 rounded hover:bg-muted/50 transition-colors">
+                              <div className="flex items-start space-x-2 flex-1 min-w-0">
+                                <input
+                                  type="checkbox"
+                                  id={`${lo.id}-${ch.id}`}
+                                  checked={selectedChapters.includes(ch.id)}
+                                  onChange={(e) => handleChapterToggle(ch.id, e.target.checked)}
+                                  className="w-3 h-3 mt-0.5 flex-shrink-0"
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-medium truncate">{ch.name}</div>
+                                  {ch.description && (
+                                    <div className="text-muted-foreground text-xs mt-0.5 line-clamp-2">{ch.description}</div>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="text-muted-foreground ml-2 flex-shrink-0">{ch.questionCount}q</span>
                             </div>
-                            <span className="text-muted-foreground">{ch.questionCount} questions</span>
-                          </div>
-                        ))}
+                          ))}
+                      </div>
                     </div>
                   </CollapsibleContent>
                 </div>
