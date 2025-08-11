@@ -409,7 +409,7 @@ const ManageAssessments = () => {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">My Assessment Dashboard</h1>
+        <h1 className="text-3xl font-bold text-foreground">Manage Assessments</h1>
         <p className="text-muted-foreground mt-1">
           Browse, filter, and manage all your generated assessment papers and worksheets
         </p>
