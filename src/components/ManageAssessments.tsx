@@ -11,13 +11,15 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Search, Download, Eye, Trash2, Filter, Calendar as CalendarIcon, User, FileText, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Download, Eye, Archive, Filter, Calendar as CalendarIcon, User, FileText, RotateCcw, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Assessment } from '@/types/assessment';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const ManageAssessments = () => {
   const { user } = useUser();
@@ -207,29 +209,30 @@ const ManageAssessments = () => {
         .update({ status: 'Archived' })
         .eq('id', assessment.id);
 
-      // Log delete action
+      // Log archive action
       await supabase
         .from('assessment_audit')
         .insert({
           assessment_id: assessment.id,
-          action: 'delete',
+          action: 'archive',
           user_id: user?.id || '',
           user_name: user?.name || 'Unknown',
           metadata: { title: assessment.title }
         });
 
       toast({
-        title: "Assessment Deleted",
+        title: "Assessment Archived",
         description: `"${assessment.title}" has been archived`,
       });
 
       fetchAssessments();
+      fetchRepositoryCount();
 
     } catch (error) {
-      console.error('Error deleting assessment:', error);
+      console.error('Error archiving assessment:', error);
       toast({
-        title: "Delete Failed",
-        description: "Failed to delete assessment. Please try again.",
+        title: "Archive Failed",
+        description: "Failed to archive assessment. Please try again.",
         variant: "destructive"
       });
     }
@@ -415,6 +418,33 @@ const ManageAssessments = () => {
         </p>
       </div>
 
+      {/* My Quota */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            My Quota
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Active assessments</span>
+              <span>{repositoryCount} / {maxRepositoryLimit}</span>
+            </div>
+            <Progress value={Math.min(100, (repositoryCount / maxRepositoryLimit) * 100)} />
+            {repositoryCount >= maxRepositoryLimit && (
+              <Alert variant="destructive" className="mt-3">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Quota reached</AlertTitle>
+                <AlertDescription>
+                  You have reached your limit. Archive existing assessments to create new ones.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Filters */}
       <Card>
         <CardHeader>
@@ -511,7 +541,7 @@ const ManageAssessments = () => {
           <div className="mt-4 pt-4 border-t">
             <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                {totalCount} total assessment{totalCount !== 1 ? 's' : ''} • Page {currentPage} of {Math.ceil(totalCount / itemsPerPage)} • Repository: {repositoryCount}/{maxRepositoryLimit} assessments
+                {totalCount} total assessment{totalCount !== 1 ? 's' : ''} • Page {currentPage} of {Math.ceil(totalCount / itemsPerPage)} • Active: {repositoryCount}/{maxRepositoryLimit}
               </div>
               <Button variant="outline" size="sm" onClick={clearFilters}>
                 <RotateCcw className="w-4 h-4 mr-2" />
@@ -606,22 +636,22 @@ const ManageAssessments = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                                className="h-8 w-8 p-0"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Archive className="w-4 h-4" />
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Assessment</AlertDialogTitle>
+                                <AlertDialogTitle>Archive Assessment</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete "{assessment.title}"? This action cannot be undone.
+                                  Are you sure you want to archive "{assessment.title}"? This will move it to Archive.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction onClick={() => handleDelete(assessment)}>
-                                  Delete
+                                  Archive
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
