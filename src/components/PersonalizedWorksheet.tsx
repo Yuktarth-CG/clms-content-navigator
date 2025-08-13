@@ -160,6 +160,8 @@ const PersonalizedWorksheet: React.FC = () => {
   const [selectedTypes, setSelectedTypes] = useState<QuestionTypeOption[]>(["MCQ"]);
   const [questionCount, setQuestionCount] = useState<number>(10);
   const [loConfigs, setLoConfigs] = useState<LOConfig[]>([]);
+  const [unifiedFormat, setUnifiedFormat] = useState(true);
+  const [studentSpecificConfigs, setStudentSpecificConfigs] = useState<{[studentId: string]: LOConfig[]}>({});
   useEffect(() => {
     if (!selectedAssessment) return;
     mockFetchAssessmentLOs(selectedAssessment).then(setLoConfigs);
@@ -328,8 +330,69 @@ const PersonalizedWorksheet: React.FC = () => {
               </div>
             </Section>}
 
-          {step === 5 && <Section title="LO-wise Personalised Format" description="Review and adjust the number, types, and difficulty per Learning Outcome. Prefilled based on assessment; modify as needed.">
-              <PerLOFormatEditor loConfigs={loConfigs} onChange={setLoConfigs} questionTypeOptions={questionTypeOptions} />
+          {step === 5 && <Section title="LO-wise Personalised Format" description="Configure question format for selected students. You can use unified settings for all students or customize per student.">
+              {selectedStudents.length > 1 && (
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3">
+                    <Checkbox 
+                      id="unified" 
+                      checked={unifiedFormat} 
+                      onCheckedChange={(checked) => setUnifiedFormat(checked as boolean)}
+                    />
+                    <Label htmlFor="unified" className="cursor-pointer">
+                      Use unified format for all {selectedStudents.length} students
+                    </Label>
+                  </div>
+                  {!unifiedFormat && (
+                    <div className="text-sm text-muted-foreground bg-muted/20 p-3 rounded-md">
+                      <strong>Individual customization:</strong> You can customize LO format for each student separately. 
+                      This might take more time but allows for precise personalization.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {unifiedFormat || selectedStudents.length === 1 ? (
+                <div className="space-y-4">
+                  <div className="text-sm font-medium text-foreground">
+                    Format Configuration {selectedStudents.length > 1 && "(Applied to all students)"}
+                  </div>
+                  <PerLOFormatEditor 
+                    loConfigs={loConfigs} 
+                    onChange={setLoConfigs} 
+                    questionTypeOptions={questionTypeOptions} 
+                  />
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {selectedStudents.map(studentId => {
+                    const student = students.find(s => s.id === studentId)!;
+                    const studentConfigs = studentSpecificConfigs[studentId] || loConfigs;
+                    
+                    return (
+                      <div key={studentId} className="border rounded-md p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm font-medium text-foreground">
+                            {student.name} - Grade {student.grade}
+                          </div>
+                          <Badge variant="outline">Individual Format</Badge>
+                        </div>
+                        <PerLOFormatEditor
+                          loConfigs={studentConfigs}
+                          onChange={(configs) => {
+                            setStudentSpecificConfigs(prev => ({
+                              ...prev,
+                              [studentId]: configs
+                            }));
+                          }}
+                          questionTypeOptions={questionTypeOptions}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               <div className="pt-4">
                 <Summary />
               </div>
