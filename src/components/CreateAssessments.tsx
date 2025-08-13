@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Zap, Settings, BookTemplate } from 'lucide-react';
+import { FileText, Zap, Settings, BookTemplate, UserCheck } from 'lucide-react';
 import AutomatedGeneration from './AutomatedGeneration';
 import CustomisedGeneration from './CustomisedGeneration';
 import BlueprintManagement from './BlueprintManagement';
+import PersonalizedWorksheet from './PersonalizedWorksheet';
 
 
 const CreateAssessments = () => {
@@ -21,7 +22,7 @@ const CreateAssessments = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="automated" className="flex items-center space-x-2">
             <Zap className="w-4 h-4" />
             <span>Quick Generation</span>
@@ -36,6 +37,11 @@ const CreateAssessments = () => {
             <BookTemplate className="w-4 h-4" />
             <span>Create Blueprints</span>
             <Badge variant="outline" className="ml-2 text-xs">Manage Templates</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="personalized" className="flex items-center space-x-2">
+            <UserCheck className="w-4 h-4" />
+            <span>Personalised Worksheet</span>
+            <Badge variant="outline" className="ml-2 text-xs">Student-specific</Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -77,6 +83,10 @@ const CreateAssessments = () => {
               <BlueprintManagement />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="personalized" className="mt-6">
+          <PersonalizedWorksheet />
         </TabsContent>
 
       </Tabs>
