@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { GraduationCap } from "lucide-react";
+
+import PerLOFormatEditor from "./PerLOFormatEditor";
 
 // Mock types local to this flow to avoid coupling to backend types yet
 type QuestionTypeOption = "MCQ" | "ShortAnswer" | "LongAnswer";
@@ -57,6 +59,30 @@ const questionTypeOptions: { key: QuestionTypeOption; label: string }[] = [
   { key: "LongAnswer", label: "Long Answer" },
 ];
 
+type DifficultyOption = "Easy" | "Medium" | "Hard";
+
+type LOConfig = {
+  loCode: string;
+  label: string;
+  types: QuestionTypeOption[];
+  count: number;
+  difficulty: DifficultyOption;
+};
+
+const mockFetchAssessmentLOs = async (assessmentId: string): Promise<LOConfig[]> => {
+  // Simulate network
+  await new Promise((r) => setTimeout(r, 200));
+  const base: LOConfig[] = [
+    { loCode: "LO-101", label: "Place value and numeration", types: ["MCQ"], count: 5, difficulty: "Easy" },
+    { loCode: "LO-205", label: "Addition and subtraction word problems", types: ["MCQ", "ShortAnswer"], count: 5, difficulty: "Medium" },
+    { loCode: "LO-309", label: "Fractions fundamentals", types: ["MCQ"], count: 5, difficulty: "Medium" },
+  ];
+  if (assessmentId === "assess-lep") {
+    return base;
+  }
+  return base.map((lo, i) => ({ ...lo, loCode: `LO-${400 + i}`, difficulty: "Hard" as DifficultyOption }));
+};
+
 const Section = ({ title, children, description }: { title: string; children: React.ReactNode; description?: string }) => (
   <section className="space-y-3">
     <h2 className="text-xl font-semibold text-foreground">{title}</h2>
@@ -98,18 +124,26 @@ const PersonalizedWorksheet: React.FC = () => {
   const [method, setMethod] = useState<"bulk" | "individual">("bulk");
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
-  // Step 5
-  const [selectedTypes, setSelectedTypes] = useState<QuestionTypeOption[]>(["MCQ"]);
-  const [questionCount, setQuestionCount] = useState<number>(10);
+// Step 5
+const [selectedTypes, setSelectedTypes] = useState<QuestionTypeOption[]>(["MCQ"]);
+const [questionCount, setQuestionCount] = useState<number>(10);
+const [loConfigs, setLoConfigs] = useState<LOConfig[]>([]);
 
-  const canGoNext = useMemo(() => {
-    if (step === 1) return udise.trim().length >= 6;
-    if (step === 2) return !!school && students.length > 0;
-    if (step === 3) return !!selectedAssessment;
-    if (step === 4) return selectedStudents.length > 0;
-    if (step === 5) return selectedTypes.length > 0 && questionCount > 0;
-    return true;
-  }, [step, udise, school, students.length, selectedAssessment, selectedStudents.length, selectedTypes.length, questionCount]);
+useEffect(() => {
+  if (!selectedAssessment) return;
+  mockFetchAssessmentLOs(selectedAssessment).then(setLoConfigs);
+}, [selectedAssessment]);
+const canGoNext = useMemo(() => {
+  if (step === 1) return udise.trim().length >= 6;
+  if (step === 2) return !!school && students.length > 0;
+  if (step === 3) return !!selectedAssessment;
+  if (step === 4) return method === "bulk" ? students.length > 0 : selectedStudents.length > 0;
+  if (step === 5) {
+    if (loConfigs.length === 0) return false;
+    return loConfigs.every((lo) => lo.count > 0 && lo.types.length > 0);
+  }
+  return true;
+}, [step, udise, school, students.length, selectedAssessment, selectedStudents.length, method, loConfigs]);
 
   const handleFetch = async () => {
     if (!udise) return;
@@ -139,9 +173,15 @@ const PersonalizedWorksheet: React.FC = () => {
   };
 
   const handleGenerate = async () => {
+    // In bulk mode, ensure all students are selected for generation
+    if (method === "bulk") {
+      setSelectedStudents(students.map((s) => s.id));
+    }
+    const studentCount = method === "bulk" ? students.length : selectedStudents.length;
+    const totalQs = loConfigs.reduce((sum, lo) => sum + lo.count, 0);
     toast({
       title: "Generating mock worksheets",
-      description: `${selectedStudents.length} student(s), ${questionCount} questions, ${selectedTypes.join(", ")}`,
+      description: `${studentCount} student(s), ${loConfigs.length} LOs, ~${totalQs} questions/worksheet`,
     });
     // Simulate generation
     setLoading(true);
@@ -155,9 +195,8 @@ const PersonalizedWorksheet: React.FC = () => {
       <div className="flex flex-wrap gap-2">
         <Badge variant="outline">UDISE: {udise}</Badge>
         <Badge variant="outline">Assessment: {assessments.find((a) => a.id === selectedAssessment)?.name}</Badge>
-        <Badge variant="outline">Students: {selectedStudents.length}</Badge>
-        <Badge variant="outline">Q Types: {selectedTypes.join(", ")}</Badge>
-        <Badge variant="outline">Count: {questionCount}</Badge>
+        <Badge variant="outline">Students: {method === "bulk" ? students.length : selectedStudents.length}</Badge>
+        <Badge variant="outline">LOs: {loConfigs.length}</Badge>
       </div>
     </div>
   );
@@ -253,7 +292,7 @@ const PersonalizedWorksheet: React.FC = () => {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Method</Label>
-                  <RadioGroup value={method} onValueChange={(v) => setMethod(v as any)} className="flex flex-col sm:flex-row gap-4">
+                  <RadioGroup value={method} onValueChange={(v) => { const next = v as "bulk" | "individual"; setMethod(next); if (next === "bulk") { setSelectedStudents(students.map((s) => s.id)); } else { setSelectedStudents([]); } }} className="flex flex-col sm:flex-row gap-4">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="bulk" id="bulk" />
                       <Label htmlFor="bulk" className="cursor-pointer">Bulk Generation</Label>
@@ -267,58 +306,41 @@ const PersonalizedWorksheet: React.FC = () => {
 
                 <div className="space-y-3">
                   <Label>Select Students</Label>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {students.map((s) => (
-                      <label key={s.id} className="flex items-center gap-3 rounded-md border p-3 cursor-pointer hover:bg-muted/40">
-                        <Checkbox
-                          checked={selectedStudents.includes(s.id)}
-                          onCheckedChange={() => toggleStudent(s.id)}
-                        />
-                        <div className="leading-tight">
-                          <div className="text-sm font-medium text-foreground">{s.name}</div>
-                          <div className="text-xs text-muted-foreground">Grade {s.grade} • ID {s.id}</div>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
+                  {method === "individual" ? (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {students.map((s) => (
+                        <label key={s.id} className="flex items-center gap-3 rounded-md border p-3 cursor-pointer hover:bg-muted/40">
+                          <Checkbox
+                            checked={selectedStudents.includes(s.id)}
+                            onCheckedChange={() => toggleStudent(s.id)}
+                          />
+                          <div className="leading-tight">
+                            <div className="text-sm font-medium text-foreground">{s.name}</div>
+                            <div className="text-xs text-muted-foreground">Grade {s.grade} • ID {s.id}</div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-md border p-3 bg-muted/20 text-sm text-muted-foreground">
+                      Bulk mode is selected. Worksheets will be generated for all {students.length} students.
+                    </div>
+                  )}
                 </div>
               </div>
             </Section>
           )}
 
-          {/* Step 5: Format options */}
           {step === 5 && (
             <Section
-              title="Personalised Sheet Format"
-              description="Limit question types and set the desired number of questions."
+              title="LO-wise Personalised Format"
+              description="Review and adjust the number, types, and difficulty per Learning Outcome. Prefilled based on assessment; modify as needed."
             >
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-3">
-                  <Label>Question Types</Label>
-                  <div className="space-y-2">
-                    {questionTypeOptions.map((opt) => (
-                      <label key={opt.key} className="flex items-center gap-3">
-                        <Checkbox
-                          checked={selectedTypes.includes(opt.key)}
-                          onCheckedChange={() => toggleType(opt.key)}
-                        />
-                        <span className="text-sm text-foreground">{opt.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="qcount">Number of Questions</Label>
-                  <Input
-                    id="qcount"
-                    type="number"
-                    min={1}
-                    value={questionCount}
-                    onChange={(e) => setQuestionCount(Math.max(1, Number(e.target.value || 1)))}
-                    className="w-40"
-                  />
-                </div>
-              </div>
+              <PerLOFormatEditor
+                loConfigs={loConfigs}
+                onChange={setLoConfigs}
+                questionTypeOptions={questionTypeOptions}
+              />
               <div className="pt-4">
                 <Summary />
               </div>
