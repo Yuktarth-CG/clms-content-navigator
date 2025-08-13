@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { GraduationCap } from "lucide-react";
-import PerLOFormatEditor from "./PerLOFormatEditor";
+import WorksheetFormatEditor, { WorksheetFormat } from "./WorksheetFormatEditor";
 
 // Mock types local to this flow to avoid coupling to backend types yet
 type QuestionTypeOption = "MCQ" | "ShortAnswer" | "LongAnswer";
@@ -156,12 +156,17 @@ const PersonalizedWorksheet: React.FC = () => {
   const [method, setMethod] = useState<"bulk" | "individual">("bulk");
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
-  // Step 5
-  const [selectedTypes, setSelectedTypes] = useState<QuestionTypeOption[]>(["MCQ"]);
-  const [questionCount, setQuestionCount] = useState<number>(10);
+  // Step 5 - New simplified format approach
+  const [worksheetFormat, setWorksheetFormat] = useState<WorksheetFormat>({
+    questionsPerLO: 5,
+    allowedQuestionTypes: ["MCQ"],
+    difficultyDistribution: {
+      easy: 40,
+      medium: 40,
+      hard: 20
+    }
+  });
   const [loConfigs, setLoConfigs] = useState<LOConfig[]>([]);
-  const [unifiedFormat, setUnifiedFormat] = useState(true);
-  const [studentSpecificConfigs, setStudentSpecificConfigs] = useState<{[studentId: string]: LOConfig[]}>({});
   useEffect(() => {
     if (!selectedAssessment) return;
     mockFetchAssessmentLOs(selectedAssessment).then(setLoConfigs);
@@ -173,10 +178,10 @@ const PersonalizedWorksheet: React.FC = () => {
     if (step === 4) return method === "bulk" ? students.length > 0 : selectedStudents.length > 0;
     if (step === 5) {
       if (loConfigs.length === 0) return false;
-      return loConfigs.every(lo => lo.count > 0 && lo.types.length > 0);
+      return worksheetFormat.allowedQuestionTypes.length > 0 && worksheetFormat.questionsPerLO > 0;
     }
     return true;
-  }, [step, udise, school, students.length, selectedAssessment, selectedStudents.length, method, loConfigs]);
+  }, [step, udise, school, students.length, selectedAssessment, selectedStudents.length, method, loConfigs, worksheetFormat]);
   const handleFetch = async () => {
     if (!udise) return;
     setLoading(true);
@@ -201,19 +206,16 @@ const PersonalizedWorksheet: React.FC = () => {
   const toggleStudent = (id: string) => {
     setSelectedStudents(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   };
-  const toggleType = (key: QuestionTypeOption) => {
-    setSelectedTypes(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
-  };
   const handleGenerate = async () => {
     // In bulk mode, ensure all students are selected for generation
     if (method === "bulk") {
       setSelectedStudents(students.map(s => s.id));
     }
     const studentCount = method === "bulk" ? students.length : selectedStudents.length;
-    const totalQs = loConfigs.reduce((sum, lo) => sum + lo.count, 0);
+    const totalQs = worksheetFormat.questionsPerLO * loConfigs.length;
     toast({
       title: "Generating mock worksheets",
-      description: `${studentCount} student(s), ${loConfigs.length} LOs, ~${totalQs} questions/worksheet`
+      description: `${studentCount} student(s), ${loConfigs.length} LOs, ${totalQs} questions/worksheet`
     });
     // Simulate generation
     setLoading(true);
@@ -330,69 +332,13 @@ const PersonalizedWorksheet: React.FC = () => {
               </div>
             </Section>}
 
-          {step === 5 && <Section title="LO-wise Personalised Format" description="Configure question format for selected students. You can use unified settings for all students or customize per student.">
-              {selectedStudents.length > 1 && (
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-3">
-                    <Checkbox 
-                      id="unified" 
-                      checked={unifiedFormat} 
-                      onCheckedChange={(checked) => setUnifiedFormat(checked as boolean)}
-                    />
-                    <Label htmlFor="unified" className="cursor-pointer">
-                      Use unified format for all {selectedStudents.length} students
-                    </Label>
-                  </div>
-                  {!unifiedFormat && (
-                    <div className="text-sm text-muted-foreground bg-muted/20 p-3 rounded-md">
-                      <strong>Individual customization:</strong> You can customize LO format for each student separately. 
-                      This might take more time but allows for precise personalization.
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {unifiedFormat || selectedStudents.length === 1 ? (
-                <div className="space-y-4">
-                  <div className="text-sm font-medium text-foreground">
-                    Format Configuration {selectedStudents.length > 1 && "(Applied to all students)"}
-                  </div>
-                  <PerLOFormatEditor 
-                    loConfigs={loConfigs} 
-                    onChange={setLoConfigs} 
-                    questionTypeOptions={questionTypeOptions} 
-                  />
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {selectedStudents.map(studentId => {
-                    const student = students.find(s => s.id === studentId)!;
-                    const studentConfigs = studentSpecificConfigs[studentId] || loConfigs;
-                    
-                    return (
-                      <div key={studentId} className="border rounded-md p-4 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="text-sm font-medium text-foreground">
-                            {student.name} - Grade {student.grade}
-                          </div>
-                          <Badge variant="outline">Individual Format</Badge>
-                        </div>
-                        <PerLOFormatEditor
-                          loConfigs={studentConfigs}
-                          onChange={(configs) => {
-                            setStudentSpecificConfigs(prev => ({
-                              ...prev,
-                              [studentId]: configs
-                            }));
-                          }}
-                          questionTypeOptions={questionTypeOptions}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
+          {step === 5 && <Section title="Worksheet Format Configuration" description="Define the overall format that will be applied to all Learning Objectives in the worksheet.">
+              <WorksheetFormatEditor 
+                format={worksheetFormat}
+                onChange={setWorksheetFormat}
+                questionTypeOptions={questionTypeOptions}
+                totalLOs={loConfigs.length}
+              />
               <div className="pt-4">
                 <Summary />
               </div>
