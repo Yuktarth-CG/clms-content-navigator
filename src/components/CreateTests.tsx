@@ -138,8 +138,7 @@ const CreateTests = () => {
             </CardHeader>
             <CardContent className="text-center">
               <p className="text-muted-foreground mb-4">
-                View, download, and manage test papers that were generated through OCR tools and CSV uploads 
-                with detailed tracking and version control
+                View, download and manage OCR based test papers that were generated through CLMS or CSV files
               </p>
               <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
