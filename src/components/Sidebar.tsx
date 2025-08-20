@@ -49,25 +49,14 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
     },
   ];
 
-  // Add assessment creation feature
+  // Add consolidated Create Tests section
   if (hasPermission('canCreateContent')) {
     menuItems.push({ 
-      id: 'question-paper-creation', 
-      label: 'Create Assessments', 
+      id: 'create-tests', 
+      label: 'Create Tests', 
       icon: BookOpen, 
       requiresPermission: 'canCreateContent',
-      tooltip: 'Create worksheets using private questions or test papers using public questions'
-    });
-  }
-
-  // Add manage assessments for Super Admin, Admin, and Creator (right after Create Assessments)
-  if (user?.role === 'SuperAdmin' || user?.role === 'Admin' || user?.role === 'Creator') {
-    menuItems.push({ 
-      id: 'manage-assessments', 
-      label: 'Manage Assessments', 
-      icon: FolderOpen, 
-      requiresPermission: null,
-      tooltip: 'View, download, and manage generated assessments with filtering and search capabilities'
+      tooltip: 'Comprehensive test creation hub - create assessments, manage papers, and use OCR tools'
     });
   }
 
@@ -166,7 +155,7 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
     tooltip: 'Track AI requests, analyze failures, and improve system performance'
   });
 
-  // OCR Tools section items
+  // OCR Tools section items - keeping for users who prefer granular access
   const ocrToolItems = [];
   
   if (hasPermission('canCreateTestPaperFromCSV')) {

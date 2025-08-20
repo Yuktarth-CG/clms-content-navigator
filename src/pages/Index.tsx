@@ -18,6 +18,7 @@ import QuestionPaperCreation from '@/components/QuestionPaperCreation';
 import ManageAssessments from '@/components/ManageAssessments';
 import Settings from '@/components/Settings';
 import DebugCenter from '@/components/DebugCenter';
+import CreateTests from '@/components/CreateTests';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, FileText, Upload, Download, CheckCircle, TrendingUp, Clock, Shield, Layout } from 'lucide-react';
 import { UserProvider, useUser } from '@/contexts/UserContext';
@@ -39,6 +40,8 @@ const IndexContent = () => {
           return <QuestionLibrary />;
         case 'question-paper-creation':
           return <QuestionPaperCreation />;
+        case 'create-tests':
+          return <CreateTests />;
         case 'bulk-import':
           return <BulkImport />;
         case 'bulk-export':
