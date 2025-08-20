@@ -102,7 +102,7 @@ const CreateTests = () => {
                 <FileText className="w-8 h-8 text-primary" />
               </div>
               <CardTitle className="text-xl flex items-center justify-center gap-2">
-                OCR Generation
+                Create OCR Worksheets & Test Papers
                 <Badge variant="secondary">Advanced</Badge>
               </CardTitle>
             </CardHeader>
