@@ -18,7 +18,7 @@ import OCRTestPaperCreation from './OCRTestPaperCreation';
 import OCRTestPaperManagement from './OCRTestPaperManagement';
 
 const CreateTests = () => {
-  const [activeTab, setActiveTab] = useState('create-assessments');
+  const [activeTab, setActiveTab] = useState('home');
 
   return (
     <div className="p-6 space-y-6">
@@ -29,29 +29,142 @@ const CreateTests = () => {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="create-assessments" className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4" />
-            Create Assessments
-            <Badge variant="secondary" className="ml-1">Core</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="manage-assessments" className="flex items-center gap-2">
-            <FolderOpen className="w-4 h-4" />
-            Manage Assessments
-            <Badge variant="secondary" className="ml-1">Library</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="ocr-generation" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            OCR Generation
-            <Badge variant="secondary" className="ml-1">Advanced</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="ocr-management" className="flex items-center gap-2">
-            <ClipboardList className="w-4 h-4" />
-            OCR Management
-            <Badge variant="secondary" className="ml-1">Archive</Badge>
-          </TabsTrigger>
-        </TabsList>
+      {activeTab === 'home' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card 
+            className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-2 hover:border-primary/50"
+            onClick={() => setActiveTab('create-assessments')}
+          >
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                <Wand2 className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl flex items-center justify-center gap-2">
+                Create Assessments
+                <Badge variant="secondary">Core</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-muted-foreground mb-4">
+                Generate worksheets, test papers, and personalized assessments using automated generation, 
+                custom building, blueprints, and more
+              </p>
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Lightbulb className="w-4 h-4" />
+                  AI-Powered
+                </span>
+                <span className="flex items-center gap-1">
+                  <BookOpen className="w-4 h-4" />
+                  Multiple Formats
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-2 hover:border-primary/50"
+            onClick={() => setActiveTab('manage-assessments')}
+          >
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                <Archive className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl flex items-center justify-center gap-2">
+                Manage Assessments
+                <Badge variant="secondary">Library</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-muted-foreground mb-4">
+                Browse, filter, download, and manage all your generated assessment papers and worksheets 
+                with advanced search and organization tools
+              </p>
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <FolderOpen className="w-4 h-4" />
+                  Organized
+                </span>
+                <span className="flex items-center gap-1">
+                  <Upload className="w-4 h-4" />
+                  Searchable
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-2 hover:border-primary/50"
+            onClick={() => setActiveTab('ocr-generation')}
+          >
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                <FileText className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl flex items-center justify-center gap-2">
+                OCR Generation
+                <Badge variant="secondary">Advanced</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-muted-foreground mb-4">
+                Generate test papers automatically from CSV files or CLMS content using OCR templates 
+                and blueprints with intelligent question mapping
+              </p>
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Upload className="w-4 h-4" />
+                  CSV Upload
+                </span>
+                <span className="flex items-center gap-1">
+                  <Lightbulb className="w-4 h-4" />
+                  Smart Mapping
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-2 hover:border-primary/50"
+            onClick={() => setActiveTab('ocr-management')}
+          >
+            <CardHeader className="text-center pb-4">
+              <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                <ClipboardList className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl flex items-center justify-center gap-2">
+                OCR Management
+                <Badge variant="secondary">Archive</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-muted-foreground mb-4">
+                View, download, and manage test papers that were generated through OCR tools and CSV uploads 
+                with detailed tracking and version control
+              </p>
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Archive className="w-4 h-4" />
+                  Archive
+                </span>
+                <span className="flex items-center gap-1">
+                  <ClipboardList className="w-4 h-4" />
+                  Track History
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="mb-6 flex items-center gap-2">
+            <button 
+              onClick={() => setActiveTab('home')} 
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ← Back to Create Tests Home
+            </button>
+          </div>
 
         <TabsContent value="create-assessments" className="mt-6">
           <Card>
@@ -121,7 +234,8 @@ const CreateTests = () => {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+        </Tabs>
+      )}
     </div>
   );
 };
