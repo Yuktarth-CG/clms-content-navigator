@@ -108,8 +108,7 @@ const CreateTests = () => {
             </CardHeader>
             <CardContent className="text-center">
               <p className="text-muted-foreground mb-4">
-                Generate test papers automatically from CSV files or CLMS content using OCR templates 
-                and blueprints with intelligent question mapping
+                Generate test papers from CLMS content or CSV files with intelligent question mapping
               </p>
               <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
