@@ -71,7 +71,7 @@ const CreateTests = () => {
                 <Archive className="w-8 h-8 text-primary" />
               </div>
               <CardTitle className="text-xl flex items-center justify-center gap-2">
-                Manage Assessments
+                Manage Worksheets & Test Papers
                 <Badge variant="secondary">Library</Badge>
               </CardTitle>
             </CardHeader>
