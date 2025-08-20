@@ -40,7 +40,7 @@ const CreateTests = () => {
                 <Wand2 className="w-8 h-8 text-primary" />
               </div>
               <CardTitle className="text-xl flex items-center justify-center gap-2">
-                Create Assessments
+                Create Worksheets & Test Papers
                 <Badge variant="secondary">Core</Badge>
               </CardTitle>
             </CardHeader>
