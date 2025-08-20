@@ -133,7 +133,7 @@ const CreateTests = () => {
                 <ClipboardList className="w-8 h-8 text-primary" />
               </div>
               <CardTitle className="text-xl flex items-center justify-center gap-2">
-                OCR Management
+                Manage OCR Worksheets & Test Papers
                 <Badge variant="secondary">Archive</Badge>
               </CardTitle>
             </CardHeader>
