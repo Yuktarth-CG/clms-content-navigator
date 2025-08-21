@@ -156,6 +156,9 @@ const PersonalizedWorksheet: React.FC = () => {
   const [selectedAssessment, setSelectedAssessment] = useState<string>("");
 
   // Step 5
+  const [acceptanceCriteria, setAcceptanceCriteria] = useState<string>("");
+
+  // Step 6
   const [method, setMethod] = useState<"bulk" | "individual">("bulk");
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
@@ -179,13 +182,14 @@ const PersonalizedWorksheet: React.FC = () => {
     if (step === 2) return !!school && students.length > 0;
     if (step === 3) return !!selectedGrade;
     if (step === 4) return !!selectedAssessment;
-    if (step === 5) return method === "bulk" ? students.length > 0 : selectedStudents.length > 0;
-    if (step === 6) {
+    if (step === 5) return !!acceptanceCriteria.trim();
+    if (step === 6) return method === "bulk" ? students.length > 0 : selectedStudents.length > 0;
+    if (step === 7) {
       if (loConfigs.length === 0) return false;
       return worksheetFormat.allowedQuestionTypes.length > 0 && worksheetFormat.questionsPerLO > 0;
     }
     return true;
-  }, [step, udise, selectedGrade, school, students.length, selectedAssessment, selectedStudents.length, method, loConfigs, worksheetFormat]);
+  }, [step, udise, selectedGrade, school, students.length, selectedAssessment, acceptanceCriteria, selectedStudents.length, method, loConfigs, worksheetFormat]);
   const handleFetch = async () => {
     if (!udise) return;
     setLoading(true);
@@ -225,13 +229,14 @@ const PersonalizedWorksheet: React.FC = () => {
     setLoading(true);
     await new Promise(r => setTimeout(r, 700));
     setLoading(false);
-    setStep(7);
+    setStep(8);
   };
   const Summary = () => <div className="space-y-3 text-sm text-muted-foreground">
       <div className="flex flex-wrap gap-2">
         <Badge variant="outline">UDISE: {udise}</Badge>
         <Badge variant="outline">Grade: {selectedGrade}</Badge>
         <Badge variant="outline">Assessment: {assessments.find(a => a.id === selectedAssessment)?.name}</Badge>
+        <Badge variant="outline">Criteria: {acceptanceCriteria}</Badge>
         <Badge variant="outline">Students: {method === "bulk" ? students.length : selectedStudents.length}</Badge>
         <Badge variant="outline">LOs: {loConfigs.length}</Badge>
       </div>
@@ -313,8 +318,26 @@ const PersonalizedWorksheet: React.FC = () => {
               </div>
             </Section>}
 
-          {/* Step 5: Student selection method */}
-          {step === 5 && <Section title="Choose Students" description="Pick a method and select the students to include.">
+          {/* Step 5: Acceptance Criteria */}
+          {step === 5 && <Section title="Student Acceptance Criteria" description="Define criteria to select students based on their assessment performance.">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="criteria">Acceptance Criteria</Label>
+                  <Input 
+                    id="criteria" 
+                    placeholder="e.g. bottom 25%, top 30%, score < 70%" 
+                    value={acceptanceCriteria} 
+                    onChange={e => setAcceptanceCriteria(e.target.value)} 
+                  />
+                   <p className="text-xs text-muted-foreground">
+                     Examples: "bottom 25%", "top 30%", "score &lt; 70%", "failed students"
+                   </p>
+                </div>
+              </div>
+            </Section>}
+
+          {/* Step 6: Student selection method */}
+          {step === 6 && <Section title="Choose Students" description="Pick a method and select the students to include.">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Method</Label>
@@ -355,7 +378,7 @@ const PersonalizedWorksheet: React.FC = () => {
               </div>
             </Section>}
 
-          {step === 6 && <Section title="Worksheet Format Configuration" description="Define the overall format that will be applied to all Learning Objectives in the worksheet.">
+          {step === 7 && <Section title="Worksheet Format Configuration" description="Define the overall format that will be applied to all Learning Objectives in the worksheet.">
               <WorksheetFormatEditor 
                 format={worksheetFormat}
                 onChange={setWorksheetFormat}
@@ -367,8 +390,8 @@ const PersonalizedWorksheet: React.FC = () => {
               </div>
             </Section>}
 
-          {/* Step 7: Result summary (mock) */}
-          {step === 7 && <Section title="Generation Complete (Mock)" description="Worksheets were generated locally in this demo. In production, PDFs will be saved to storage for download and printing.">
+          {/* Step 8: Result summary (mock) */}
+          {step === 8 && <Section title="Generation Complete (Mock)" description="Worksheets were generated locally in this demo. In production, PDFs will be saved to storage for download and printing.">
               <Summary />
               <div className="mt-4 grid gap-2">
                 {selectedStudents.map(id => {
@@ -391,10 +414,10 @@ const PersonalizedWorksheet: React.FC = () => {
             <Button variant="outline" onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1 || loading}>
               Back
             </Button>
-            {step < 6 && <Button onClick={() => setStep(s => s + 1)} disabled={!canGoNext || loading}>
+            {step < 7 && <Button onClick={() => setStep(s => s + 1)} disabled={!canGoNext || loading}>
                 Next
               </Button>}
-            {step === 6 && <Button onClick={handleGenerate} disabled={!canGoNext || loading}>
+            {step === 7 && <Button onClick={handleGenerate} disabled={!canGoNext || loading}>
                 Generate Worksheets (Mock)
               </Button>}
           </div>
