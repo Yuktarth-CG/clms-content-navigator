@@ -142,6 +142,9 @@ const PersonalizedWorksheet: React.FC = () => {
   const [udise, setUdise] = useState("");
 
   // Step 2
+  const [selectedGrade, setSelectedGrade] = useState<string>("");
+
+  // Step 3
   const [school, setSchool] = useState<MockSchool | null>(null);
   const [students, setStudents] = useState<MockStudent[]>([]);
   const [assessments, setAssessments] = useState<{
@@ -149,14 +152,14 @@ const PersonalizedWorksheet: React.FC = () => {
     name: string;
   }[]>([]);
 
-  // Step 3
+  // Step 4
   const [selectedAssessment, setSelectedAssessment] = useState<string>("");
 
-  // Step 4
+  // Step 5
   const [method, setMethod] = useState<"bulk" | "individual">("bulk");
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
-  // Step 5 - New simplified format approach
+  // Step 6 - New simplified format approach
   const [worksheetFormat, setWorksheetFormat] = useState<WorksheetFormat>({
     questionsPerLO: 5,
     allowedQuestionTypes: ["MCQ"],
@@ -173,17 +176,18 @@ const PersonalizedWorksheet: React.FC = () => {
   }, [selectedAssessment]);
   const canGoNext = useMemo(() => {
     if (step === 1) return udise.trim().length >= 6;
-    if (step === 2) return !!school && students.length > 0;
-    if (step === 3) return !!selectedAssessment;
-    if (step === 4) return method === "bulk" ? students.length > 0 : selectedStudents.length > 0;
-    if (step === 5) {
+    if (step === 2) return !!selectedGrade;
+    if (step === 3) return !!school && students.length > 0;
+    if (step === 4) return !!selectedAssessment;
+    if (step === 5) return method === "bulk" ? students.length > 0 : selectedStudents.length > 0;
+    if (step === 6) {
       if (loConfigs.length === 0) return false;
       return worksheetFormat.allowedQuestionTypes.length > 0 && worksheetFormat.questionsPerLO > 0;
     }
     return true;
-  }, [step, udise, school, students.length, selectedAssessment, selectedStudents.length, method, loConfigs, worksheetFormat]);
+  }, [step, udise, selectedGrade, school, students.length, selectedAssessment, selectedStudents.length, method, loConfigs, worksheetFormat]);
   const handleFetch = async () => {
-    if (!udise) return;
+    if (!udise || !selectedGrade) return;
     setLoading(true);
     try {
       const {
@@ -196,9 +200,9 @@ const PersonalizedWorksheet: React.FC = () => {
       setAssessments(assessments);
       toast({
         title: "Mock data loaded",
-        description: `Found ${students.length} students for UDISE ${udise}.`
+        description: `Found ${students.length} students for Grade ${selectedGrade} in UDISE ${udise}.`
       });
-      setStep(2);
+      setStep(3);
     } finally {
       setLoading(false);
     }
@@ -221,11 +225,12 @@ const PersonalizedWorksheet: React.FC = () => {
     setLoading(true);
     await new Promise(r => setTimeout(r, 700));
     setLoading(false);
-    setStep(6);
+    setStep(7);
   };
   const Summary = () => <div className="space-y-3 text-sm text-muted-foreground">
       <div className="flex flex-wrap gap-2">
         <Badge variant="outline">UDISE: {udise}</Badge>
+        <Badge variant="outline">Grade: {selectedGrade}</Badge>
         <Badge variant="outline">Assessment: {assessments.find(a => a.id === selectedAssessment)?.name}</Badge>
         <Badge variant="outline">Students: {method === "bulk" ? students.length : selectedStudents.length}</Badge>
         <Badge variant="outline">LOs: {loConfigs.length}</Badge>
@@ -246,34 +251,56 @@ const PersonalizedWorksheet: React.FC = () => {
         <CardContent className="space-y-8">
           {/* Step 1: UDISE */}
           {step === 1 && <Section title="Enter School UDISE" description="We will fetch mock school details and students for this UDISE.">
-              <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+              <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="udise">UDISE Code</Label>
                   <Input id="udise" placeholder="e.g. 27010100123" value={udise} onChange={e => setUdise(e.target.value)} />
                 </div>
+              </div>
+            </Section>}
+
+          {/* Step 2: Grade Selection */}
+          {step === 2 && <Section title="Select Grade" description="Choose the grade for which you want to create worksheets.">
+              <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                <div className="space-y-2">
+                  <Label>Grade</Label>
+                  <Select value={selectedGrade} onValueChange={setSelectedGrade}>
+                    <SelectTrigger className="w-full sm:w-[240px]">
+                      <SelectValue placeholder="Select grade" />
+                    </SelectTrigger>
+                    <SelectContent className="z-50 bg-background">
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
+                        <SelectItem key={grade} value={grade.toString()}>
+                          Grade {grade}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="flex items-end">
-                  <Button onClick={handleFetch} disabled={loading || udise.trim().length < 6}>
+                  <Button onClick={handleFetch} disabled={loading || !selectedGrade || udise.trim().length < 6}>
                     Fetch Mock Data
                   </Button>
                 </div>
               </div>
             </Section>}
 
-          {/* Step 2: School & Students */}
-          {step === 2 && <Section title="Review School & Students" description="Verify the mock school details and continue.">
+          {/* Step 3: School & Students */}
+          {step === 3 && <Section title="Review School & Students" description="Verify the mock school details and continue.">
               <div className="rounded-md border p-4 bg-card">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
                     <div className="font-medium text-foreground">{school?.name}</div>
                     <div className="text-sm text-muted-foreground">{school?.address}</div>
+                    <div className="text-sm text-muted-foreground">Grade {selectedGrade}</div>
                   </div>
                   <Badge variant="secondary">{students.length} students</Badge>
                 </div>
               </div>
             </Section>}
 
-          {/* Step 3: Assessment selection */}
-          {step === 3 && <Section title="Select Assessment" description="Choose the past assessment to base the personalised worksheets on.">
+          {/* Step 4: Assessment selection */}
+          {step === 4 && <Section title="Select Assessment" description="Choose the past assessment to base the personalised worksheets on.">
               <div className="space-y-2">
                 <Label>Assessment</Label>
                 <Select value={selectedAssessment} onValueChange={setSelectedAssessment}>
@@ -290,8 +317,8 @@ const PersonalizedWorksheet: React.FC = () => {
               </div>
             </Section>}
 
-          {/* Step 4: Student selection method */}
-          {step === 4 && <Section title="Choose Students" description="Pick a method and select the students to include.">
+          {/* Step 5: Student selection method */}
+          {step === 5 && <Section title="Choose Students" description="Pick a method and select the students to include.">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Method</Label>
@@ -332,7 +359,7 @@ const PersonalizedWorksheet: React.FC = () => {
               </div>
             </Section>}
 
-          {step === 5 && <Section title="Worksheet Format Configuration" description="Define the overall format that will be applied to all Learning Objectives in the worksheet.">
+          {step === 6 && <Section title="Worksheet Format Configuration" description="Define the overall format that will be applied to all Learning Objectives in the worksheet.">
               <WorksheetFormatEditor 
                 format={worksheetFormat}
                 onChange={setWorksheetFormat}
@@ -344,8 +371,8 @@ const PersonalizedWorksheet: React.FC = () => {
               </div>
             </Section>}
 
-          {/* Step 6: Result summary (mock) */}
-          {step === 6 && <Section title="Generation Complete (Mock)" description="Worksheets were generated locally in this demo. In production, PDFs will be saved to storage for download and printing.">
+          {/* Step 7: Result summary (mock) */}
+          {step === 7 && <Section title="Generation Complete (Mock)" description="Worksheets were generated locally in this demo. In production, PDFs will be saved to storage for download and printing.">
               <Summary />
               <div className="mt-4 grid gap-2">
                 {selectedStudents.map(id => {
@@ -368,10 +395,10 @@ const PersonalizedWorksheet: React.FC = () => {
             <Button variant="outline" onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1 || loading}>
               Back
             </Button>
-            {step < 5 && <Button onClick={() => setStep(s => s + 1)} disabled={!canGoNext || loading}>
+            {step < 6 && <Button onClick={() => setStep(s => s + 1)} disabled={!canGoNext || loading}>
                 Next
               </Button>}
-            {step === 5 && <Button onClick={handleGenerate} disabled={!canGoNext || loading}>
+            {step === 6 && <Button onClick={handleGenerate} disabled={!canGoNext || loading}>
                 Generate Worksheets (Mock)
               </Button>}
           </div>
