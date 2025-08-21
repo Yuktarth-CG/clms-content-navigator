@@ -4,12 +4,16 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export type QuestionTypeOption = "MCQ" | "ShortAnswer" | "LongAnswer";
+
+export type DifficultySystem = "traditional" | "bloom";
 
 export type WorksheetFormat = {
   questionsPerLO: number;
   allowedQuestionTypes: QuestionTypeOption[];
+  difficultySystem: DifficultySystem;
   difficultyDistribution: {
     easy: number;
     medium: number;
@@ -30,6 +34,27 @@ const WorksheetFormatEditor: React.FC<Props> = ({
   questionTypeOptions, 
   totalLOs 
 }) => {
+  const getDifficultyLabels = () => {
+    if (format.difficultySystem === "bloom") {
+      return { easy: "LOTS", medium: "MOTS", hard: "HOTS" };
+    }
+    return { easy: "Easy", medium: "Medium", hard: "Hard" };
+  };
+
+  const getDifficultyDescriptions = () => {
+    if (format.difficultySystem === "bloom") {
+      return { 
+        easy: "Lower Order Thinking Skills (Knowledge, Comprehension)",
+        medium: "Middle Order Thinking Skills (Application, Analysis)", 
+        hard: "Higher Order Thinking Skills (Synthesis, Evaluation)"
+      };
+    }
+    return { 
+      easy: "Basic level questions with simple recall",
+      medium: "Moderate difficulty requiring understanding", 
+      hard: "Challenging questions requiring analysis"
+    };
+  };
   const toggleQuestionType = (type: QuestionTypeOption) => {
     const newTypes = format.allowedQuestionTypes.includes(type)
       ? format.allowedQuestionTypes.filter(t => t !== type)
@@ -132,6 +157,37 @@ const WorksheetFormatEditor: React.FC<Props> = ({
             </div>
           </div>
 
+          {/* Difficulty System Selection */}
+          <div className="space-y-4">
+            <Label className="text-base font-medium">Difficulty System</Label>
+            <p className="text-sm text-muted-foreground">
+              Choose how you want to categorize question difficulty levels.
+            </p>
+            <RadioGroup 
+              value={format.difficultySystem} 
+              onValueChange={(value: DifficultySystem) => onChange({
+                ...format,
+                difficultySystem: value
+              })}
+              className="space-y-3"
+            >
+              <div className="flex items-start space-x-3 rounded-lg border p-4 hover:bg-muted/20">
+                <RadioGroupItem value="traditional" id="traditional" className="mt-1" />
+                <div className="space-y-1">
+                  <Label htmlFor="traditional" className="font-medium cursor-pointer">Traditional (Easy, Medium, Hard)</Label>
+                  <p className="text-sm text-muted-foreground">Simple difficulty levels based on complexity</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3 rounded-lg border p-4 hover:bg-muted/20">
+                <RadioGroupItem value="bloom" id="bloom" className="mt-1" />
+                <div className="space-y-1">
+                  <Label htmlFor="bloom" className="font-medium cursor-pointer">Bloom's Taxonomy (LOTS, MOTS, HOTS)</Label>
+                  <p className="text-sm text-muted-foreground">Based on cognitive thinking levels and learning objectives</p>
+                </div>
+              </div>
+            </RadioGroup>
+          </div>
+
           {/* Difficulty Distribution */}
           <div className="space-y-4">
             <Label className="text-base font-medium">Difficulty Distribution</Label>
@@ -140,24 +196,33 @@ const WorksheetFormatEditor: React.FC<Props> = ({
             </p>
             
             <div className="space-y-4">
-              {Object.entries(format.difficultyDistribution).map(([difficulty, percentage]) => (
-                <div key={difficulty} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm capitalize">{difficulty}</Label>
-                    <span className="text-sm font-medium">{percentage}%</span>
+              {Object.entries(format.difficultyDistribution).map(([difficulty, percentage]) => {
+                const labels = getDifficultyLabels();
+                const descriptions = getDifficultyDescriptions();
+                const diffKey = difficulty as keyof typeof labels;
+                
+                return (
+                  <div key={difficulty} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label className="text-sm font-medium">{labels[diffKey]}</Label>
+                        <p className="text-xs text-muted-foreground">{descriptions[diffKey]}</p>
+                      </div>
+                      <span className="text-sm font-medium">{percentage}%</span>
+                    </div>
+                    <Slider
+                      value={[percentage]}
+                      onValueChange={(value) => updateDifficultyDistribution(
+                        difficulty as keyof WorksheetFormat['difficultyDistribution'], 
+                        value[0]
+                      )}
+                      max={100}
+                      step={5}
+                      className="w-full"
+                    />
                   </div>
-                  <Slider
-                    value={[percentage]}
-                    onValueChange={(value) => updateDifficultyDistribution(
-                      difficulty as keyof WorksheetFormat['difficultyDistribution'], 
-                      value[0]
-                    )}
-                    max={100}
-                    step={5}
-                    className="w-full"
-                  />
-                </div>
-              ))}
+                );
+              })}
               
               <div className="text-xs text-muted-foreground">
                 Total: {difficultyTotal}% {difficultyTotal !== 100 && "(should equal 100%)"}
@@ -172,7 +237,7 @@ const WorksheetFormatEditor: React.FC<Props> = ({
               <div>• {totalQuestions} total questions across {totalLOs} Learning Objectives</div>
               <div>• {format.questionsPerLO} questions per LO</div>
               <div>• Question types: {format.allowedQuestionTypes.join(", ") || "None selected"}</div>
-              <div>• Difficulty: {format.difficultyDistribution.easy}% Easy, {format.difficultyDistribution.medium}% Medium, {format.difficultyDistribution.hard}% Hard</div>
+              <div>• Difficulty ({format.difficultySystem === "bloom" ? "Bloom's Taxonomy" : "Traditional"}): {format.difficultyDistribution.easy}% {getDifficultyLabels().easy}, {format.difficultyDistribution.medium}% {getDifficultyLabels().medium}, {format.difficultyDistribution.hard}% {getDifficultyLabels().hard}</div>
             </div>
           </div>
         </CardContent>

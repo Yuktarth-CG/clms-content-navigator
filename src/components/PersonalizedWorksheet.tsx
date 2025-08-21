@@ -166,6 +166,7 @@ const PersonalizedWorksheet: React.FC = () => {
   const [worksheetFormat, setWorksheetFormat] = useState<WorksheetFormat>({
     questionsPerLO: 5,
     allowedQuestionTypes: ["MCQ"],
+    difficultySystem: "traditional",
     difficultyDistribution: {
       easy: 40,
       medium: 40,
