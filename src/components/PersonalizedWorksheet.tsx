@@ -319,19 +319,40 @@ const PersonalizedWorksheet: React.FC = () => {
             </Section>}
 
           {/* Step 5: Acceptance Criteria */}
-          {step === 5 && <Section title="Student Acceptance Criteria" description="Define criteria to select students based on their assessment performance.">
+          {step === 5 && <Section title="Student Selection Criteria" description="Choose which students should receive personalized worksheets based on their assessment performance.">
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="criteria">Acceptance Criteria</Label>
-                  <Input 
-                    id="criteria" 
-                    placeholder="e.g. bottom 25%, top 30%, score < 70%" 
-                    value={acceptanceCriteria} 
-                    onChange={e => setAcceptanceCriteria(e.target.value)} 
-                  />
-                   <p className="text-xs text-muted-foreground">
-                     Examples: "bottom 25%", "top 30%", "score &lt; 70%", "failed students"
-                   </p>
+                <div className="space-y-3">
+                  <Label>Who needs extra support?</Label>
+                  <RadioGroup value={acceptanceCriteria} onValueChange={setAcceptanceCriteria} className="space-y-3">
+                    <div className="flex items-start space-x-3 rounded-lg border p-4 hover:bg-muted/20">
+                      <RadioGroupItem value="bottom 25%" id="bottom25" className="mt-1" />
+                      <div className="space-y-1">
+                        <Label htmlFor="bottom25" className="font-medium cursor-pointer">Students who need the most help (Bottom 25%)</Label>
+                        <p className="text-sm text-muted-foreground">Students with the lowest scores who would benefit from additional practice</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3 rounded-lg border p-4 hover:bg-muted/20">
+                      <RadioGroupItem value="bottom 50%" id="bottom50" className="mt-1" />
+                      <div className="space-y-1">
+                        <Label htmlFor="bottom50" className="font-medium cursor-pointer">Students below average (Bottom 50%)</Label>
+                        <p className="text-sm text-muted-foreground">All students who scored below the class average</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3 rounded-lg border p-4 hover:bg-muted/20">
+                      <RadioGroupItem value="failed students" id="failed" className="mt-1" />
+                      <div className="space-y-1">
+                        <Label htmlFor="failed" className="font-medium cursor-pointer">Students who did not pass</Label>
+                        <p className="text-sm text-muted-foreground">Students who scored below the passing threshold</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3 rounded-lg border p-4 hover:bg-muted/20">
+                      <RadioGroupItem value="all students" id="all" className="mt-1" />
+                      <div className="space-y-1">
+                        <Label htmlFor="all" className="font-medium cursor-pointer">All students</Label>
+                        <p className="text-sm text-muted-foreground">Generate personalized worksheets for every student in the class</p>
+                      </div>
+                    </div>
+                  </RadioGroup>
                 </div>
               </div>
             </Section>}
