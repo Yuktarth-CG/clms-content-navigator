@@ -142,15 +142,15 @@ const PersonalizedWorksheet: React.FC = () => {
   const [udise, setUdise] = useState("");
 
   // Step 2
-  const [selectedGrade, setSelectedGrade] = useState<string>("");
-
-  // Step 3
   const [school, setSchool] = useState<MockSchool | null>(null);
   const [students, setStudents] = useState<MockStudent[]>([]);
   const [assessments, setAssessments] = useState<{
     id: string;
     name: string;
   }[]>([]);
+
+  // Step 3
+  const [selectedGrade, setSelectedGrade] = useState<string>("");
 
   // Step 4
   const [selectedAssessment, setSelectedAssessment] = useState<string>("");
@@ -176,8 +176,8 @@ const PersonalizedWorksheet: React.FC = () => {
   }, [selectedAssessment]);
   const canGoNext = useMemo(() => {
     if (step === 1) return udise.trim().length >= 6;
-    if (step === 2) return !!selectedGrade;
-    if (step === 3) return !!school && students.length > 0;
+    if (step === 2) return !!school && students.length > 0;
+    if (step === 3) return !!selectedGrade;
     if (step === 4) return !!selectedAssessment;
     if (step === 5) return method === "bulk" ? students.length > 0 : selectedStudents.length > 0;
     if (step === 6) {
@@ -187,7 +187,7 @@ const PersonalizedWorksheet: React.FC = () => {
     return true;
   }, [step, udise, selectedGrade, school, students.length, selectedAssessment, selectedStudents.length, method, loConfigs, worksheetFormat]);
   const handleFetch = async () => {
-    if (!udise || !selectedGrade) return;
+    if (!udise) return;
     setLoading(true);
     try {
       const {
@@ -200,9 +200,9 @@ const PersonalizedWorksheet: React.FC = () => {
       setAssessments(assessments);
       toast({
         title: "Mock data loaded",
-        description: `Found ${students.length} students for Grade ${selectedGrade} in UDISE ${udise}.`
+        description: `Found school ${school.name} with ${students.length} students.`
       });
-      setStep(3);
+      setStep(2);
     } finally {
       setLoading(false);
     }
@@ -256,46 +256,42 @@ const PersonalizedWorksheet: React.FC = () => {
                   <Label htmlFor="udise">UDISE Code</Label>
                   <Input id="udise" placeholder="e.g. 27010100123" value={udise} onChange={e => setUdise(e.target.value)} />
                 </div>
+                <Button onClick={handleFetch} disabled={loading || udise.trim().length < 6}>
+                  Fetch School Data
+                </Button>
               </div>
             </Section>}
 
-          {/* Step 2: Grade Selection */}
-          {step === 2 && <Section title="Select Grade" description="Choose the grade for which you want to create worksheets.">
-              <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-                <div className="space-y-2">
-                  <Label>Grade</Label>
-                  <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-                    <SelectTrigger className="w-full sm:w-[240px]">
-                      <SelectValue placeholder="Select grade" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-background">
-                      {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
-                        <SelectItem key={grade} value={grade.toString()}>
-                          Grade {grade}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-end">
-                  <Button onClick={handleFetch} disabled={loading || !selectedGrade || udise.trim().length < 6}>
-                    Fetch Mock Data
-                  </Button>
-                </div>
-              </div>
-            </Section>}
-
-          {/* Step 3: School & Students */}
-          {step === 3 && <Section title="Review School & Students" description="Verify the mock school details and continue.">
+          {/* Step 2: School Confirmation */}
+          {step === 2 && <Section title="School Confirmation" description="Verify the mock school details fetched from UDISE.">
               <div className="rounded-md border p-4 bg-card">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
                     <div className="font-medium text-foreground">{school?.name}</div>
                     <div className="text-sm text-muted-foreground">{school?.address}</div>
-                    <div className="text-sm text-muted-foreground">Grade {selectedGrade}</div>
+                    <div className="text-sm text-muted-foreground">UDISE: {udise}</div>
                   </div>
                   <Badge variant="secondary">{students.length} students</Badge>
                 </div>
+              </div>
+            </Section>}
+
+          {/* Step 3: Grade Selection */}
+          {step === 3 && <Section title="Select Grade" description="Choose the grade for which you want to create worksheets.">
+              <div className="space-y-2">
+                <Label>Grade</Label>
+                <Select value={selectedGrade} onValueChange={setSelectedGrade}>
+                  <SelectTrigger className="w-full sm:w-[240px]">
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent className="z-50 bg-background">
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
+                      <SelectItem key={grade} value={grade.toString()}>
+                        Grade {grade}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </Section>}
 
