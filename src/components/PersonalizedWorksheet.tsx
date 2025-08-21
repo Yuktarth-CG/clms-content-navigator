@@ -352,6 +352,35 @@ const PersonalizedWorksheet: React.FC = () => {
                         <p className="text-sm text-muted-foreground">Generate personalized worksheets for every student in the class</p>
                       </div>
                     </div>
+                    <div className="flex items-start space-x-3 rounded-lg border p-4 hover:bg-muted/20">
+                      <RadioGroupItem value="custom" id="custom" className="mt-1" />
+                      <div className="space-y-2 flex-1">
+                        <Label htmlFor="custom" className="font-medium cursor-pointer">Custom percentage</Label>
+                        <p className="text-sm text-muted-foreground">Specify your own percentage of students who need support</p>
+                        {acceptanceCriteria === "custom" && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <Label htmlFor="customInput" className="text-sm">Bottom</Label>
+                            <Input 
+                              id="customInput"
+                              type="number"
+                              min="1"
+                              max="100"
+                              placeholder="25"
+                              className="w-20"
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (value) {
+                                  setAcceptanceCriteria(`bottom ${value}%`);
+                                } else {
+                                  setAcceptanceCriteria("custom");
+                                }
+                              }}
+                            />
+                            <span className="text-sm">% of students</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </RadioGroup>
                 </div>
               </div>
