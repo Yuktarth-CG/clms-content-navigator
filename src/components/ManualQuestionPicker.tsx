@@ -422,6 +422,8 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
   const [sortBy, setSortBy] = useState<'difficulty' | 'marks' | 'time' | 'chapter'>('difficulty');
   const [selectedChapter, setSelectedChapter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'all' | 'chapter'>('chapter');
+  const [currentPage, setCurrentPage] = useState(1);
+  const questionsPerPage = 6;
 
   // Get unique chapters for navigation
   const availableChapters = useMemo(() => {
@@ -489,6 +491,17 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
     }, {} as Record<string, Question[]>);
     return grouped;
   }, [filteredQuestions]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredQuestions.length / questionsPerPage);
+  const startIndex = (currentPage - 1) * questionsPerPage;
+  const endIndex = startIndex + questionsPerPage;
+  const paginatedQuestions = filteredQuestions.slice(startIndex, endIndex);
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedChapter, searchTerm, filterDifficulty]);
 
   const handleQuestionToggle = (questionId: string, checked: boolean) => {
     if (checked) {
@@ -705,9 +718,22 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
       )}
 
       {/* Questions List */}
-      <ScrollArea className="h-[600px] w-full rounded-md border">
-        <div className="p-4 space-y-4">
-          {filteredQuestions.map((question) => (
+      <div className="space-y-4">
+        {/* Pagination info */}
+        {filteredQuestions.length > 0 && (
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div>
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredQuestions.length)} of {filteredQuestions.length} questions
+            </div>
+            <div>
+              Page {currentPage} of {totalPages}
+            </div>
+          </div>
+        )}
+
+        <div className="border rounded-md">
+          <div className="p-4 space-y-4 min-h-[400px]">
+            {paginatedQuestions.map((question) => (
             <Card key={question.id} className={`transition-all duration-200 ${
               selectedQuestions.includes(question.id) 
                 ? 'ring-2 ring-primary bg-primary/5' 
@@ -798,8 +824,46 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
               )}
             </div>
           )}
+          </div>
         </div>
-      </ScrollArea>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center space-x-2 pt-4 border-t">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  className="w-8 h-8 p-0"
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
