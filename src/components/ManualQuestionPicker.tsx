@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, BookOpen, Target, ChevronRight, Star, Clock, Brain, Zap } from 'lucide-react';
+import { Search, Filter, BookOpen, Target, ChevronRight, Star, Clock, Brain, Zap, ChevronLeft, ChevronDown } from 'lucide-react';
 
 interface Question {
   id: string;
@@ -420,51 +420,41 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
   const [filterQuestionType, setFilterQuestionType] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'difficulty' | 'marks' | 'time' | 'chapter'>('difficulty');
+  const [selectedChapter, setSelectedChapter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'all' | 'chapter'>('chapter');
+
+  // Get unique chapters for navigation
+  const availableChapters = useMemo(() => {
+    const chapters = Array.from(new Set(mockQuestions.map(q => q.chapter))).sort();
+    return chapters;
+  }, []);
 
   // Filter and sort questions
   const filteredQuestions = useMemo(() => {
     let filtered = mockQuestions;
 
-    // Debug: Log what we're working with
-    console.log('🔍 [ManualQuestionPicker] Total mock questions:', mockQuestions.length);
-    console.log('🔍 [ManualQuestionPicker] Selected chapters:', selectedChapters);
-    console.log('🔍 [ManualQuestionPicker] Search term:', searchTerm);
-    console.log('🔍 [ManualQuestionPicker] Filter difficulty:', filterDifficulty);
-    console.log('🔍 [ManualQuestionPicker] Filter question type:', filterQuestionType);
-
-    // Only filter by selected chapters if chapters are specifically selected AND not empty
-    // Show all questions by default to ensure they're visible for demonstration
-    if (selectedChapters.length > 0) {
-      const beforeChapterFilter = filtered.length;
-      filtered = filtered.filter(q => selectedChapters.includes(q.chapter));
-      console.log('🔍 [ManualQuestionPicker] After chapter filter:', filtered.length, 'from', beforeChapterFilter);
-    } else {
-      console.log('🔍 [ManualQuestionPicker] No chapter filtering - showing all questions');
+    // Filter by selected chapter for chapter-by-chapter view
+    if (viewMode === 'chapter' && selectedChapter !== 'all') {
+      filtered = filtered.filter(q => q.chapter === selectedChapter);
     }
 
     // Filter by search term
     if (searchTerm.trim()) {
-      const beforeSearchFilter = filtered.length;
       filtered = filtered.filter(q => 
         q.questionStem.toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.chapter.toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.topic.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      console.log('🔍 [ManualQuestionPicker] After search filter:', filtered.length, 'from', beforeSearchFilter);
     }
 
     // Filter by difficulty
     if (filterDifficulty !== 'all') {
-      const beforeDifficultyFilter = filtered.length;
       filtered = filtered.filter(q => q.difficulty === filterDifficulty);
-      console.log('🔍 [ManualQuestionPicker] After difficulty filter:', filtered.length, 'from', beforeDifficultyFilter);
     }
 
     // Filter by question type
     if (filterQuestionType !== 'all') {
-      const beforeTypeFilter = filtered.length;
       filtered = filtered.filter(q => q.questionType === filterQuestionType);
-      console.log('🔍 [ManualQuestionPicker] After type filter:', filtered.length, 'from', beforeTypeFilter);
     }
 
     // Sort questions
@@ -485,11 +475,20 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
       }
     });
 
-    console.log('🔍 [ManualQuestionPicker] Final filtered questions:', filtered.length);
-    console.log('🔍 [ManualQuestionPicker] First few questions:', filtered.slice(0, 3).map(q => ({ id: q.id, stem: q.questionStem.substring(0, 50) + '...' })));
-
     return filtered;
-  }, [selectedChapters, searchTerm, filterDifficulty, filterQuestionType, sortBy]);
+  }, [selectedChapter, viewMode, searchTerm, filterDifficulty, filterQuestionType, sortBy]);
+
+  // Group questions by chapter for chapter view
+  const questionsByChapter = useMemo(() => {
+    const grouped = filteredQuestions.reduce((acc, question) => {
+      if (!acc[question.chapter]) {
+        acc[question.chapter] = [];
+      }
+      acc[question.chapter].push(question);
+      return acc;
+    }, {} as Record<string, Question[]>);
+    return grouped;
+  }, [filteredQuestions]);
 
   const handleQuestionToggle = (questionId: string, checked: boolean) => {
     if (checked) {
@@ -584,14 +583,62 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
         </div>
       </div>
 
-      {/* Filters and Search */}
+      {/* Chapter Navigation */}
+      <div className="bg-muted/20 rounded-lg p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="font-semibold flex items-center">
+            <BookOpen className="w-4 h-4 mr-2" />
+            Browse by Chapter
+          </h4>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setSelectedChapter('all')}
+            className={selectedChapter === 'all' ? 'bg-primary/10' : ''}
+          >
+            View All
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {availableChapters.map((chapter) => {
+            const chapterQuestions = mockQuestions.filter(q => q.chapter === chapter);
+            const isSelected = selectedChapter === chapter;
+            
+            return (
+              <Button
+                key={chapter}
+                variant={isSelected ? "default" : "outline"}
+                className={`p-4 h-auto flex flex-col items-start text-left transition-all ${
+                  isSelected ? 'ring-2 ring-primary/50' : 'hover:bg-muted/50'
+                }`}
+                onClick={() => setSelectedChapter(chapter)}
+              >
+                <div className="font-medium capitalize mb-1">
+                  {chapter.replace('chapter', 'Chapter ')}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {chapterQuestions.length} questions
+                </div>
+                <div className="flex space-x-1 mt-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500" title="Easy"></div>
+                  <div className="w-2 h-2 rounded-full bg-yellow-500" title="Medium"></div>
+                  <div className="w-2 h-2 rounded-full bg-red-500" title="Hard"></div>
+                </div>
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Filters and Search - Simplified for chapter view */}
       <div className="space-y-4">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="flex-1 min-w-60">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search questions, chapters, or topics..."
+                placeholder="Search questions in selected chapter..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -626,24 +673,12 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
               <SelectItem value="Arrange">Arrange</SelectItem>
             </SelectContent>
           </Select>
-
-          <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="difficulty">Difficulty</SelectItem>
-              <SelectItem value="marks">Marks</SelectItem>
-              <SelectItem value="time">Time</SelectItem>
-              <SelectItem value="chapter">Chapter</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Quick select buttons */}
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => handleSelectAll()}>
-            Select All Visible
+            Select All in {selectedChapter === 'all' ? 'All Chapters' : selectedChapter.replace('chapter', 'Chapter ')}
           </Button>
           <Button variant="outline" size="sm" onClick={() => handleSelectAll('Easy')}>
             Select All Easy
@@ -656,6 +691,28 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Chapter Navigation Breadcrumb */}
+      {selectedChapter !== 'all' && (
+        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setSelectedChapter('all')}
+            className="p-1 h-auto"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            All Chapters
+          </Button>
+          <ChevronRight className="w-4 h-4" />
+          <span className="font-medium capitalize">
+            {selectedChapter.replace('chapter', 'Chapter ')}
+          </span>
+          <span className="text-xs">
+            ({filteredQuestions.length} question{filteredQuestions.length !== 1 ? 's' : ''})
+          </span>
+        </div>
+      )}
 
       {/* Questions List */}
       <ScrollArea className="h-[600px] w-full rounded-md border">
@@ -734,11 +791,21 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
             <div className="text-center py-12">
               <div className="text-muted-foreground mb-2">No questions found</div>
               <div className="text-sm text-muted-foreground">
-                Try adjusting your filters or search terms
+                {selectedChapter === 'all' 
+                  ? 'Try adjusting your filters or search terms'
+                  : `No questions available in ${selectedChapter.replace('chapter', 'Chapter ')}`
+                }
               </div>
-              <div className="text-xs text-muted-foreground mt-2">
-                Debug: Total questions available: {mockQuestions.length}
-              </div>
+              {selectedChapter !== 'all' && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-4"
+                  onClick={() => setSelectedChapter('all')}
+                >
+                  Browse All Chapters
+                </Button>
+              )}
             </div>
           )}
         </div>
