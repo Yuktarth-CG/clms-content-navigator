@@ -34,7 +34,7 @@ interface ManualQuestionPickerProps {
   maxQuestions?: number;
 }
 
-// Mock questions with varying difficulties and types - Updated with more variety
+// Mock questions - Updated to use more generic chapter names that might be selected
 const mockQuestions: Question[] = [
   // Easy MCQ Questions
   {
@@ -44,7 +44,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Photosynthesis',
+    chapter: 'chapter1',
     topic: 'Plant Biology',
     estimatedTime: 1,
     options: [
@@ -62,7 +62,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Cell Structure',
+    chapter: 'chapter1',
     topic: 'Cellular Biology',
     estimatedTime: 1,
     options: [
@@ -80,7 +80,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Human Body Systems',
+    chapter: 'chapter2',
     topic: 'Circulatory System',
     estimatedTime: 1,
     options: [
@@ -98,7 +98,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Human Body Systems',
+    chapter: 'chapter2',
     topic: 'Circulatory System',
     estimatedTime: 1,
     options: [
@@ -116,7 +116,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Photosynthesis',
+    chapter: 'chapter1',
     topic: 'Plant Biology',
     estimatedTime: 1,
     options: [
@@ -135,7 +135,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Photosynthesis',
+    chapter: 'chapter1',
     topic: 'Plant Biology',
     estimatedTime: 1,
     answer: 'photosynthesis'
@@ -147,7 +147,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Cell Structure',
+    chapter: 'chapter1',
     topic: 'Cellular Biology',
     estimatedTime: 1,
     answer: 'cell'
@@ -159,7 +159,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Photosynthesis',
+    chapter: 'chapter1',
     topic: 'Plant Biology',
     estimatedTime: 1,
     answer: 'chlorophyll'
@@ -172,7 +172,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Cell Structure',
+    chapter: 'chapter1',
     topic: 'Cellular Respiration',
     estimatedTime: 1,
     answer: 'False (anaerobic organisms exist)'
@@ -184,7 +184,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Human Body Systems',
+    chapter: 'chapter2',
     topic: 'Nervous System',
     estimatedTime: 1,
     answer: 'True'
@@ -197,7 +197,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Medium',
     bloomLevel: 2,
     marks: 3,
-    chapter: 'Photosynthesis',
+    chapter: 'chapter1',
     topic: 'Plant Adaptations',
     estimatedTime: 5,
     answer: 'Broad flat surface for maximum light absorption, waxy cuticle to reduce water loss, stomata for gas exchange, chloroplasts in palisade layer for photosynthesis'
@@ -209,7 +209,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Medium',
     bloomLevel: 2,
     marks: 4,
-    chapter: 'Cell Structure',
+    chapter: 'chapter1',
     topic: 'Cell Division',
     estimatedTime: 6,
     answer: 'Mitosis produces identical diploid cells for growth and repair, while meiosis produces genetically diverse gametes for reproduction'
@@ -221,7 +221,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Medium',
     bloomLevel: 3,
     marks: 2,
-    chapter: 'Ecosystems',
+    chapter: 'chapter3',
     topic: 'Food Webs',
     estimatedTime: 2,
     options: [
@@ -239,7 +239,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Medium',
     bloomLevel: 2,
     marks: 2,
-    chapter: 'Photosynthesis',
+    chapter: 'chapter1',
     topic: 'Light Reactions',
     estimatedTime: 2,
     options: [
@@ -257,7 +257,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Medium',
     bloomLevel: 1,
     marks: 2,
-    chapter: 'Human Body Systems',
+    chapter: 'chapter2',
     topic: 'Respiratory System',
     estimatedTime: 2,
     answer: 'nose/mouth, trachea, lungs'
@@ -270,7 +270,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Medium',
     bloomLevel: 2,
     marks: 3,
-    chapter: 'Cell Structure',
+    chapter: 'chapter1',
     topic: 'Organelle Functions',
     estimatedTime: 3,
     answer: '1-Controls cell activities, 2-Protein synthesis, 3-Storage'
@@ -282,7 +282,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Medium',
     bloomLevel: 3,
     marks: 3,
-    chapter: 'Cell Structure',
+    chapter: 'chapter1',
     topic: 'Cellular Respiration',
     estimatedTime: 4,
     answer: 'Glycolysis, Krebs cycle, Electron transport chain'
@@ -295,7 +295,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Hard',
     bloomLevel: 5,
     marks: 8,
-    chapter: 'Photosynthesis',
+    chapter: 'chapter1',
     topic: 'Biochemical Processes',
     estimatedTime: 15,
     answer: 'Detailed analysis of light and dark reactions, discussion of limiting factors, experimental design with controls and variables'
@@ -307,7 +307,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Hard',
     bloomLevel: 6,
     marks: 10,
-    chapter: 'Ecosystems',
+    chapter: 'chapter3',
     topic: 'Environmental Change',
     estimatedTime: 20,
     answer: 'Comprehensive analysis of climate impacts, species migration patterns, ecosystem disruption, and biodiversity loss predictions'
@@ -319,12 +319,12 @@ const mockQuestions: Question[] = [
     difficulty: 'Hard',
     bloomLevel: 5,
     marks: 8,
-    chapter: 'Cell Structure',
+    chapter: 'chapter1',
     topic: 'Cellular Organization',
     estimatedTime: 18,
     answer: 'Detailed analysis of organelle interactions, protein synthesis pathway, energy production, and cellular transport mechanisms'
   },
-  // Additional Medium Questions for variety
+  // Additional questions for more variety
   {
     id: 'q21',
     questionStem: 'Describe the pathway of blood circulation through the human heart.',
@@ -332,7 +332,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Medium',
     bloomLevel: 2,
     marks: 4,
-    chapter: 'Human Body Systems',
+    chapter: 'chapter2',
     topic: 'Circulatory System',
     estimatedTime: 5,
     answer: 'Blood flows from body → right atrium → right ventricle → lungs → left atrium → left ventricle → body'
@@ -344,7 +344,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Medium',
     bloomLevel: 2,
     marks: 3,
-    chapter: 'Ecosystems',
+    chapter: 'chapter3',
     topic: 'Nutrient Cycling',
     estimatedTime: 4,
     answer: 'Break down dead organic matter, recycle nutrients back to soil, maintain ecosystem balance'
@@ -356,7 +356,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Photosynthesis',
+    chapter: 'chapter1',
     topic: 'Plant Biology',
     estimatedTime: 1,
     options: [
@@ -374,7 +374,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Easy',
     bloomLevel: 1,
     marks: 1,
-    chapter: 'Human Body Systems',
+    chapter: 'chapter2',
     topic: 'Organ Systems',
     estimatedTime: 1,
     answer: 'skin'
@@ -386,7 +386,7 @@ const mockQuestions: Question[] = [
     difficulty: 'Medium',
     bloomLevel: 2,
     marks: 2,
-    chapter: 'Photosynthesis',
+    chapter: 'chapter1',
     topic: 'Plant Biology',
     estimatedTime: 2,
     answer: 'True (light-dependent reactions require sunlight)'
