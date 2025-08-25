@@ -631,14 +631,14 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
         </div>
       </div>
 
-      {/* Filters and Search - Simplified for chapter view */}
-      <div className="space-y-4">
-        <div className="flex flex-wrap gap-4 items-center">
+      {/* Simplified Filters */}
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-3 items-center">
           <div className="flex-1 min-w-60">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search questions in selected chapter..."
+                placeholder="Search questions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -647,47 +647,37 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
           </div>
           
           <Select value={filterDifficulty} onValueChange={setFilterDifficulty}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-36">
               <SelectValue placeholder="Difficulty" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Difficulties</SelectItem>
+              <SelectItem value="all">All Levels</SelectItem>
               <SelectItem value="Easy">Easy</SelectItem>
               <SelectItem value="Medium">Medium</SelectItem>
               <SelectItem value="Hard">Hard</SelectItem>
             </SelectContent>
           </Select>
 
-          <Select value={filterQuestionType} onValueChange={setFilterQuestionType}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Question Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="MCQ">Multiple Choice</SelectItem>
-              <SelectItem value="FITB">Fill in Blank</SelectItem>
-              <SelectItem value="SA">Short Answer</SelectItem>
-              <SelectItem value="ETA">Essay Type</SelectItem>
-              <SelectItem value="TF">True/False</SelectItem>
-              <SelectItem value="Match">Matching</SelectItem>
-              <SelectItem value="Arrange">Arrange</SelectItem>
-            </SelectContent>
-          </Select>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => onQuestionsChange([])}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Clear All
+          </Button>
         </div>
 
-        {/* Quick select buttons */}
+        {/* Quick select - simplified */}
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => handleSelectAll()}>
-            Select All in {selectedChapter === 'all' ? 'All Chapters' : selectedChapter.replace('chapter', 'Chapter ')}
+            Select All Shown
           </Button>
           <Button variant="outline" size="sm" onClick={() => handleSelectAll('Easy')}>
-            Select All Easy
+            + All Easy
           </Button>
           <Button variant="outline" size="sm" onClick={() => handleSelectAll('Medium')}>
-            Select All Medium
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => onQuestionsChange([])}>
-            Clear Selection
+            + All Medium
           </Button>
         </div>
       </div>
