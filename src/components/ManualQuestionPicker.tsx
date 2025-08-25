@@ -34,7 +34,7 @@ interface ManualQuestionPickerProps {
   maxQuestions?: number;
 }
 
-// Mock questions with varying difficulties and types
+// Mock questions with varying difficulties and types - Updated with more variety
 const mockQuestions: Question[] = [
   // Easy MCQ Questions
   {
@@ -91,9 +91,45 @@ const mockQuestions: Question[] = [
     ],
     answer: 'C) Four'
   },
-  // Easy Fill in the Blank
   {
     id: 'q4',
+    questionStem: 'What type of blood vessels carry blood away from the heart?',
+    questionType: 'MCQ',
+    difficulty: 'Easy',
+    bloomLevel: 1,
+    marks: 1,
+    chapter: 'Human Body Systems',
+    topic: 'Circulatory System',
+    estimatedTime: 1,
+    options: [
+      'A) Veins',
+      'B) Arteries',
+      'C) Capillaries',
+      'D) Lymph vessels'
+    ],
+    answer: 'B) Arteries'
+  },
+  {
+    id: 'q5',
+    questionStem: 'Which gas do plants absorb from the atmosphere during photosynthesis?',
+    questionType: 'MCQ',
+    difficulty: 'Easy',
+    bloomLevel: 1,
+    marks: 1,
+    chapter: 'Photosynthesis',
+    topic: 'Plant Biology',
+    estimatedTime: 1,
+    options: [
+      'A) Oxygen',
+      'B) Nitrogen',
+      'C) Carbon dioxide',
+      'D) Hydrogen'
+    ],
+    answer: 'C) Carbon dioxide'
+  },
+  // Easy Fill in the Blank
+  {
+    id: 'q6',
     questionStem: 'The process by which plants make their own food using sunlight is called _______.',
     questionType: 'FITB',
     difficulty: 'Easy',
@@ -105,7 +141,7 @@ const mockQuestions: Question[] = [
     answer: 'photosynthesis'
   },
   {
-    id: 'q5',
+    id: 'q7',
     questionStem: 'The basic unit of life is called a _______.',
     questionType: 'FITB',
     difficulty: 'Easy',
@@ -116,9 +152,46 @@ const mockQuestions: Question[] = [
     estimatedTime: 1,
     answer: 'cell'
   },
+  {
+    id: 'q8',
+    questionStem: 'The green pigment in plants that captures light energy is called _______.',
+    questionType: 'FITB',
+    difficulty: 'Easy',
+    bloomLevel: 1,
+    marks: 1,
+    chapter: 'Photosynthesis',
+    topic: 'Plant Biology',
+    estimatedTime: 1,
+    answer: 'chlorophyll'
+  },
+  // Easy True/False
+  {
+    id: 'q9',
+    questionStem: 'True or False: All living organisms require oxygen for survival.',
+    questionType: 'TF',
+    difficulty: 'Easy',
+    bloomLevel: 1,
+    marks: 1,
+    chapter: 'Cell Structure',
+    topic: 'Cellular Respiration',
+    estimatedTime: 1,
+    answer: 'False (anaerobic organisms exist)'
+  },
+  {
+    id: 'q10',
+    questionStem: 'True or False: The human brain is part of the nervous system.',
+    questionType: 'TF',
+    difficulty: 'Easy',
+    bloomLevel: 1,
+    marks: 1,
+    chapter: 'Human Body Systems',
+    topic: 'Nervous System',
+    estimatedTime: 1,
+    answer: 'True'
+  },
   // Medium Questions
   {
-    id: 'q6',
+    id: 'q11',
     questionStem: 'Explain how the structure of the leaf is adapted for photosynthesis. Include at least three specific adaptations.',
     questionType: 'SA',
     difficulty: 'Medium',
@@ -130,7 +203,7 @@ const mockQuestions: Question[] = [
     answer: 'Broad flat surface for maximum light absorption, waxy cuticle to reduce water loss, stomata for gas exchange, chloroplasts in palisade layer for photosynthesis'
   },
   {
-    id: 'q7',
+    id: 'q12',
     questionStem: 'Compare and contrast mitosis and meiosis. Discuss their purposes and key differences.',
     questionType: 'SA',
     difficulty: 'Medium',
@@ -142,7 +215,7 @@ const mockQuestions: Question[] = [
     answer: 'Mitosis produces identical diploid cells for growth and repair, while meiosis produces genetically diverse gametes for reproduction'
   },
   {
-    id: 'q8',
+    id: 'q13',
     questionStem: 'Which of the following best describes the relationship between predators and prey in an ecosystem?',
     questionType: 'MCQ',
     difficulty: 'Medium',
@@ -159,33 +232,8 @@ const mockQuestions: Question[] = [
     ],
     answer: 'B) Predator and prey populations fluctuate in cycles'
   },
-  // Hard Questions
   {
-    id: 'q9',
-    questionStem: 'Analyze the biochemical pathway of photosynthesis and evaluate how environmental factors (light intensity, CO2 concentration, temperature) affect the rate of photosynthesis. Design an experiment to test one of these factors.',
-    questionType: 'ETA',
-    difficulty: 'Hard',
-    bloomLevel: 5,
-    marks: 8,
-    chapter: 'Photosynthesis',
-    topic: 'Biochemical Processes',
-    estimatedTime: 15,
-    answer: 'Detailed analysis of light and dark reactions, discussion of limiting factors, experimental design with controls and variables'
-  },
-  {
-    id: 'q10',
-    questionStem: 'Evaluate the impact of climate change on ecosystem dynamics. Predict how rising temperatures and changing precipitation patterns might affect species interactions and biodiversity.',
-    questionType: 'ETA',
-    difficulty: 'Hard',
-    bloomLevel: 6,
-    marks: 10,
-    chapter: 'Ecosystems',
-    topic: 'Environmental Change',
-    estimatedTime: 20,
-    answer: 'Comprehensive analysis of climate impacts, species migration patterns, ecosystem disruption, and biodiversity loss predictions'
-  },
-  {
-    id: 'q11',
+    id: 'q14',
     questionStem: 'What happens during the light-dependent reactions of photosynthesis?',
     questionType: 'MCQ',
     difficulty: 'Medium',
@@ -203,7 +251,7 @@ const mockQuestions: Question[] = [
     answer: 'B) ATP and NADPH are generated'
   },
   {
-    id: 'q12',
+    id: 'q15',
     questionStem: 'The human respiratory system includes the _______, _______, and _______.',
     questionType: 'FITB',
     difficulty: 'Medium',
@@ -214,24 +262,12 @@ const mockQuestions: Question[] = [
     estimatedTime: 2,
     answer: 'nose/mouth, trachea, lungs'
   },
-  // More variety in question types
+  // Medium Matching and Arrangement
   {
-    id: 'q13',
-    questionStem: 'True or False: All living organisms require oxygen for survival.',
-    questionType: 'TF',
-    difficulty: 'Easy',
-    bloomLevel: 1,
-    marks: 1,
-    chapter: 'Cell Structure',
-    topic: 'Cellular Respiration',
-    estimatedTime: 1,
-    answer: 'False (anaerobic organisms exist)'
-  },
-  {
-    id: 'q14',
+    id: 'q16',
     questionStem: 'Match the following organelles with their functions: 1) Nucleus 2) Ribosome 3) Vacuole',
     questionType: 'Match',
-    difficulty: 'Easy',
+    difficulty: 'Medium',
     bloomLevel: 2,
     marks: 3,
     chapter: 'Cell Structure',
@@ -240,7 +276,7 @@ const mockQuestions: Question[] = [
     answer: '1-Controls cell activities, 2-Protein synthesis, 3-Storage'
   },
   {
-    id: 'q15',
+    id: 'q17',
     questionStem: 'Arrange the following steps of cellular respiration in correct order: Krebs cycle, Glycolysis, Electron transport chain',
     questionType: 'Arrange',
     difficulty: 'Medium',
@@ -250,6 +286,110 @@ const mockQuestions: Question[] = [
     topic: 'Cellular Respiration',
     estimatedTime: 4,
     answer: 'Glycolysis, Krebs cycle, Electron transport chain'
+  },
+  // Hard Questions
+  {
+    id: 'q18',
+    questionStem: 'Analyze the biochemical pathway of photosynthesis and evaluate how environmental factors (light intensity, CO2 concentration, temperature) affect the rate of photosynthesis. Design an experiment to test one of these factors.',
+    questionType: 'ETA',
+    difficulty: 'Hard',
+    bloomLevel: 5,
+    marks: 8,
+    chapter: 'Photosynthesis',
+    topic: 'Biochemical Processes',
+    estimatedTime: 15,
+    answer: 'Detailed analysis of light and dark reactions, discussion of limiting factors, experimental design with controls and variables'
+  },
+  {
+    id: 'q19',
+    questionStem: 'Evaluate the impact of climate change on ecosystem dynamics. Predict how rising temperatures and changing precipitation patterns might affect species interactions and biodiversity.',
+    questionType: 'ETA',
+    difficulty: 'Hard',
+    bloomLevel: 6,
+    marks: 10,
+    chapter: 'Ecosystems',
+    topic: 'Environmental Change',
+    estimatedTime: 20,
+    answer: 'Comprehensive analysis of climate impacts, species migration patterns, ecosystem disruption, and biodiversity loss predictions'
+  },
+  {
+    id: 'q20',
+    questionStem: 'Critically analyze the role of different cell organelles in maintaining cellular homeostasis. How do mitochondria, endoplasmic reticulum, and Golgi apparatus work together?',
+    questionType: 'ETA',
+    difficulty: 'Hard',
+    bloomLevel: 5,
+    marks: 8,
+    chapter: 'Cell Structure',
+    topic: 'Cellular Organization',
+    estimatedTime: 18,
+    answer: 'Detailed analysis of organelle interactions, protein synthesis pathway, energy production, and cellular transport mechanisms'
+  },
+  // Additional Medium Questions for variety
+  {
+    id: 'q21',
+    questionStem: 'Describe the pathway of blood circulation through the human heart.',
+    questionType: 'SA',
+    difficulty: 'Medium',
+    bloomLevel: 2,
+    marks: 4,
+    chapter: 'Human Body Systems',
+    topic: 'Circulatory System',
+    estimatedTime: 5,
+    answer: 'Blood flows from body → right atrium → right ventricle → lungs → left atrium → left ventricle → body'
+  },
+  {
+    id: 'q22',
+    questionStem: 'What role do decomposers play in an ecosystem?',
+    questionType: 'SA',
+    difficulty: 'Medium',
+    bloomLevel: 2,
+    marks: 3,
+    chapter: 'Ecosystems',
+    topic: 'Nutrient Cycling',
+    estimatedTime: 4,
+    answer: 'Break down dead organic matter, recycle nutrients back to soil, maintain ecosystem balance'
+  },
+  {
+    id: 'q23',
+    questionStem: 'Which process occurs in the chloroplasts of plant cells?',
+    questionType: 'MCQ',
+    difficulty: 'Easy',
+    bloomLevel: 1,
+    marks: 1,
+    chapter: 'Photosynthesis',
+    topic: 'Plant Biology',
+    estimatedTime: 1,
+    options: [
+      'A) Cellular respiration',
+      'B) Photosynthesis',
+      'C) Protein synthesis',
+      'D) DNA replication'
+    ],
+    answer: 'B) Photosynthesis'
+  },
+  {
+    id: 'q24',
+    questionStem: 'The largest organ in the human body is the _______.',
+    questionType: 'FITB',
+    difficulty: 'Easy',
+    bloomLevel: 1,
+    marks: 1,
+    chapter: 'Human Body Systems',
+    topic: 'Organ Systems',
+    estimatedTime: 1,
+    answer: 'skin'
+  },
+  {
+    id: 'q25',
+    questionStem: 'True or False: Photosynthesis only occurs during the day.',
+    questionType: 'TF',
+    difficulty: 'Medium',
+    bloomLevel: 2,
+    marks: 2,
+    chapter: 'Photosynthesis',
+    topic: 'Plant Biology',
+    estimatedTime: 2,
+    answer: 'True (light-dependent reactions require sunlight)'
   }
 ];
 
@@ -285,7 +425,8 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
   const filteredQuestions = useMemo(() => {
     let filtered = mockQuestions;
 
-    // Filter by selected chapters
+    // Only filter by selected chapters if chapters are actually selected
+    // This allows all questions to show when no specific chapters are chosen
     if (selectedChapters.length > 0) {
       filtered = filtered.filter(q => selectedChapters.includes(q.chapter));
     }
