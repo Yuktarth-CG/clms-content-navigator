@@ -425,29 +425,46 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
   const filteredQuestions = useMemo(() => {
     let filtered = mockQuestions;
 
-    // Only filter by selected chapters if chapters are actually selected
-    // This allows all questions to show when no specific chapters are chosen
+    // Debug: Log what we're working with
+    console.log('🔍 [ManualQuestionPicker] Total mock questions:', mockQuestions.length);
+    console.log('🔍 [ManualQuestionPicker] Selected chapters:', selectedChapters);
+    console.log('🔍 [ManualQuestionPicker] Search term:', searchTerm);
+    console.log('🔍 [ManualQuestionPicker] Filter difficulty:', filterDifficulty);
+    console.log('🔍 [ManualQuestionPicker] Filter question type:', filterQuestionType);
+
+    // Only filter by selected chapters if chapters are specifically selected AND not empty
+    // Show all questions by default to ensure they're visible for demonstration
     if (selectedChapters.length > 0) {
+      const beforeChapterFilter = filtered.length;
       filtered = filtered.filter(q => selectedChapters.includes(q.chapter));
+      console.log('🔍 [ManualQuestionPicker] After chapter filter:', filtered.length, 'from', beforeChapterFilter);
+    } else {
+      console.log('🔍 [ManualQuestionPicker] No chapter filtering - showing all questions');
     }
 
     // Filter by search term
-    if (searchTerm) {
+    if (searchTerm.trim()) {
+      const beforeSearchFilter = filtered.length;
       filtered = filtered.filter(q => 
         q.questionStem.toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.chapter.toLowerCase().includes(searchTerm.toLowerCase()) ||
         q.topic.toLowerCase().includes(searchTerm.toLowerCase())
       );
+      console.log('🔍 [ManualQuestionPicker] After search filter:', filtered.length, 'from', beforeSearchFilter);
     }
 
     // Filter by difficulty
     if (filterDifficulty !== 'all') {
+      const beforeDifficultyFilter = filtered.length;
       filtered = filtered.filter(q => q.difficulty === filterDifficulty);
+      console.log('🔍 [ManualQuestionPicker] After difficulty filter:', filtered.length, 'from', beforeDifficultyFilter);
     }
 
     // Filter by question type
     if (filterQuestionType !== 'all') {
+      const beforeTypeFilter = filtered.length;
       filtered = filtered.filter(q => q.questionType === filterQuestionType);
+      console.log('🔍 [ManualQuestionPicker] After type filter:', filtered.length, 'from', beforeTypeFilter);
     }
 
     // Sort questions
@@ -467,6 +484,9 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
           return 0;
       }
     });
+
+    console.log('🔍 [ManualQuestionPicker] Final filtered questions:', filtered.length);
+    console.log('🔍 [ManualQuestionPicker] First few questions:', filtered.slice(0, 3).map(q => ({ id: q.id, stem: q.questionStem.substring(0, 50) + '...' })));
 
     return filtered;
   }, [selectedChapters, searchTerm, filterDifficulty, filterQuestionType, sortBy]);
@@ -715,6 +735,9 @@ const ManualQuestionPicker: React.FC<ManualQuestionPickerProps> = ({
               <div className="text-muted-foreground mb-2">No questions found</div>
               <div className="text-sm text-muted-foreground">
                 Try adjusting your filters or search terms
+              </div>
+              <div className="text-xs text-muted-foreground mt-2">
+                Debug: Total questions available: {mockQuestions.length}
               </div>
             </div>
           )}
