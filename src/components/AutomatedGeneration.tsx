@@ -28,6 +28,7 @@ import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import { debugService } from '@/services/debugService';
 import { exportElementToPdf } from '@/utils/pdfExport';
+import ManualQuestionPicker from './ManualQuestionPicker';
 
 const mockChapters = [
   { 
@@ -133,6 +134,8 @@ const AutomatedGeneration = () => {
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [showPDFPreview, setShowPDFPreview] = useState(false);
   const [blueprintPage, setBlueprintPage] = useState(1);
+  const [showManualQuestionPicker, setShowManualQuestionPicker] = useState(false);
+  const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
   const blueprintsPerPage = 6;
 
   const [showStudentDetails, setShowStudentDetails] = useState(false);

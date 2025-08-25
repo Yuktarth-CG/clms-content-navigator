@@ -30,6 +30,7 @@ import {
 import PDFPreview, { AdditionalLine } from './PDFPreview';
 import QuestionShortageResolver from './QuestionShortageResolver';
 import ChapterLOSelector from './ChapterLOSelector';
+import ManualQuestionPicker from './ManualQuestionPicker';
 import SectionEditor, { Section } from './SectionEditor';
 import AdditionalLinesEditor from './AdditionalLinesEditor';
 import StudentDetailsForm from './StudentDetailsForm';
@@ -47,6 +48,7 @@ const CustomisedGeneration = () => {
   const [generating, setGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const [contentType, setContentType] = useState<'chapters' | 'learningOutcomes'>('chapters');
+  const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
   
   // Blueprint state
   const [blueprints, setBlueprints] = useState<Blueprint[]>([]);
@@ -119,7 +121,7 @@ const CustomisedGeneration = () => {
   const [presetName, setPresetName] = useState('');
   const [presetDescription, setPresetDescription] = useState('');
 
-  const totalSteps = 5;
+  const totalSteps = 4;
   const stepProgress = (currentStep / totalSteps) * 100;
 
   // Blueprint functionality
@@ -1013,10 +1015,10 @@ const CustomisedGeneration = () => {
                 </Button>
                 <Button 
                   onClick={nextStep}
-                  disabled={!canProceedToStep4()}
+                  disabled={!canProceedToStep3()}
                   className="flex items-center space-x-2"
                 >
-                  <span>Next: Question Distribution</span>
+                  <span>Next: Select Questions</span>
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -1024,15 +1026,52 @@ const CustomisedGeneration = () => {
           </Card>
         )}
 
-        {/* Step 3: Question Distribution */}
+        {/* Step 3: Manual Question Selection */}
         {currentStep === 3 && (
           <Card className="animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">3</div>
-                <span>Question Distribution</span>
+                <span>Select Questions</span>
               </CardTitle>
-              <p className="text-muted-foreground">Configure question types and counts for each selected chapter</p>
+              <p className="text-muted-foreground">Choose specific questions for your assessment. Questions are sorted by difficulty (easiest first)</p>
+            </CardHeader>
+            <CardContent>
+              <ManualQuestionPicker
+                selectedChapters={formData.chapters}
+                selectedLearningOutcomes={formData.learningOutcomes}
+                selectedQuestions={selectedQuestions}
+                onQuestionsChange={setSelectedQuestions}
+                maxQuestions={30}
+              />
+
+              <div className="flex justify-between pt-6">
+                <Button variant="outline" onClick={prevStep} className="flex items-center space-x-2">
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Back</span>
+                </Button>
+                <Button 
+                  onClick={nextStep}
+                  disabled={!canProceedToStep4()}
+                  className="flex items-center space-x-2"
+                >
+                  <span>Next: Section Management</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Step 4: Section Management */}
+        {currentStep === 4 && (
+          <Card className="animate-fade-in">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                <span>Section Management</span>
+              </CardTitle>
+              <p className="text-muted-foreground">Organize your selected questions into sections</p>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Preset Management */}
@@ -1369,10 +1408,10 @@ const CustomisedGeneration = () => {
                 </Button>
                 <Button
                   onClick={nextStep}
-                  disabled={!canProceedToStep6()}
+                  disabled={sections.length === 0}
                   className="flex items-center space-x-2"
                 >
-                  <span>Next: Generate</span>
+                  <span>Next: Review & Generate</span>
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
@@ -1380,7 +1419,7 @@ const CustomisedGeneration = () => {
           </Card>
         )}
 
-        {/* Step 5: Generate */}
+        {/* Final Step: Generate */}
         {currentStep === 5 && (
           <Card className="animate-fade-in">
             <CardHeader>
@@ -1401,7 +1440,7 @@ const CustomisedGeneration = () => {
                   {formData.totalMarks && <div><strong>Total Marks:</strong> {formData.totalMarks}</div>}
                   {formData.duration && <div><strong>Duration:</strong> {formData.duration} minutes</div>}
                   <div><strong>Sections:</strong> {sections.length} section{sections.length !== 1 ? 's' : ''} configured</div>
-                  <div><strong>Question Types:</strong> {formData.allowedQuestionTypes.map(type => QuestionTypeLabels[type]).join(', ')}</div>
+                  <div><strong>Selected Questions:</strong> {selectedQuestions.length} questions manually selected</div>
                   <div><strong>Content:</strong> {contentType === 'chapters' ? `${formData.chapters.length} chapters selected` : `${formData.learningOutcomes.length} learning outcomes selected`}</div>
                   <div><strong>Distribution:</strong> {formData.distributionMethod === 'blooms' ? 'Bloom\'s Taxonomy' : 'Difficulty Levels'}</div>
                 </div>
@@ -1422,7 +1461,7 @@ const CustomisedGeneration = () => {
                 ) : (
                   <Button
                     onClick={handleCreate}
-                    disabled={!canGenerate() || generating}
+                    disabled={selectedQuestions.length === 0 || generating}
                     className="flex items-center space-x-2"
                   >
                     <span>{generating ? 'Generating...' : 'Generate Assessment'}</span>
