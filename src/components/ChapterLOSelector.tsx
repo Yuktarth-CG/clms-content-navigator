@@ -7,7 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Search, BookOpen, Target, ChevronRight, ChevronDown } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Search, BookOpen, Target, ChevronRight, ChevronDown, Grid, List } from 'lucide-react';
 
 // Mock data with cross-references
 const mockChapters = [{
@@ -237,6 +239,9 @@ const ChapterLOSelector: React.FC<ChapterLOSelectorProps> = ({
   const [loSearch, setLoSearch] = useState('');
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
   const [expandedLOs, setExpandedLOs] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const itemsPerPage = 6;
   console.log('ChapterLOSelector rendering, mode:', mode, 'expandedChapters:', expandedChapters);
 
   // Filter chapters based on search and show related LOs
@@ -274,6 +279,20 @@ const ChapterLOSelector: React.FC<ChapterLOSelectorProps> = ({
     });
     return mockChapters.filter(ch => relatedIds.has(ch.id));
   }, [selectedLearningOutcomes]);
+
+  // Pagination logic
+  const paginatedChapters = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredChapters.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredChapters, currentPage, itemsPerPage]);
+
+  const paginatedLOs = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredLOs.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredLOs, currentPage, itemsPerPage]);
+
+  const totalChapterPages = Math.ceil(filteredChapters.length / itemsPerPage);
+  const totalLOPages = Math.ceil(filteredLOs.length / itemsPerPage);
   const handleChapterToggle = (chapterId: string, checked: boolean) => {
     if (checked) {
       onChapterChange([...selectedChapters, chapterId]);
@@ -359,15 +378,41 @@ const ChapterLOSelector: React.FC<ChapterLOSelectorProps> = ({
                 {selectedChapters.length} selected
               </Badge>
             </div>
-            <Input
-              placeholder="Search chapters..."
-              value={chapterSearch}
-              onChange={(e) => setChapterSearch(e.target.value)}
-              className="max-w-xs"
-            />
+            <div className="flex items-center space-x-2">
+              <Input
+                placeholder="Search chapters..."
+                value={chapterSearch}
+                onChange={(e) => {
+                  setChapterSearch(e.target.value);
+                  setCurrentPage(1); // Reset to first page on search
+                }}
+                className="max-w-xs"
+              />
+              <div className="flex border rounded-md">
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-r-none"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-l-none"
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="grid gap-3">
-            {filteredChapters.map(chapter => (
+          
+          {/* Chapter List/Grid Container */}
+          <ScrollArea className="h-[500px] w-full rounded-md border p-4">
+            <div className={viewMode === 'grid' ? "grid grid-cols-2 gap-3" : "grid gap-3"}>
+              {paginatedChapters.map(chapter => (
               <Collapsible key={chapter.id} open={expandedChapters.has(chapter.id)} onOpenChange={() => handleChapterExpand(chapter.id)}>
                 <div className="border rounded-lg hover:bg-muted/50 transition-colors">
                   <div className="flex items-center space-x-3 p-3">
@@ -436,6 +481,44 @@ const ChapterLOSelector: React.FC<ChapterLOSelectorProps> = ({
                 </div>
               </Collapsible>
             ))}
+            </div>
+          </ScrollArea>
+          
+          {/* Pagination for Chapters */}
+          {filteredChapters.length > itemsPerPage && (
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalChapterPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(page)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(Math.min(totalChapterPages, currentPage + 1))}
+                    className={currentPage === totalChapterPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+          
+          {/* Summary info */}
+          <div className="text-sm text-muted-foreground">
+            Showing {paginatedChapters.length} of {filteredChapters.length} chapters
+            {chapterSearch && ` matching "${chapterSearch}"`}
           </div>
         </div>
       )}
@@ -451,15 +534,41 @@ const ChapterLOSelector: React.FC<ChapterLOSelectorProps> = ({
                 {selectedLearningOutcomes.length} selected
               </Badge>
             </div>
-            <Input
-              placeholder="Search learning outcomes..."
-              value={loSearch}
-              onChange={(e) => setLoSearch(e.target.value)}
-              className="max-w-xs"
-            />
+            <div className="flex items-center space-x-2">
+              <Input
+                placeholder="Search learning outcomes..."
+                value={loSearch}
+                onChange={(e) => {
+                  setLoSearch(e.target.value);
+                  setCurrentPage(1); // Reset to first page on search
+                }}
+                className="max-w-xs"
+              />
+              <div className="flex border rounded-md">
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-r-none"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-l-none"
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="grid gap-3">
-            {filteredLOs.map(lo => (
+          
+          {/* Learning Outcomes List/Grid Container */}
+          <ScrollArea className="h-[500px] w-full rounded-md border p-4">
+            <div className={viewMode === 'grid' ? "grid grid-cols-2 gap-3" : "grid gap-3"}>
+              {paginatedLOs.map(lo => (
               <Collapsible key={lo.id} open={expandedLOs.has(lo.id)} onOpenChange={() => handleLOExpand(lo.id)}>
                 <div className="border rounded-lg hover:bg-muted/50 transition-colors">
                   <div className="flex items-center space-x-3 p-3">
@@ -528,6 +637,44 @@ const ChapterLOSelector: React.FC<ChapterLOSelectorProps> = ({
                 </div>
               </Collapsible>
             ))}
+            </div>
+          </ScrollArea>
+          
+          {/* Pagination for Learning Outcomes */}
+          {filteredLOs.length > itemsPerPage && (
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalLOPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => setCurrentPage(page)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(Math.min(totalLOPages, currentPage + 1))}
+                    className={currentPage === totalLOPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+          
+          {/* Summary info */}
+          <div className="text-sm text-muted-foreground">
+            Showing {paginatedLOs.length} of {filteredLOs.length} learning outcomes
+            {loSearch && ` matching "${loSearch}"`}
           </div>
         </div>
       )}
