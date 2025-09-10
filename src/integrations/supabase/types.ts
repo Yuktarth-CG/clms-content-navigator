@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -319,6 +319,99 @@ export type Database = {
           },
         ]
       }
+      csv_upload_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_rows: number | null
+          errors: Json | null
+          file_name: string
+          file_path: string | null
+          id: string
+          processed_rows: number | null
+          state_id: string
+          status: string | null
+          total_rows: number | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_rows?: number | null
+          errors?: Json | null
+          file_name: string
+          file_path?: string | null
+          id?: string
+          processed_rows?: number | null
+          state_id: string
+          status?: string | null
+          total_rows?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_rows?: number | null
+          errors?: Json | null
+          file_name?: string
+          file_path?: string | null
+          id?: string
+          processed_rows?: number | null
+          state_id?: string
+          status?: string | null
+          total_rows?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input_file_name: string
+          input_file_path: string
+          job_config: Json
+          result_file_path: string | null
+          scheduled_for: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_file_name: string
+          input_file_path: string
+          job_config: Json
+          result_file_path?: string | null
+          scheduled_for: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["job_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_file_name?: string
+          input_file_path?: string
+          job_config?: Json
+          result_file_path?: string | null
+          scheduled_for?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["job_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       learning_outcomes: {
         Row: {
           bloom_level: number
@@ -350,6 +443,202 @@ export type Database = {
             columns: ["chapter_id"]
             isOneToOne: false
             referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      master_data_audit: {
+        Row: {
+          action: Database["public"]["Enums"]["master_data_action"]
+          id: string
+          metadata: Json | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string
+          state_id: string | null
+          table_name: string
+          timestamp: string | null
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["master_data_action"]
+          id?: string
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id: string
+          state_id?: string | null
+          table_name: string
+          timestamp?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["master_data_action"]
+          id?: string
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string
+          state_id?: string | null
+          table_name?: string
+          timestamp?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
+      master_data_entries: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          metadata: Json | null
+          name: Json
+          parent_id: string | null
+          state_id: string
+          type_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name: Json
+          parent_id?: string | null
+          state_id: string
+          type_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          metadata?: Json | null
+          name?: Json
+          parent_id?: string | null
+          state_id?: string
+          type_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_data_entries_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "master_data_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_data_entries_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "master_data_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      master_data_types: {
+        Row: {
+          created_at: string | null
+          display_name: string
+          display_order: number | null
+          id: string
+          is_hierarchical: boolean | null
+          is_mandatory: boolean | null
+          name: string
+          parent_type_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name: string
+          display_order?: number | null
+          id?: string
+          is_hierarchical?: boolean | null
+          is_mandatory?: boolean | null
+          name: string
+          parent_type_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string
+          display_order?: number | null
+          id?: string
+          is_hierarchical?: boolean | null
+          is_mandatory?: boolean | null
+          name?: string
+          parent_type_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_data_types_parent_type_id_fkey"
+            columns: ["parent_type_id"]
+            isOneToOne: false
+            referencedRelation: "master_data_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      state_field_config: {
+        Row: {
+          created_at: string | null
+          field_type_id: string | null
+          id: string
+          is_active: boolean | null
+          is_required: boolean | null
+          state_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          field_type_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          state_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          field_type_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          state_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "state_field_config_field_type_id_fkey"
+            columns: ["field_type_id"]
+            isOneToOne: false
+            referencedRelation: "master_data_types"
             referencedColumns: ["id"]
           },
         ]
@@ -453,6 +742,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_api_keys: {
+        Row: {
+          created_at: string
+          encrypted_key: string
+          id: string
+          is_active: boolean
+          is_exhausted: boolean
+          key_preview: string
+          last_used_at: string | null
+          provider: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          encrypted_key: string
+          id?: string
+          is_active?: boolean
+          is_exhausted?: boolean
+          key_preview: string
+          last_used_at?: string | null
+          provider: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          encrypted_key?: string
+          id?: string
+          is_active?: boolean
+          is_exhausted?: boolean
+          key_preview?: string
+          last_used_at?: string | null
+          provider?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       videos: {
         Row: {
           created_at: string
@@ -542,6 +867,8 @@ export type Database = {
       assessment_mode: "FA" | "SA"
       assessment_source: "Automated" | "Customised" | "CSV Upload" | "OCR"
       assessment_status: "Generated" | "Assigned" | "Archived"
+      job_status: "pending" | "running" | "completed" | "failed" | "cancelled"
+      master_data_action: "CREATE" | "UPDATE" | "DELETE" | "BULK_UPLOAD"
       question_type:
         | "MCQ"
         | "FITB"
@@ -681,6 +1008,8 @@ export const Constants = {
       assessment_mode: ["FA", "SA"],
       assessment_source: ["Automated", "Customised", "CSV Upload", "OCR"],
       assessment_status: ["Generated", "Assigned", "Archived"],
+      job_status: ["pending", "running", "completed", "failed", "cancelled"],
+      master_data_action: ["CREATE", "UPDATE", "DELETE", "BULK_UPLOAD"],
       question_type: [
         "MCQ",
         "FITB",
