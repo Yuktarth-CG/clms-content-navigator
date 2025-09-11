@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import MasterDataManagement from "./components/MasterDataManagement";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/master-data/*" element={<MasterDataManagement />} />
             <Route path="/ocr/test-paper" element={<Index />} />
             <Route path="/ocr/worksheet" element={<Index />} />
             <Route path="/ocr/templates" element={<Index />} />

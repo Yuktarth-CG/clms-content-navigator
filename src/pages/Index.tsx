@@ -18,6 +18,7 @@ import QuestionPaperCreation from '@/components/QuestionPaperCreation';
 import ManageAssessments from '@/components/ManageAssessments';
 import Settings from '@/components/Settings';
 import DebugCenter from '@/components/DebugCenter';
+import MasterDataManagement from '@/components/MasterDataManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, FileText, Upload, Download, CheckCircle, TrendingUp, Clock, Shield, Layout } from 'lucide-react';
 import { UserProvider, useUser } from '@/contexts/UserContext';
@@ -71,6 +72,8 @@ const IndexContent = () => {
           return <Settings />;
         case 'debug-center':
           return <DebugCenter />;
+        case 'master-data':
+          return <MasterDataManagement />;
         default:
           return <QuestionLibrary />;
       }

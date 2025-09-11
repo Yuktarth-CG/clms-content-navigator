@@ -19,7 +19,8 @@ import {
   FolderOpen,
   Bug,
   Brain,
-  Lightbulb
+  Lightbulb,
+  Database
 } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -145,6 +146,17 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
       icon: Shield, 
       requiresPermission: 'canViewAuditLogs',
       tooltip: 'Track all system activities and changes for security and compliance monitoring'
+    });
+  }
+
+  // Add Master Data Management for admins and above
+  if (user?.role === 'Admin' || user?.role === 'SuperAdmin') {
+    menuItems.push({ 
+      id: 'master-data', 
+      label: 'Master Data', 
+      icon: Database, 
+      requiresPermission: null,
+      tooltip: 'Manage curriculum framework and content taxonomy with flexible data management tools'
     });
   }
 
