@@ -3,8 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Info, Plus, Trash2, Link2, CheckCircle2 } from 'lucide-react';
@@ -13,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const MasterDataDashboard = () => {
   const { toast } = useToast();
-  const [selectedState, setSelectedState] = useState('default');
+  const selectedState = 'default'; // Each state has their own CLMS instance
   const [selectedCLMSTag, setSelectedCLMSTag] = useState<string | null>(null);
   const [newTagName, setNewTagName] = useState('');
   const [newTagNameHindi, setNewTagNameHindi] = useState('');
@@ -93,28 +91,6 @@ const MasterDataDashboard = () => {
 
   return (
     <div className="space-y-4">
-      {/* State Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Select Your State</CardTitle>
-          <CardDescription>Choose which state's curriculum you're working with</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Select value={selectedState} onValueChange={setSelectedState}>
-            <SelectTrigger className="w-full max-w-xs">
-              <SelectValue placeholder="Select a state" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="default">Default State</SelectItem>
-              <SelectItem value="maharashtra">Maharashtra</SelectItem>
-              <SelectItem value="karnataka">Karnataka</SelectItem>
-              <SelectItem value="tamil_nadu">Tamil Nadu</SelectItem>
-              <SelectItem value="gujarat">Gujarat</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
       {/* Main Mapping Interface */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Left Side: CLMS Tags */}
@@ -125,45 +101,45 @@ const MasterDataDashboard = () => {
               CLMS Tags
             </CardTitle>
             <CardDescription>
-              Standard curriculum tags - hover to see descriptions
+              Standard curriculum tags - click to select and add your own tags
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 overflow-hidden">
             <ScrollArea className="h-full pr-4">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {clmsTags?.map((tag) => (
-                  <TooltipProvider key={tag.id}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant={selectedCLMSTag === tag.id ? "default" : "outline"}
-                          className="w-full justify-between h-auto py-3"
-                          onClick={() => setSelectedCLMSTag(tag.id)}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{tag.display_name}</span>
-                            {tag.is_mandatory && (
-                              <Badge variant="secondary" className="text-xs">Required</Badge>
-                            )}
-                          </div>
-                          {selectedCLMSTag === tag.id && (
-                            <CheckCircle2 className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-xs">
-                        <p className="font-semibold">{tag.display_name}</p>
-                        <p className="text-sm mt-1">
-                          {tag.is_hierarchical 
-                            ? "This is a hierarchical field that can have parent-child relationships." 
-                            : "This is a standalone field."}
-                        </p>
+                  <div
+                    key={tag.id}
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      selectedCLMSTag === tag.id
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                    }`}
+                    onClick={() => setSelectedCLMSTag(tag.id)}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-base">{tag.display_name}</h4>
+                      </div>
+                      <div className="flex items-center gap-2">
                         {tag.is_mandatory && (
-                          <p className="text-sm mt-1 text-amber-500">This field is required for all entries.</p>
+                          <Badge variant="secondary" className="text-xs">Required</Badge>
                         )}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                        {tag.is_hierarchical && (
+                          <Badge variant="outline" className="text-xs">Hierarchical</Badge>
+                        )}
+                        {selectedCLMSTag === tag.id && (
+                          <CheckCircle2 className="h-5 w-5 text-primary" />
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {tag.is_hierarchical 
+                        ? "This field can have parent-child relationships (e.g., State → District → Block)." 
+                        : "This is a standalone field without hierarchy."}
+                      {tag.is_mandatory && " This field is required for all entries."}
+                    </p>
+                  </div>
                 ))}
               </div>
             </ScrollArea>
