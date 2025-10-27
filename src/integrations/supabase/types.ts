@@ -19,7 +19,7 @@ export type Database = {
           action: string
           assessment_id: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           metadata: Json | null
           timestamp: string
           user_id: string
@@ -29,7 +29,7 @@ export type Database = {
           action: string
           assessment_id: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           timestamp?: string
           user_id: string
@@ -39,7 +39,7 @@ export type Database = {
           action?: string
           assessment_id?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           timestamp?: string
           user_id?: string
@@ -412,6 +412,106 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_graph_fields: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          field_type_id: string
+          graph_id: string
+          hierarchy_level: number
+          id: string
+          is_mandatory: boolean | null
+          parent_field_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          field_type_id: string
+          graph_id: string
+          hierarchy_level: number
+          id?: string
+          is_mandatory?: boolean | null
+          parent_field_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          field_type_id?: string
+          graph_id?: string
+          hierarchy_level?: number
+          id?: string
+          is_mandatory?: boolean | null
+          parent_field_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_graph_fields_field_type_id_fkey"
+            columns: ["field_type_id"]
+            isOneToOne: false
+            referencedRelation: "master_data_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_graph_fields_graph_id_fkey"
+            columns: ["graph_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_graphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_graph_fields_parent_field_id_fkey"
+            columns: ["parent_field_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_graph_fields"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_graphs: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          description: string | null
+          display_name: string
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          state_id: string
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          state_id?: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          state_id?: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: []
+      }
       learning_outcomes: {
         Row: {
           bloom_level: number
@@ -493,40 +593,59 @@ export type Database = {
         Row: {
           created_at: string | null
           created_by: string | null
+          graph_id: string | null
           id: string
           is_active: boolean | null
           metadata: Json | null
           name: Json
           parent_id: string | null
+          published_at: string | null
+          published_by: string | null
           state_id: string
+          status: string | null
           type_id: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           created_by?: string | null
+          graph_id?: string | null
           id?: string
           is_active?: boolean | null
           metadata?: Json | null
           name: Json
           parent_id?: string | null
+          published_at?: string | null
+          published_by?: string | null
           state_id: string
+          status?: string | null
           type_id?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           created_by?: string | null
+          graph_id?: string | null
           id?: string
           is_active?: boolean | null
           metadata?: Json | null
           name?: Json
           parent_id?: string | null
+          published_at?: string | null
+          published_by?: string | null
           state_id?: string
+          status?: string | null
           type_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "master_data_entries_graph_id_fkey"
+            columns: ["graph_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_graphs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "master_data_entries_parent_id_fkey"
             columns: ["parent_id"]
@@ -604,6 +723,44 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      publication_audit: {
+        Row: {
+          graph_id: string
+          id: string
+          publication_metadata: Json | null
+          published_by: string
+          published_by_name: string
+          records_count: number
+          timestamp: string | null
+        }
+        Insert: {
+          graph_id: string
+          id?: string
+          publication_metadata?: Json | null
+          published_by: string
+          published_by_name: string
+          records_count: number
+          timestamp?: string | null
+        }
+        Update: {
+          graph_id?: string
+          id?: string
+          publication_metadata?: Json | null
+          published_by?: string
+          published_by_name?: string
+          records_count?: number
+          timestamp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publication_audit_graph_id_fkey"
+            columns: ["graph_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_graphs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       state_field_config: {
         Row: {
@@ -778,6 +935,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          state_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          state_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          state_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       videos: {
         Row: {
           created_at: string
@@ -861,9 +1045,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role:
+        | "system_admin"
+        | "state_admin"
+        | "lead_admin"
+        | "content_creator"
       assessment_mode: "FA" | "SA"
       assessment_source: "Automated" | "Customised" | "CSV Upload" | "OCR"
       assessment_status: "Generated" | "Assigned" | "Archived"
@@ -1005,6 +1200,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: [
+        "system_admin",
+        "state_admin",
+        "lead_admin",
+        "content_creator",
+      ],
       assessment_mode: ["FA", "SA"],
       assessment_source: ["Automated", "Customised", "CSV Upload", "OCR"],
       assessment_status: ["Generated", "Assigned", "Archived"],
