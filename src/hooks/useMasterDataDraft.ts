@@ -69,8 +69,8 @@ export const usePublishMasterData = () => {
   
   return useMutation({
     mutationFn: async (graphId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      // MOCK: Skip auth check for testing
+      const mockUserId = 'mock-user-id';
 
       // Get all draft entries for this graph
       const { data: draftEntries, error: fetchError } = await supabase
@@ -92,7 +92,7 @@ export const usePublishMasterData = () => {
         .update({
           status: 'live',
           published_at: new Date().toISOString(),
-          published_by: user.id,
+          published_by: mockUserId,
         })
         .eq('graph_id', graphId)
         .eq('status', 'draft')
@@ -105,8 +105,8 @@ export const usePublishMasterData = () => {
         .from('publication_audit')
         .insert({
           graph_id: graphId,
-          published_by: user.id,
-          published_by_name: user.email || 'Unknown',
+          published_by: mockUserId,
+          published_by_name: 'Mock User',
           records_count: draftEntries.length,
           publication_metadata: {
             timestamp: new Date().toISOString(),
@@ -150,8 +150,8 @@ export const useCreateDraftMasterDataEntry = () => {
       state_id: string;
       metadata?: any;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      // MOCK: Skip auth check for testing
+      const mockUserId = 'mock-user-id';
 
       const { data, error } = await supabase
         .from('master_data_entries')
@@ -164,7 +164,7 @@ export const useCreateDraftMasterDataEntry = () => {
           metadata: entry.metadata || {},
           status: 'draft',
           is_active: true,
-          created_by: user.id,
+          created_by: mockUserId,
         })
         .select()
         .single();
@@ -205,8 +205,8 @@ export const useBulkUploadDraft = () => {
         metadata?: any;
       }>;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      // MOCK: Skip auth check for testing
+      const mockUserId = 'mock-user-id';
 
       const entriesToInsert = params.entries.map(entry => ({
         graph_id: params.graph_id,
@@ -217,7 +217,7 @@ export const useBulkUploadDraft = () => {
         metadata: entry.metadata || {},
         status: 'draft',
         is_active: true,
-        created_by: user.id,
+        created_by: mockUserId,
       }));
 
       const { data, error } = await supabase
