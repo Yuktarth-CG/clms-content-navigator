@@ -66,8 +66,8 @@ export const useCreateKnowledgeGraph = () => {
         display_order: number;
       }>;
     }) => {
-      // MOCK: Skip auth check for testing
-      const mockUserId = 'mock-user-id';
+      // MOCK: Use a valid UUID for testing
+      const mockUserId = '00000000-0000-0000-0000-000000000001';
 
       // Create the graph
       const { data: graphData, error: graphError } = await supabase

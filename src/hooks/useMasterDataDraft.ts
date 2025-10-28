@@ -69,8 +69,8 @@ export const usePublishMasterData = () => {
   
   return useMutation({
     mutationFn: async (graphId: string) => {
-      // MOCK: Skip auth check for testing
-      const mockUserId = 'mock-user-id';
+      // MOCK: Use a valid UUID for testing
+      const mockUserId = '00000000-0000-0000-0000-000000000001';
 
       // Get all draft entries for this graph
       const { data: draftEntries, error: fetchError } = await supabase
@@ -150,8 +150,8 @@ export const useCreateDraftMasterDataEntry = () => {
       state_id: string;
       metadata?: any;
     }) => {
-      // MOCK: Skip auth check for testing
-      const mockUserId = 'mock-user-id';
+      // MOCK: Use a valid UUID for testing
+      const mockUserId = '00000000-0000-0000-0000-000000000001';
 
       const { data, error } = await supabase
         .from('master_data_entries')
@@ -205,8 +205,8 @@ export const useBulkUploadDraft = () => {
         metadata?: any;
       }>;
     }) => {
-      // MOCK: Skip auth check for testing
-      const mockUserId = 'mock-user-id';
+      // MOCK: Use a valid UUID for testing
+      const mockUserId = '00000000-0000-0000-0000-000000000001';
 
       const entriesToInsert = params.entries.map(entry => ({
         graph_id: params.graph_id,
