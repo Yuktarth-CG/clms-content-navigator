@@ -5,13 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Trash2, MoveUp, MoveDown, Lock } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, MoveUp, MoveDown, Lock, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useMasterDataTypes } from '@/hooks/useMasterData';
 import { useCreateKnowledgeGraph } from '@/hooks/useKnowledgeGraphs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Mandatory fields that should be pre-selected and locked
 const MANDATORY_FIELDS = [
@@ -21,6 +22,18 @@ const MANDATORY_FIELDS = [
   'Evidence of Misconception',
   'Evidence of Calculation Error'
 ];
+
+// Field descriptions for tooltips
+const FIELD_DESCRIPTIONS: Record<string, string> = {
+  'Subject': 'The subject area or domain of study (e.g., Mathematics, Science, English)',
+  'Learning Outcome': 'The specific learning objective or competency that students should achieve',
+  'Skill': 'The particular skill or ability being assessed or taught',
+  'Evidence of Misconception': 'Common errors or misunderstandings that students may have about this concept',
+  'Evidence of Calculation Error': 'Typical computational mistakes or procedural errors students make',
+  'Grade': 'The grade or year level for which this content is intended',
+  'Chapter': 'The chapter or unit within the curriculum structure',
+  'Topic': 'The specific topic or lesson within a chapter'
+};
 
 interface CustomField {
   id: string;
@@ -352,6 +365,20 @@ const KnowledgeGraphCreator = () => {
                         {getFieldDisplayName(field)}
                         {field.is_locked && (
                           <Lock className="h-3 w-3 text-muted-foreground" />
+                        )}
+                        {field.is_mandatory && !field.is_custom && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="max-w-xs">
+                                  {FIELD_DESCRIPTIONS[masterDataTypes?.find(t => t.id === field.field_type_id)?.display_name || ''] || 'Mandatory field for this knowledge graph'}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         )}
                         {field.is_custom && (
                           <Badge variant="secondary" className="text-xs">Custom</Badge>
