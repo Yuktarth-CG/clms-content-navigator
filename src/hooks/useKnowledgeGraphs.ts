@@ -66,10 +66,7 @@ export const useCreateKnowledgeGraph = () => {
         display_order: number;
       }>;
     }) => {
-      // MOCK: Use a valid UUID for testing
-      const mockUserId = '00000000-0000-0000-0000-000000000001';
-
-      // Create the graph
+      // Create the graph (created_by can be null for mock flow)
       const { data: graphData, error: graphError } = await supabase
         .from('knowledge_graphs')
         .insert({
@@ -78,7 +75,7 @@ export const useCreateKnowledgeGraph = () => {
           description: graph.description,
           state_id: graph.state_id,
           is_default: graph.is_default || false,
-          created_by: mockUserId,
+          created_by: null,
         })
         .select()
         .single();

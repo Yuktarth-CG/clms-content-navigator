@@ -69,9 +69,6 @@ export const usePublishMasterData = () => {
   
   return useMutation({
     mutationFn: async (graphId: string) => {
-      // MOCK: Use a valid UUID for testing
-      const mockUserId = '00000000-0000-0000-0000-000000000001';
-
       // Get all draft entries for this graph
       const { data: draftEntries, error: fetchError } = await supabase
         .from('master_data_entries')
@@ -92,7 +89,7 @@ export const usePublishMasterData = () => {
         .update({
           status: 'live',
           published_at: new Date().toISOString(),
-          published_by: mockUserId,
+          published_by: null,
         })
         .eq('graph_id', graphId)
         .eq('status', 'draft')
@@ -105,7 +102,7 @@ export const usePublishMasterData = () => {
         .from('publication_audit')
         .insert({
           graph_id: graphId,
-          published_by: mockUserId,
+          published_by: null,
           published_by_name: 'Mock User',
           records_count: draftEntries.length,
           publication_metadata: {
@@ -150,9 +147,6 @@ export const useCreateDraftMasterDataEntry = () => {
       state_id: string;
       metadata?: any;
     }) => {
-      // MOCK: Use a valid UUID for testing
-      const mockUserId = '00000000-0000-0000-0000-000000000001';
-
       const { data, error } = await supabase
         .from('master_data_entries')
         .insert({
@@ -164,7 +158,7 @@ export const useCreateDraftMasterDataEntry = () => {
           metadata: entry.metadata || {},
           status: 'draft',
           is_active: true,
-          created_by: mockUserId,
+          created_by: null,
         })
         .select()
         .single();
@@ -205,9 +199,6 @@ export const useBulkUploadDraft = () => {
         metadata?: any;
       }>;
     }) => {
-      // MOCK: Use a valid UUID for testing
-      const mockUserId = '00000000-0000-0000-0000-000000000001';
-
       const entriesToInsert = params.entries.map(entry => ({
         graph_id: params.graph_id,
         type_id: entry.type_id,
@@ -217,7 +208,7 @@ export const useBulkUploadDraft = () => {
         metadata: entry.metadata || {},
         status: 'draft',
         is_active: true,
-        created_by: mockUserId,
+        created_by: null,
       }));
 
       const { data, error } = await supabase

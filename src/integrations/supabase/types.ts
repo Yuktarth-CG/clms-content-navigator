@@ -473,7 +473,7 @@ export type Database = {
       knowledge_graphs: {
         Row: {
           created_at: string | null
-          created_by: string
+          created_by: string | null
           description: string | null
           display_name: string
           id: string
@@ -486,7 +486,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          created_by: string
+          created_by?: string | null
           description?: string | null
           display_name: string
           id?: string
@@ -499,7 +499,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          created_by?: string
+          created_by?: string | null
           description?: string | null
           display_name?: string
           id?: string
