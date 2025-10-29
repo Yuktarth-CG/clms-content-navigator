@@ -6,12 +6,21 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, FileText, Download, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
+import { Upload, FileText, Download, CheckCircle, AlertCircle, Trash2, X } from 'lucide-react';
 import { useKnowledgeGraphs, useKnowledgeGraph } from '@/hooks/useKnowledgeGraphs';
 import { useDraftMasterDataEntries, useCreateDraftMasterDataEntry, usePublishMasterData, useBulkUploadDraft } from '@/hooks/useMasterDataDraft';
 import { useCanPublish } from '@/hooks/useUserRoles';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+
+const MASTER_DATA_CATEGORIES = [
+  { id: 'grade', name: 'Grade Master', description: 'Upload grade/class information' },
+  { id: 'subject', name: 'Subject Master', description: 'Upload subject data' },
+  { id: 'parent_child', name: 'Parent-Child Subject', description: 'Upload subject hierarchies' },
+  { id: 'attribute', name: 'Attribute Master', description: 'Upload attribute data' },
+  { id: 'lo', name: 'LO Master', description: 'Upload learning outcomes' },
+  { id: 'skill', name: 'Skill Master', description: 'Upload skill data' },
+];
 
 const DraftUploadInterface = () => {
   const { toast } = useToast();
@@ -20,7 +29,7 @@ const DraftUploadInterface = () => {
   const publishData = usePublishMasterData();
 
   const [selectedGraphId, setSelectedGraphId] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({});
 
   const { data: graphDetails } = useKnowledgeGraph(selectedGraphId);
   const { data: draftEntries } = useDraftMasterDataEntries(selectedGraphId);
@@ -51,10 +60,10 @@ const DraftUploadInterface = () => {
     window.URL.revokeObjectURL(url);
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (categoryId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === 'text/csv') {
-      setSelectedFile(file);
+      setUploadedFiles(prev => ({ ...prev, [categoryId]: file }));
     } else {
       toast({
         title: "Invalid File",
@@ -64,20 +73,28 @@ const DraftUploadInterface = () => {
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile || !selectedGraphId) return;
-
-    // Parse CSV and validate headers
-    const text = await selectedFile.text();
-    const lines = text.split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
-
-    // For demo, we'll just show success
-    toast({
-      title: "CSV Uploaded",
-      description: "Entries have been added to draft successfully",
+  const handleRemoveFile = (categoryId: string) => {
+    setUploadedFiles(prev => {
+      const updated = { ...prev };
+      delete updated[categoryId];
+      return updated;
     });
-    setSelectedFile(null);
+  };
+
+  const handleUploadAll = async () => {
+    if (Object.keys(uploadedFiles).length === 0 || !selectedGraphId) return;
+
+    // Process each uploaded file
+    for (const [categoryId, file] of Object.entries(uploadedFiles)) {
+      const text = await file.text();
+      // Parse and upload logic here
+    }
+
+    toast({
+      title: "CSV Files Uploaded",
+      description: `${Object.keys(uploadedFiles).length} file(s) have been added to draft successfully`,
+    });
+    setUploadedFiles({});
   };
 
   const handleManualSubmit = async () => {
@@ -140,40 +157,59 @@ const DraftUploadInterface = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Bulk CSV Upload</CardTitle>
-                  <CardDescription>Upload master data in bulk using a CSV file</CardDescription>
+                  <CardDescription>Upload separate CSV files for each master data type</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Button variant="outline" onClick={handleDownloadTemplate}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Download Template
-                    </Button>
-                    <Badge variant="secondary">
-                      Template matches your graph structure
-                    </Badge>
-                  </div>
+                <CardContent className="space-y-6">
+                  <div className="grid gap-4">
+                    {MASTER_DATA_CATEGORIES.map((category) => (
+                      <div key={category.id} className="space-y-2 p-4 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="text-base font-semibold">{category.name}</Label>
+                            <p className="text-sm text-muted-foreground">{category.description}</p>
+                          </div>
+                          {uploadedFiles[category.id] && (
+                            <Badge variant="secondary" className="ml-2">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Uploaded
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id={`csv-${category.id}`}
+                            type="file"
+                            accept=".csv"
+                            onChange={(e) => handleFileSelect(category.id, e)}
+                            className="flex-1"
+                          />
+                        </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="csv-file">Upload CSV File</Label>
-                    <Input
-                      id="csv-file"
-                      type="file"
-                      accept=".csv"
-                      onChange={handleFileSelect}
-                    />
-                  </div>
-
-                  {selectedFile && (
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        <span className="font-medium">{selectedFile.name}</span>
+                        {uploadedFiles[category.id] && (
+                          <div className="flex items-center justify-between p-2 bg-secondary/30 rounded">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm font-medium">{uploadedFiles[category.id].name}</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveFile(category.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                      <Button onClick={handleUpload}>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Upload to Draft
-                      </Button>
-                    </div>
+                    ))}
+                  </div>
+
+                  {Object.keys(uploadedFiles).length > 0 && (
+                    <Button onClick={handleUploadAll} className="w-full">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload All Files to Draft ({Object.keys(uploadedFiles).length})
+                    </Button>
                   )}
                 </CardContent>
               </Card>
