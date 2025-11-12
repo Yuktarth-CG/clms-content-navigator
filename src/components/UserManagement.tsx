@@ -14,7 +14,7 @@ import { Plus, Edit, Trash2, Search, Users, Shield, AlertTriangle, Upload, Downl
 import { User, UserRole } from '@/types/content';
 import { getRolePermissions } from '@/utils/permissions';
 import BulkUserUpload from './BulkUserUpload';
-import EnhancedPermissions from './EnhancedPermissions';
+import PermissionsMatrix from './PermissionsMatrix';
 
 interface CMSPermissions {
   view: boolean;
@@ -1028,7 +1028,7 @@ const CreateUserForm = ({
         </Alert>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         <div>
           <Label htmlFor="name">Name *</Label>
           <Input
@@ -1045,25 +1045,34 @@ const CreateUserForm = ({
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            placeholder="Enter email address"
+            placeholder="user@domain.com"
           />
         </div>
         <div>
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="password">Password {!editingUser && '*'}</Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="user@domain.com"
+            disabled={!!editingUser}
+          />
+        </div>
+        <div>
+          <Label htmlFor="phone">Phone</Label>
           <Input
             id="phone"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            placeholder="+91-XXXXXXXXXX"
+            placeholder="+1 (555) 123-4567"
           />
         </div>
       </div>
 
       <div>
-        <Label>Roles * (Select one or more)</Label>
-        <div className="grid grid-cols-2 gap-3 mt-2 p-4 border rounded-lg bg-muted/20">
+        <Label>Role</Label>
+        <div className="space-y-3 mt-2">
           {roles.map((role) => (
-            <div key={role.id} className="flex items-start space-x-3 p-3 border rounded bg-background">
+            <div key={role.id} className="flex items-start space-x-3">
               <Checkbox
                 id={`role-${role.id}`}
                 checked={formData.roles.includes(role.name)}
@@ -1073,17 +1082,27 @@ const CreateUserForm = ({
                 <Label htmlFor={`role-${role.id}`} className="cursor-pointer font-medium">
                   {role.name}
                 </Label>
-                <p className="text-xs text-muted-foreground mt-1">{role.description}</p>
+                <p className="text-sm text-muted-foreground">{role.description}</p>
               </div>
             </div>
           ))}
         </div>
+        
         {formData.roles.length > 0 && (
-          <Alert className="mt-3">
-            <AlertDescription>
-              <strong>Permissions are merged from all selected roles.</strong> The user will have the union of all permissions from their assigned roles. Role permissions cannot be modified.
-            </AlertDescription>
-          </Alert>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {formData.roles.map((roleName) => (
+              <Badge key={roleName} variant="default" className="px-3 py-1">
+                {roleName}
+                <button
+                  type="button"
+                  onClick={() => handleRoleToggle(roleName)}
+                  className="ml-2 hover:text-destructive"
+                >
+                  ×
+                </button>
+              </Badge>
+            ))}
+          </div>
         )}
       </div>
 
@@ -1117,9 +1136,9 @@ const CreateUserForm = ({
         </div>
       )}
 
-      <EnhancedPermissions
-        permissions={formData.enhancedPermissions}
-        onPermissionChange={handlePermissionChange}
+      <PermissionsMatrix 
+        selectedRoles={formData.roles}
+        mergedPermissions={getMergedPermissions()}
       />
 
       <div className="flex justify-end space-x-2">
@@ -1292,9 +1311,9 @@ const CreateRoleForm = ({
         </div>
       </div>
 
-      <EnhancedPermissions
-        permissions={formData.defaultPermissions}
-        onPermissionChange={handlePermissionChange}
+      <PermissionsMatrix 
+        selectedRoles={[formData.name]}
+        mergedPermissions={formData.defaultPermissions}
       />
 
       <div className="flex justify-end space-x-2">
