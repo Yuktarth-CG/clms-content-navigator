@@ -74,6 +74,7 @@ interface TaggingPermissions {
 
 interface ExtendedUser extends User {
   phone?: string;
+  roles: string[]; // Changed from single role to multiple roles
   cmsPermissions: CMSPermissions;
   lmsPermissions: LMSPermissions;
   exportPermissions: ExportPermissions;
@@ -111,7 +112,8 @@ const UserManagement = () => {
       name: 'Sarah Johnson',
       email: 'sarah.johnson@example.com',
       phone: '+91-9876543210',
-      role: 'SuperAdmin',
+      role: 'SuperAdmin', // Keep for compatibility
+      roles: ['SuperAdmin'], // New multiple roles field
       permissions: getRolePermissions('SuperAdmin'),
       createdAt: '2024-01-01',
       lastLogin: '2024-06-24',
@@ -173,7 +175,8 @@ const UserManagement = () => {
       name: 'John Admin',
       email: 'john.admin@example.com',
       phone: '+91-9876543211',
-      role: 'Admin',
+      role: 'Admin', // Keep for compatibility
+      roles: ['Admin', 'Creator'], // Multiple roles example
       permissions: getRolePermissions('Admin'),
       createdAt: '2024-02-01',
       lastLogin: '2024-06-23',
@@ -529,7 +532,7 @@ const UserManagement = () => {
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchTerm.toLowerCase())
+    user.roles.some(role => role.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const filteredRoles = roles.filter(role =>
@@ -623,7 +626,7 @@ const UserManagement = () => {
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
-                    <TableHead>Role</TableHead>
+                    <TableHead>Roles</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last Login</TableHead>
                     <TableHead>Actions</TableHead>
@@ -636,7 +639,11 @@ const UserManagement = () => {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.phone || 'N/A'}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{user.role}</Badge>
+                        <div className="flex flex-wrap gap-1">
+                          {user.roles.map((role) => (
+                            <Badge key={role} variant="secondary">{role}</Badge>
+                          ))}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant={user.isActive ? 'default' : 'destructive'}>
@@ -751,7 +758,7 @@ const UserManagement = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              const usersWithRole = users.filter(u => u.role === role.name);
+                              const usersWithRole = users.filter(u => u.roles.includes(role.name));
                               if (usersWithRole.length > 0) {
                                 alert('Cannot delete role with assigned users. Please reassign users first.');
                                 return;
@@ -883,7 +890,7 @@ const CreateUserForm = ({
     name: editingUser?.name || '',
     email: editingUser?.email || '',
     phone: editingUser?.phone || '',
-    role: editingUser?.role || '',
+    roles: editingUser?.roles || [], // Changed to multiple roles
     languages: editingUser?.languages || [],
     enhancedPermissions: editingUser?.cmsPermissions || {}
   });
@@ -893,15 +900,38 @@ const CreateUserForm = ({
 
   const availableLanguages = ['English', 'Hindi', 'Tamil', 'Telugu', 'Marathi', 'Bengali'];
 
-  const handleRoleChange = (role: string) => {
-    setFormData({ ...formData, role });
-    // Set default permissions based on role
-    const rolePermissions = getRolePermissions(role as UserRole);
+  const handleRoleToggle = (roleName: string) => {
+    const newRoles = formData.roles.includes(roleName)
+      ? formData.roles.filter(r => r !== roleName)
+      : [...formData.roles, roleName];
+    
     setFormData(prev => ({
       ...prev,
-      role,
-      enhancedPermissions: rolePermissions
+      roles: newRoles
     }));
+  };
+
+  // Calculate merged permissions from all selected roles
+  const getMergedPermissions = () => {
+    if (formData.roles.length === 0) return {};
+    
+    // Start with the first role's permissions
+    const merged = { ...roles.find(r => r.name === formData.roles[0])?.defaultPermissions };
+    
+    // Merge permissions from all roles (union of permissions)
+    formData.roles.forEach(roleName => {
+      const role = roles.find(r => r.name === roleName);
+      if (role) {
+        Object.keys(role.defaultPermissions).forEach(module => {
+          Object.keys(role.defaultPermissions[module]).forEach(permission => {
+            if (!merged[module]) merged[module] = {};
+            merged[module][permission] = merged[module][permission] || role.defaultPermissions[module][permission];
+          });
+        });
+      }
+    });
+    
+    return merged;
   };
 
   const handlePermissionChange = (path: string[], value: boolean) => {
@@ -930,7 +960,7 @@ const CreateUserForm = ({
     
     if (!formData.name.trim()) newErrors.push('Name is required');
     if (!formData.email.trim()) newErrors.push('Email is required');
-    if (!formData.role) newErrors.push('Role is required');
+    if (formData.roles.length === 0) newErrors.push('At least one role is required');
     
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -939,28 +969,30 @@ const CreateUserForm = ({
     }
     
     // Translator validation
-    if (formData.role === 'Translator' && formData.languages.length === 0) {
+    if (formData.roles.includes('Translator') && formData.languages.length === 0) {
       newErrors.push('Select at least one language for translation');
     }
     
     setErrors(newErrors);
     
     if (newErrors.length === 0) {
+      const mergedPerms = getMergedPermissions();
       const userData: ExtendedUser = {
         id: editingUser?.id || '',
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        role: formData.role as UserRole,
-        permissions: getRolePermissions(formData.role as UserRole),
+        role: formData.roles[0] as UserRole, // Keep first role for compatibility
+        roles: formData.roles,
+        permissions: getRolePermissions(formData.roles[0] as UserRole),
         createdAt: editingUser?.createdAt || new Date().toISOString(),
         lastLogin: editingUser?.lastLogin,
         isActive: editingUser?.isActive ?? true,
-        cmsPermissions: editingUser?.cmsPermissions || getDefaultCMSPermissions(),
-        lmsPermissions: editingUser?.lmsPermissions || getDefaultLMSPermissions(),
-        exportPermissions: editingUser?.exportPermissions || getDefaultExportPermissions(),
-        userMgmtPermissions: editingUser?.userMgmtPermissions || getDefaultUserMgmtPermissions(),
-        taggingPermissions: editingUser?.taggingPermissions || getDefaultTaggingPermissions(),
+        cmsPermissions: (mergedPerms as any).cms || getDefaultCMSPermissions(),
+        lmsPermissions: (mergedPerms as any).lms || getDefaultLMSPermissions(),
+        exportPermissions: (mergedPerms as any).export || getDefaultExportPermissions(),
+        userMgmtPermissions: (mergedPerms as any).userMgmt || getDefaultUserMgmtPermissions(),
+        taggingPermissions: (mergedPerms as any).tagging || getDefaultTaggingPermissions(),
         languages: formData.languages
       };
       
@@ -1028,22 +1060,34 @@ const CreateUserForm = ({
       </div>
 
       <div>
-        <Label htmlFor="role">Role *</Label>
-        <Select value={formData.role} onValueChange={handleRoleChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a role" />
-          </SelectTrigger>
-          <SelectContent>
-            {roles.map((role) => (
-              <SelectItem key={role.id} value={role.name}>
-                {role.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label>Roles * (Select one or more)</Label>
+        <div className="grid grid-cols-2 gap-3 mt-2 p-4 border rounded-lg bg-muted/20">
+          {roles.map((role) => (
+            <div key={role.id} className="flex items-start space-x-3 p-3 border rounded bg-background">
+              <Checkbox
+                id={`role-${role.id}`}
+                checked={formData.roles.includes(role.name)}
+                onCheckedChange={() => handleRoleToggle(role.name)}
+              />
+              <div className="flex-1">
+                <Label htmlFor={`role-${role.id}`} className="cursor-pointer font-medium">
+                  {role.name}
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">{role.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        {formData.roles.length > 0 && (
+          <Alert className="mt-3">
+            <AlertDescription>
+              <strong>Permissions are merged from all selected roles.</strong> The user will have the union of all permissions from their assigned roles. Role permissions cannot be modified.
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
 
-      {formData.role === 'Translator' && (
+      {formData.roles.includes('Translator') && (
         <div>
           <Label>Translation Languages *</Label>
           <div className="grid grid-cols-3 gap-2 mt-2">
