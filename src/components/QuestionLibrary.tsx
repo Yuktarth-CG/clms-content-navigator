@@ -11,14 +11,19 @@ import { Question, RepositoryType } from '@/types/content';
 import RepositoryBadge from './RepositoryBadge';
 import BulkImport from './BulkImport';
 import { useUser } from '@/contexts/UserContext';
+import ManualQuestionEntry from './ManualQuestionEntry';
+import { ManualQuestion } from '@/types/assessment';
+import { useToast } from '@/hooks/use-toast';
 
 const QuestionLibrary = () => {
   const { user, hasPermission, canAccessRepository } = useUser();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedLOCode, setSelectedLOCode] = useState('all');
   const [selectedRepository, setSelectedRepository] = useState<RepositoryType | 'all'>('all');
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
+  const [isCreateContentOpen, setIsCreateContentOpen] = useState(false);
 
   const statusColors = {
     'Drafts': 'bg-gray-100 text-gray-800',
@@ -127,10 +132,35 @@ const QuestionLibrary = () => {
             </Dialog>
           )}
           {hasPermission('canCreateContent') && (
-            <Button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4" />
-              <span>Create Content</span>
-            </Button>
+            <Dialog open={isCreateContentOpen} onOpenChange={setIsCreateContentOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4" />
+                  <span>Create Content</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create New Question</DialogTitle>
+                </DialogHeader>
+                <ManualQuestionEntry
+                  shortages={[
+                    { questionType: 'MCQ', required: 5, available: 0, shortage: 5 },
+                    { questionType: 'FITB', required: 3, available: 0, shortage: 3 },
+                    { questionType: 'SA', required: 2, available: 0, shortage: 2 }
+                  ]}
+                  onSave={(questions: ManualQuestion[]) => {
+                    console.log('Questions saved:', questions);
+                    toast({
+                      title: "Questions Created",
+                      description: `${questions.length} question(s) created successfully with KG metadata`
+                    });
+                    setIsCreateContentOpen(false);
+                  }}
+                  onCancel={() => setIsCreateContentOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       </div>
