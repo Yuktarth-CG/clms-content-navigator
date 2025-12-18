@@ -138,6 +138,18 @@ export interface QuestionShortage {
   shortage: number;
 }
 
+export interface KGMetadata {
+  knowledgeGraphId: string;
+  gradeId: string;
+  subjectId: string;
+  strandId: string;
+  topicId: string;
+  loId: string;
+  subtopicId: string;
+  skillId: string;
+  cognitiveLevel?: string;
+}
+
 export interface ManualQuestion {
   id: string;
   questionType: QuestionType;
@@ -148,6 +160,7 @@ export interface ManualQuestion {
   marks: number;
   addedBy: string;
   addedAt: string;
+  kgMetadata?: KGMetadata;
 }
 
 // Unified QuestionTypeLabels
