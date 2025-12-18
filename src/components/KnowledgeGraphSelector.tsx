@@ -230,56 +230,66 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
         )}
 
         {selection.strandId && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Topic */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                Topic
-              </Label>
-              <Select
-                value={selection.topicId}
-                onValueChange={(value) => updateSelection('topicId', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Topic" />
-                </SelectTrigger>
-                <SelectContent>
-                  {topics.map(topic => (
-                    <SelectItem key={topic.id} value={topic.id}>
-                      <span className="font-mono text-xs text-muted-foreground mr-2">{topic.id}</span>
-                      {topic.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Topic */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Target className="w-4 h-4" />
+                  Topic ID
+                </Label>
+                <Select
+                  value={selection.topicId}
+                  onValueChange={(value) => updateSelection('topicId', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Topic ID" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {topics.map(topic => (
+                      <SelectItem key={topic.id} value={topic.id}>
+                        <span className="font-mono">{topic.id}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selection.topicId && (
+                  <div className="p-2 rounded-md bg-muted/50 border text-sm">
+                    {topics.find(t => t.id === selection.topicId)?.name}
+                  </div>
+                )}
+              </div>
 
-            {/* Learning Outcome */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                Learning Outcome
-              </Label>
-              <Select
-                value={selection.loId}
-                onValueChange={(value) => updateSelection('loId', value)}
-                disabled={!selection.topicId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select LO" />
-                </SelectTrigger>
-                <SelectContent>
-                  {los.map(lo => (
-                    <SelectItem key={lo.id} value={lo.id}>
-                      <span className="font-mono text-xs text-muted-foreground mr-2">{lo.id}</span>
-                      <span className="truncate max-w-[200px]">{lo.description.substring(0, 50)}...</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* Learning Outcome */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  LO ID
+                </Label>
+                <Select
+                  value={selection.loId}
+                  onValueChange={(value) => updateSelection('loId', value)}
+                  disabled={!selection.topicId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select LO ID" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {los.map(lo => (
+                      <SelectItem key={lo.id} value={lo.id}>
+                        <span className="font-mono">{lo.id}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selection.loId && (
+                  <div className="p-2 rounded-md bg-muted/50 border text-sm max-h-24 overflow-y-auto">
+                    {los.find(l => l.id === selection.loId)?.description}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {selection.loId && (
@@ -288,31 +298,35 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <BookMarked className="w-4 h-4" />
-                Subtopic
+                Subtopic ID
               </Label>
               <Select
                 value={selection.subtopicId}
                 onValueChange={(value) => updateSelection('subtopicId', value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Subtopic" />
+                  <SelectValue placeholder="Select Subtopic ID" />
                 </SelectTrigger>
                 <SelectContent>
                   {subtopics.map(subtopic => (
                     <SelectItem key={subtopic.id} value={subtopic.id}>
-                      <span className="font-mono text-xs text-muted-foreground mr-2">{subtopic.id}</span>
-                      {subtopic.name}
+                      <span className="font-mono">{subtopic.id}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {selection.subtopicId && (
+                <div className="p-2 rounded-md bg-muted/50 border text-sm">
+                  {subtopics.find(s => s.id === selection.subtopicId)?.name}
+                </div>
+              )}
             </div>
 
             {/* Skill */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Lightbulb className="w-4 h-4" />
-                Skill
+                Skill ID
               </Label>
               <Select
                 value={selection.skillId}
@@ -320,13 +334,13 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
                 disabled={!selection.subtopicId}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Skill" />
+                  <SelectValue placeholder="Select Skill ID" />
                 </SelectTrigger>
                 <SelectContent>
                   {skills.map(skill => (
                     <SelectItem key={skill.id} value={skill.id}>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs text-muted-foreground">{skill.id}</span>
+                        <span className="font-mono">{skill.id}</span>
                         <Badge className={`text-xs ${getCognitiveLevelColor(skill.cognitiveLevel)}`}>
                           {skill.cognitiveLevel}
                         </Badge>
@@ -335,19 +349,25 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
                   ))}
                 </SelectContent>
               </Select>
+              {selection.skillId && (
+                <div className="p-2 rounded-md bg-muted/50 border text-sm">
+                  {skills.find(s => s.id === selection.skillId)?.name}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Selected Skill Details */}
+        {/* Selected Skill Summary */}
         {selectedSkill && (
-          <Card className="bg-muted/50">
+          <Card className="bg-primary/5 border-primary/20">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 <Brain className="w-5 h-5 text-primary mt-0.5" />
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm">{selectedSkill.id}</span>
+                <div className="space-y-2 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-sm">Selected Skill:</span>
+                    <span className="font-mono text-sm bg-muted px-2 py-0.5 rounded">{selectedSkill.id}</span>
                     <Badge className={getCognitiveLevelColor(selectedSkill.cognitiveLevel)}>
                       {selectedSkill.cognitiveLevel}
                     </Badge>
