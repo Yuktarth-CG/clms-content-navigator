@@ -163,223 +163,209 @@ const ManualQuestionEntry: React.FC<ManualQuestionEntryProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Knowledge Graph Selector */}
-      <KnowledgeGraphSelector
-        selection={kgSelection}
-        onSelectionChange={setKgSelection}
-      />
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-amber-500" />
-            Question Shortage Detected
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              The system couldn't find enough questions to complete your assessment. Please add the missing questions manually below.
-            </AlertDescription>
-          </Alert>
+    <div className="space-y-4">
+      {/* Split Layout: Left - KG Selection, Right - Question Form */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Panel - Knowledge Graph Selection */}
+        <div className="space-y-4">
+          <KnowledgeGraphSelector
+            selection={kgSelection}
+            onSelectionChange={setKgSelection}
+          />
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {shortages.map((shortage) => (
-              <Card key={shortage.questionType} className="border-orange-200 dark:border-orange-800">
-                <CardContent className="p-4">
-                  <div className="text-center">
-                    <Badge variant="outline" className="mb-2">
+        {/* Right Panel - Question Addition */}
+        <div className="space-y-4">
+          {/* Shortage Summary */}
+          <Card>
+            <CardHeader className="py-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <AlertCircle className="w-4 h-4 text-amber-500" />
+                Question Shortage
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-3 gap-2">
+                {shortages.map((shortage) => (
+                  <div key={shortage.questionType} className="p-2 rounded-md border bg-muted/30 text-center">
+                    <Badge variant="outline" className="mb-1 text-xs">
                       {QuestionTypeLabels[shortage.questionType]}
                     </Badge>
-                    <div className="text-sm text-muted-foreground">
-                      Need: {shortage.shortage} more
+                    <div className="text-xs text-muted-foreground">
+                      {getAddedCountForType(shortage.questionType)}/{shortage.shortage}
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Added: {getAddedCountForType(shortage.questionType)}
-                    </div>
-                    <div className="text-sm font-medium text-orange-600 dark:text-orange-400">
-                      Remaining: {getRemainingShortage(shortage.questionType)}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Add Manual Questions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Question Type</Label>
-            <Select 
-              value={currentQuestion.questionType} 
-              onValueChange={(value) => setCurrentQuestion({
-                ...currentQuestion, 
-                questionType: value as QuestionType,
-                options: value === 'MCQ' ? ['', '', '', ''] : undefined
-              })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {shortages.map(shortage => (
-                  <SelectItem key={shortage.questionType} value={shortage.questionType}>
-                    {QuestionTypeLabels[shortage.questionType]} 
-                    {getRemainingShortage(shortage.questionType) > 0 && 
-                      ` (${getRemainingShortage(shortage.questionType)} needed)`
-                    }
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Question Text</Label>
-            <Textarea
-              placeholder="Enter your question here..."
-              value={currentQuestion.questionText}
-              onChange={(e) => setCurrentQuestion({
-                ...currentQuestion, 
-                questionText: e.target.value
-              })}
-              rows={3}
-            />
-          </div>
-
-          {currentQuestion.questionType === 'MCQ' && (
-            <div className="space-y-2">
-              <Label>Answer Options</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {(currentQuestion.options || ['', '', '', '']).map((option, index) => (
-                  <div key={index} className="space-y-1">
-                    <Label className="text-xs">Option {String.fromCharCode(65 + index)}</Label>
-                    <Input
-                      placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                      value={option}
-                      onChange={(e) => updateOption(index, e.target.value)}
-                    />
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            </CardContent>
+          </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Correct Answer</Label>
-              {currentQuestion.questionType === 'MCQ' ? (
-                <Select 
-                  value={currentQuestion.correctAnswer} 
-                  onValueChange={(value) => setCurrentQuestion({
-                    ...currentQuestion, 
-                    correctAnswer: value
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select correct option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(currentQuestion.options || []).map((option, index) => {
-                      const optionValue = option.trim() || `option_${index}`;
-                      return (
-                        <SelectItem key={index} value={optionValue} disabled={!option.trim()}>
-                          {String.fromCharCode(65 + index)}: {option || 'Empty option'}
-                        </SelectItem>
-                      );
+          {/* Question Form */}
+          <Card>
+            <CardHeader className="py-3">
+              <CardTitle className="text-base">Add Question</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-sm">Question Type</Label>
+                  <Select 
+                    value={currentQuestion.questionType} 
+                    onValueChange={(value) => setCurrentQuestion({
+                      ...currentQuestion, 
+                      questionType: value as QuestionType,
+                      options: value === 'MCQ' ? ['', '', '', ''] : undefined
                     })}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input
-                  placeholder="Enter the correct answer"
-                  value={currentQuestion.correctAnswer}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {shortages.map(shortage => (
+                        <SelectItem key={shortage.questionType} value={shortage.questionType}>
+                          {QuestionTypeLabels[shortage.questionType]} 
+                          {getRemainingShortage(shortage.questionType) > 0 && 
+                            ` (${getRemainingShortage(shortage.questionType)} needed)`
+                          }
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-sm">Marks</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    className="h-9"
+                    value={currentQuestion.marks}
+                    onChange={(e) => setCurrentQuestion({
+                      ...currentQuestion, 
+                      marks: parseInt(e.target.value) || 1
+                    })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-sm">Question Text</Label>
+                <Textarea
+                  placeholder="Enter your question here..."
+                  value={currentQuestion.questionText}
                   onChange={(e) => setCurrentQuestion({
                     ...currentQuestion, 
-                    correctAnswer: e.target.value
+                    questionText: e.target.value
                   })}
+                  rows={2}
+                  className="resize-none"
                 />
+              </div>
+
+              {currentQuestion.questionType === 'MCQ' && (
+                <div className="space-y-1">
+                  <Label className="text-sm">Options</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(currentQuestion.options || ['', '', '', '']).map((option, index) => (
+                      <Input
+                        key={index}
+                        placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                        value={option}
+                        onChange={(e) => updateOption(index, e.target.value)}
+                        className="h-9"
+                      />
+                    ))}
+                  </div>
+                </div>
               )}
-            </div>
 
-            <div className="space-y-2">
-              <Label>Marks</Label>
-              <Input
-                type="number"
-                min="1"
-                value={currentQuestion.marks}
-                onChange={(e) => setCurrentQuestion({
-                  ...currentQuestion, 
-                  marks: parseInt(e.target.value) || 1
-                })}
-              />
-            </div>
-          </div>
+              <div className="space-y-1">
+                <Label className="text-sm">Correct Answer</Label>
+                {currentQuestion.questionType === 'MCQ' ? (
+                  <Select 
+                    value={currentQuestion.correctAnswer} 
+                    onValueChange={(value) => setCurrentQuestion({
+                      ...currentQuestion, 
+                      correctAnswer: value
+                    })}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Select correct option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(currentQuestion.options || []).map((option, index) => {
+                        const optionValue = option.trim() || `option_${index}`;
+                        return (
+                          <SelectItem key={index} value={optionValue} disabled={!option.trim()}>
+                            {String.fromCharCode(65 + index)}: {option || 'Empty option'}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    placeholder="Enter the correct answer"
+                    className="h-9"
+                    value={currentQuestion.correctAnswer}
+                    onChange={(e) => setCurrentQuestion({
+                      ...currentQuestion, 
+                      correctAnswer: e.target.value
+                    })}
+                  />
+                )}
+              </div>
 
-          <Button onClick={addQuestion} className="w-full">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Question
-          </Button>
-        </CardContent>
-      </Card>
+              <Button onClick={addQuestion} className="w-full" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Question
+              </Button>
+            </CardContent>
+          </Card>
 
-      {manualQuestions.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-green-500" />
-              Added Questions ({manualQuestions.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {manualQuestions.map((question, index) => (
-                <Card key={question.id} className="border-green-200 dark:border-green-800">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline">
+          {/* Added Questions */}
+          {manualQuestions.length > 0 && (
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  Added ({manualQuestions.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {manualQuestions.map((question, index) => (
+                    <div key={question.id} className="p-2 rounded-md border bg-muted/30 flex justify-between items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1 mb-1">
+                          <Badge variant="outline" className="text-xs">
                             {QuestionTypeLabels[question.questionType]}
                           </Badge>
                           <Badge variant="outline" className="text-xs">
-                            {question.marks} marks
+                            {question.marks}m
                           </Badge>
                         </div>
-                        <p className="text-sm font-medium mb-2">{question.questionText}</p>
-                        {question.options && (
-                          <div className="text-xs text-muted-foreground">
-                            Options: {question.options.join(', ')}
-                          </div>
-                        )}
-                        <div className="text-xs text-muted-foreground">
-                          Correct Answer: {question.correctAnswer}
-                        </div>
+                        <p className="text-xs truncate">{question.questionText}</p>
                       </div>
                       <Button
-                        variant="outline"
-                        size="sm"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => removeQuestion(index)}
-                        className="text-destructive hover:text-destructive"
+                        className="h-6 w-6 text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
 
-      <div className="flex gap-4">
+      {/* Footer Actions */}
+      <div className="flex gap-4 pt-2 border-t">
         <Button 
           onClick={() => onSave(manualQuestions)} 
           disabled={!canSave()}
@@ -397,7 +383,7 @@ const ManualQuestionEntry: React.FC<ManualQuestionEntryProps> = ({
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            You still need to add more questions to resolve all shortages before continuing.
+            You still need to add more questions to resolve all shortages.
           </AlertDescription>
         </Alert>
       )}
