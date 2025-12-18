@@ -11,6 +11,7 @@ import { Plus, Trash2, Save, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { QuestionType, QuestionShortage, ManualQuestion, QuestionTypeLabels } from '@/types/assessment';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
+import KnowledgeGraphSelector, { KGSelection } from './KnowledgeGraphSelector';
 
 interface ManualQuestionEntryProps {
   shortages: QuestionShortage[];
@@ -26,6 +27,16 @@ const ManualQuestionEntry: React.FC<ManualQuestionEntryProps> = ({
   const { user } = useUser();
   const { toast } = useToast();
   const [manualQuestions, setManualQuestions] = useState<ManualQuestion[]>([]);
+  const [kgSelection, setKgSelection] = useState<KGSelection>({
+    knowledgeGraphId: '',
+    gradeId: '',
+    subjectId: '',
+    strandId: '',
+    topicId: '',
+    loId: '',
+    subtopicId: '',
+    skillId: ''
+  });
   const [currentQuestion, setCurrentQuestion] = useState<Partial<ManualQuestion>>({
     questionType: shortages[0]?.questionType || 'MCQ',
     questionText: '',
@@ -35,6 +46,15 @@ const ManualQuestionEntry: React.FC<ManualQuestionEntryProps> = ({
   });
 
   const addQuestion = () => {
+    if (!kgSelection.knowledgeGraphId) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a Knowledge Graph",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!currentQuestion.questionText) {
       toast({
         title: "Validation Error",
@@ -68,15 +88,29 @@ const ManualQuestionEntry: React.FC<ManualQuestionEntryProps> = ({
       questionText: currentQuestion.questionText,
       options: currentQuestion.questionType === 'MCQ' ? currentQuestion.options : undefined,
       correctAnswer: currentQuestion.correctAnswer,
-      bloomLevel: 1, // Default level since it's not captured but required by type
+      bloomLevel: kgSelection.skill?.cognitiveLevel === 'Knowing' ? 1 : 
+                  kgSelection.skill?.cognitiveLevel === 'Applying' ? 3 : 
+                  kgSelection.skill?.cognitiveLevel === 'Reasoning' ? 5 : 1,
       marks: currentQuestion.marks || 1,
       addedBy: user?.id || '',
-      addedAt: new Date().toISOString()
+      addedAt: new Date().toISOString(),
+      // Add KG metadata
+      kgMetadata: {
+        knowledgeGraphId: kgSelection.knowledgeGraphId,
+        gradeId: kgSelection.gradeId,
+        subjectId: kgSelection.subjectId,
+        strandId: kgSelection.strandId,
+        topicId: kgSelection.topicId,
+        loId: kgSelection.loId,
+        subtopicId: kgSelection.subtopicId,
+        skillId: kgSelection.skillId,
+        cognitiveLevel: kgSelection.skill?.cognitiveLevel
+      }
     };
 
     setManualQuestions([...manualQuestions, newQuestion]);
     
-    // Reset form
+    // Reset form (keep KG selection)
     setCurrentQuestion({
       questionType: shortages[0]?.questionType || 'MCQ',
       questionText: '',
@@ -130,6 +164,11 @@ const ManualQuestionEntry: React.FC<ManualQuestionEntryProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Knowledge Graph Selector */}
+      <KnowledgeGraphSelector
+        selection={kgSelection}
+        onSelectionChange={setKgSelection}
+      />
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
