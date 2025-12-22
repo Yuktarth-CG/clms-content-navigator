@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Brain, Search, CheckCircle, AlertCircle } from 'lucide-react';
+import { BookOpen, Brain, Search, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import {
   AVAILABLE_KNOWLEDGE_GRAPHS,
-  KnowledgeGraph,
   Skill
 } from '@/data/cgiKnowledgeGraph';
 import {
@@ -22,6 +20,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 
 export interface KGSelection {
@@ -156,12 +160,73 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
     skill.id.toLowerCase().includes(searchValue.toLowerCase())
   );
 
+  const nomenclatureInfo = [
+    { term: 'Grade', description: 'The class/grade level (e.g., Grade 8, Grade 9)' },
+    { term: 'Subject', description: 'The academic subject (e.g., Hindi, Mathematics)' },
+    { term: 'Strand', description: 'A major thematic area within a subject (e.g., Vocabulary, Grammar, Algebra)' },
+    { term: 'Topic', description: 'A specific topic within a strand, identified by a unique code' },
+    { term: 'Learning Outcome (LO)', description: 'Expected learning achievement that students should demonstrate' },
+    { term: 'Subtopic', description: 'A focused area within a learning outcome' },
+    { term: 'Skill', description: 'A specific skill to be assessed, categorized by cognitive level (Knowing, Applying, Reasoning)' },
+  ];
+
+  const DetailBox = ({ label, value, code, tooltip }: { label: string; value: string; code?: string; tooltip?: string }) => (
+    <div className="p-3 rounded-lg border bg-card">
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
+        {tooltip && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[250px]">
+                <p className="text-xs">{tooltip}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
+      <p className="text-sm font-medium">{value}</p>
+      {code && (
+        <span className="text-xs font-mono text-muted-foreground mt-1 inline-block">{code}</span>
+      )}
+    </div>
+  );
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BookOpen className="w-5 h-5" />
           Skill Code Selection
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto">
+                <Info className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="end">
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm">Knowledge Graph Terminology</h4>
+                <div className="space-y-2">
+                  {nomenclatureInfo.map((item) => (
+                    <div key={item.term} className="text-sm">
+                      <span className="font-medium">{item.term}:</span>
+                      <span className="text-muted-foreground ml-1">{item.description}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    <strong>Skill Code Format:</strong> Subject_Grade_Strand_LO_Subtopic_Skill
+                    <br />
+                    <span className="font-mono">Example: HI_8_VO_L1_SHN_S1</span>
+                  </p>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -219,69 +284,70 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
               </Command>
             </PopoverContent>
           </Popover>
-          <p className="text-xs text-muted-foreground">
-            Format: Subject_Grade_Strand_LO_Subtopic_Skill (e.g., HI_8_VO_L1_SHN_S1)
-          </p>
         </div>
 
-        {/* Selected Skill Details */}
+        {/* Selected Skill Details - Individual Boxes */}
         {selectedSkill && (
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-4 space-y-4">
-              <div className="flex items-start gap-3">
-                <Brain className="w-5 h-5 text-primary mt-0.5" />
-                <div className="space-y-2 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-sm">Selected Skill:</span>
-                    <span className="font-mono text-sm bg-muted px-2 py-0.5 rounded">{selectedSkill.id}</span>
-                    <Badge className={getCognitiveLevelColor(selectedSkill.cognitiveLevel)}>
-                      {selectedSkill.cognitiveLevel}
-                    </Badge>
+          <div className="space-y-4">
+            {/* Skill Summary */}
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <Brain className="w-5 h-5 text-primary mt-0.5" />
+                  <div className="space-y-2 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm">Selected Skill:</span>
+                      <span className="font-mono text-sm bg-muted px-2 py-0.5 rounded">{selectedSkill.id}</span>
+                      <Badge className={getCognitiveLevelColor(selectedSkill.cognitiveLevel)}>
+                        {selectedSkill.cognitiveLevel}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{selectedSkill.name}</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{selectedSkill.name}</p>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Hierarchy Details */}
-              <div className="grid grid-cols-2 gap-3 text-sm border-t pt-4">
-                <div>
-                  <span className="text-muted-foreground">Grade:</span>
-                  <span className="ml-2 font-medium">{selectedSkill.gradeName}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Subject:</span>
-                  <span className="ml-2 font-medium">{selectedSkill.subjectName}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Strand:</span>
-                  <span className="ml-2 font-medium">{selectedSkill.strandName}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Topic:</span>
-                  <span className="ml-2 font-medium font-mono text-xs">{selectedSkill.topicId}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-muted-foreground">Topic Name:</span>
-                  <span className="ml-2 font-medium">{selectedSkill.topicName}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-muted-foreground">LO:</span>
-                  <span className="ml-2 font-mono text-xs">{selectedSkill.loId}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-muted-foreground">LO Description:</span>
-                  <p className="mt-1 text-muted-foreground bg-muted/50 p-2 rounded text-xs">
-                    {selectedSkill.loDescription}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-muted-foreground">Subtopic:</span>
-                  <span className="ml-2 font-medium">{selectedSkill.subtopicName}</span>
-                  <span className="ml-2 font-mono text-xs text-muted-foreground">({selectedSkill.subtopicId})</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            {/* Hierarchy Details - Individual Boxes */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+              <DetailBox 
+                label="Grade" 
+                value={selectedSkill.gradeName}
+                tooltip="The class/grade level for this content"
+              />
+              <DetailBox 
+                label="Subject" 
+                value={selectedSkill.subjectName}
+                tooltip="The academic subject area"
+              />
+              <DetailBox 
+                label="Strand" 
+                value={selectedSkill.strandName}
+                tooltip="A major thematic area within the subject"
+              />
+            </div>
+
+            <DetailBox 
+              label="Topic" 
+              value={selectedSkill.topicName}
+              code={selectedSkill.topicId}
+              tooltip="A specific topic within the strand"
+            />
+
+            <DetailBox 
+              label="Learning Outcome (LO)" 
+              value={selectedSkill.loDescription}
+              code={selectedSkill.loId}
+              tooltip="Expected learning achievement students should demonstrate"
+            />
+
+            <DetailBox 
+              label="Subtopic" 
+              value={selectedSkill.subtopicName}
+              code={selectedSkill.subtopicId}
+              tooltip="A focused area within the learning outcome"
+            />
+          </div>
         )}
       </CardContent>
     </Card>
