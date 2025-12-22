@@ -198,7 +198,7 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
                 
                 {/* Visual Code Breakdown */}
                 <div className="p-3 rounded-lg bg-muted/50 border">
-                  <p className="text-xs text-muted-foreground mb-2">Example Skill Code:</p>
+                  <p className="text-xs text-muted-foreground mb-2">Example:</p>
                   <div className="font-mono text-sm font-medium flex flex-wrap gap-0.5">
                     <span className="bg-blue-100 dark:bg-blue-900 px-1.5 py-0.5 rounded-l">HI</span>
                     <span className="bg-green-100 dark:bg-green-900 px-1.5 py-0.5">KG</span>
