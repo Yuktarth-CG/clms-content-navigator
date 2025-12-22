@@ -1,20 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Layers, Target, FileText, BookMarked, Lightbulb, Brain } from 'lucide-react';
+import { BookOpen, Brain, Search, CheckCircle, AlertCircle } from 'lucide-react';
 import {
   AVAILABLE_KNOWLEDGE_GRAPHS,
   KnowledgeGraph,
-  getSubjectsForGrade,
-  getStrandsForSubject,
-  getTopicsForStrand,
-  getLOsForTopic,
-  getSubtopicsForLO,
-  getSkillsForSubtopic,
   Skill
 } from '@/data/cgiKnowledgeGraph';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
 export interface KGSelection {
   knowledgeGraphId: string;
@@ -28,6 +36,22 @@ export interface KGSelection {
   skill?: Skill;
 }
 
+interface SkillWithContext extends Skill {
+  knowledgeGraphId: string;
+  gradeId: string;
+  gradeName: string;
+  subjectId: string;
+  subjectName: string;
+  strandId: string;
+  strandName: string;
+  topicId: string;
+  topicName: string;
+  loId: string;
+  loDescription: string;
+  subtopicId: string;
+  subtopicName: string;
+}
+
 interface KnowledgeGraphSelectorProps {
   onSelectionChange: (selection: KGSelection) => void;
   selection?: Partial<KGSelection>;
@@ -37,90 +61,81 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
   onSelectionChange,
   selection: initialSelection
 }) => {
-  const [selection, setSelection] = useState<KGSelection>({
-    knowledgeGraphId: initialSelection?.knowledgeGraphId || '',
-    gradeId: initialSelection?.gradeId || '',
-    subjectId: initialSelection?.subjectId || '',
-    strandId: initialSelection?.strandId || '',
-    topicId: initialSelection?.topicId || '',
-    loId: initialSelection?.loId || '',
-    subtopicId: initialSelection?.subtopicId || '',
-    skillId: initialSelection?.skillId || ''
-  });
+  const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const [selectedSkill, setSelectedSkill] = useState<SkillWithContext | null>(null);
 
-  const selectedKG = AVAILABLE_KNOWLEDGE_GRAPHS.find(kg => kg.id === selection.knowledgeGraphId);
-
-  // Get filtered options based on current selections
-  const grades = selectedKG?.grades || [];
-  const subjects = selectedKG && selection.gradeId ? getSubjectsForGrade(selectedKG, selection.gradeId) : [];
-  const strands = selectedKG && selection.gradeId && selection.subjectId 
-    ? getStrandsForSubject(selectedKG, selection.gradeId, selection.subjectId) : [];
-  const topics = selectedKG && selection.gradeId && selection.subjectId && selection.strandId
-    ? getTopicsForStrand(selectedKG, selection.gradeId, selection.subjectId, selection.strandId) : [];
-  const los = selectedKG && selection.gradeId && selection.subjectId && selection.strandId && selection.topicId
-    ? getLOsForTopic(selectedKG, selection.gradeId, selection.subjectId, selection.strandId, selection.topicId) : [];
-  const subtopics = selectedKG && selection.gradeId && selection.subjectId && selection.strandId && selection.topicId && selection.loId
-    ? getSubtopicsForLO(selectedKG, selection.gradeId, selection.subjectId, selection.strandId, selection.topicId, selection.loId) : [];
-  const skills = selectedKG && selection.gradeId && selection.subjectId && selection.strandId && selection.topicId && selection.loId && selection.subtopicId
-    ? getSkillsForSubtopic(selectedKG, selection.gradeId, selection.subjectId, selection.strandId, selection.topicId, selection.loId, selection.subtopicId) : [];
-
-  const selectedSkill = skills.find(s => s.id === selection.skillId);
-
-  useEffect(() => {
-    onSelectionChange({ ...selection, skill: selectedSkill });
-  }, [selection, selectedSkill]);
-
-  const updateSelection = (field: keyof KGSelection, value: string) => {
-    const newSelection = { ...selection, [field]: value };
-
-    // Clear dependent fields when parent changes (cascading)
-    switch (field) {
-      case 'knowledgeGraphId':
-        newSelection.gradeId = '';
-        newSelection.subjectId = '';
-        newSelection.strandId = '';
-        newSelection.topicId = '';
-        newSelection.loId = '';
-        newSelection.subtopicId = '';
-        newSelection.skillId = '';
-        break;
-      case 'gradeId':
-        newSelection.subjectId = '';
-        newSelection.strandId = '';
-        newSelection.topicId = '';
-        newSelection.loId = '';
-        newSelection.subtopicId = '';
-        newSelection.skillId = '';
-        break;
-      case 'subjectId':
-        newSelection.strandId = '';
-        newSelection.topicId = '';
-        newSelection.loId = '';
-        newSelection.subtopicId = '';
-        newSelection.skillId = '';
-        break;
-      case 'strandId':
-        newSelection.topicId = '';
-        newSelection.loId = '';
-        newSelection.subtopicId = '';
-        newSelection.skillId = '';
-        break;
-      case 'topicId':
-        newSelection.loId = '';
-        newSelection.subtopicId = '';
-        newSelection.skillId = '';
-        break;
-      case 'loId':
-        newSelection.subtopicId = '';
-        newSelection.skillId = '';
-        break;
-      case 'subtopicId':
-        newSelection.skillId = '';
-        break;
+  // Build a flat list of all skills with their context
+  const allSkills = useMemo<SkillWithContext[]>(() => {
+    const skills: SkillWithContext[] = [];
+    
+    for (const kg of AVAILABLE_KNOWLEDGE_GRAPHS) {
+      for (const grade of kg.grades) {
+        for (const subject of grade.subjects) {
+          for (const strand of subject.strands) {
+            for (const topic of strand.topics) {
+              for (const lo of topic.learningOutcomes) {
+                for (const subtopic of lo.subtopics) {
+                  for (const skill of subtopic.skills) {
+                    skills.push({
+                      ...skill,
+                      knowledgeGraphId: kg.id,
+                      gradeId: grade.id,
+                      gradeName: grade.name,
+                      subjectId: subject.id,
+                      subjectName: subject.name,
+                      strandId: strand.id,
+                      strandName: strand.name,
+                      topicId: topic.id,
+                      topicName: topic.name,
+                      loId: lo.id,
+                      loDescription: lo.description,
+                      subtopicId: subtopic.id,
+                      subtopicName: subtopic.name,
+                    });
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
+    
+    return skills;
+  }, []);
 
-    setSelection(newSelection);
-  };
+  // Initialize with initial selection if provided
+  useEffect(() => {
+    if (initialSelection?.skillId) {
+      const skill = allSkills.find(s => s.id === initialSelection.skillId);
+      if (skill) {
+        setSelectedSkill(skill);
+        setSearchValue(skill.id);
+      }
+    }
+  }, [initialSelection?.skillId, allSkills]);
+
+  // Notify parent when selection changes
+  useEffect(() => {
+    if (selectedSkill) {
+      onSelectionChange({
+        knowledgeGraphId: selectedSkill.knowledgeGraphId,
+        gradeId: selectedSkill.gradeId,
+        subjectId: selectedSkill.subjectId,
+        strandId: selectedSkill.strandId,
+        topicId: selectedSkill.topicId,
+        loId: selectedSkill.loId,
+        subtopicId: selectedSkill.subtopicId,
+        skillId: selectedSkill.id,
+        skill: {
+          id: selectedSkill.id,
+          name: selectedSkill.name,
+          cognitiveLevel: selectedSkill.cognitiveLevel,
+        },
+      });
+    }
+  }, [selectedSkill, onSelectionChange]);
 
   const getCognitiveLevelColor = (level: string) => {
     switch (level) {
@@ -131,237 +146,88 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
     }
   };
 
+  const handleSelectSkill = (skill: SkillWithContext) => {
+    setSelectedSkill(skill);
+    setSearchValue(skill.id);
+    setOpen(false);
+  };
+
+  const filteredSkills = allSkills.filter(skill =>
+    skill.id.toLowerCase().includes(searchValue.toLowerCase())
+  );
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BookOpen className="w-5 h-5" />
-          Knowledge Graph Selection
+          Skill Code Selection
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Knowledge Graph */}
+        {/* Skill Code Input */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
-            <Layers className="w-4 h-4" />
-            Knowledge Graph
+            <Search className="w-4 h-4" />
+            Enter Skill Code
           </Label>
-          <Select
-            value={selection.knowledgeGraphId}
-            onValueChange={(value) => updateSelection('knowledgeGraphId', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Knowledge Graph" />
-            </SelectTrigger>
-            <SelectContent>
-              {AVAILABLE_KNOWLEDGE_GRAPHS.map(kg => (
-                <SelectItem key={kg.id} value={kg.id}>
-                  {kg.displayName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="w-full justify-between font-mono"
+              >
+                {selectedSkill ? selectedSkill.id : "Search or enter skill code..."}
+                <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0 min-w-[400px]" align="start">
+              <Command>
+                <CommandInput 
+                  placeholder="Type skill code (e.g., HI_8_VO_L1_SHN_S1)..." 
+                  value={searchValue}
+                  onValueChange={setSearchValue}
+                />
+                <CommandList>
+                  <CommandEmpty>
+                    <div className="flex items-center gap-2 text-muted-foreground p-2">
+                      <AlertCircle className="w-4 h-4" />
+                      No skill found with this code
+                    </div>
+                  </CommandEmpty>
+                  <CommandGroup heading="Available Skills">
+                    {filteredSkills.slice(0, 20).map((skill) => (
+                      <CommandItem
+                        key={skill.id}
+                        value={skill.id}
+                        onSelect={() => handleSelectSkill(skill)}
+                        className="cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 w-full">
+                          <CheckCircle className={`w-4 h-4 ${selectedSkill?.id === skill.id ? 'text-primary' : 'text-transparent'}`} />
+                          <span className="font-mono text-sm">{skill.id}</span>
+                          <Badge className={`text-xs ml-auto ${getCognitiveLevelColor(skill.cognitiveLevel)}`}>
+                            {skill.cognitiveLevel}
+                          </Badge>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          <p className="text-xs text-muted-foreground">
+            Format: Subject_Grade_Strand_LO_Subtopic_Skill (e.g., HI_8_VO_L1_SHN_S1)
+          </p>
         </div>
 
-        {selection.knowledgeGraphId && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Grade */}
-            <div className="space-y-2">
-              <Label>Grade</Label>
-              <Select
-                value={selection.gradeId}
-                onValueChange={(value) => updateSelection('gradeId', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Grade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {grades.map(grade => (
-                    <SelectItem key={grade.id} value={grade.id}>
-                      {grade.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Subject */}
-            <div className="space-y-2">
-              <Label>Subject</Label>
-              <Select
-                value={selection.subjectId}
-                onValueChange={(value) => updateSelection('subjectId', value)}
-                disabled={!selection.gradeId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subjects.map(subject => (
-                    <SelectItem key={subject.id} value={subject.id}>
-                      {subject.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Strand */}
-            <div className="space-y-2">
-              <Label>Strand</Label>
-              <Select
-                value={selection.strandId}
-                onValueChange={(value) => updateSelection('strandId', value)}
-                disabled={!selection.subjectId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Strand" />
-                </SelectTrigger>
-                <SelectContent>
-                  {strands.map(strand => (
-                    <SelectItem key={strand.id} value={strand.id}>
-                      {strand.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )}
-
-        {selection.strandId && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Topic */}
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Target className="w-4 h-4" />
-                  Topic ID
-                </Label>
-                <Select
-                  value={selection.topicId}
-                  onValueChange={(value) => updateSelection('topicId', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Topic ID" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {topics.map(topic => (
-                      <SelectItem key={topic.id} value={topic.id}>
-                        <span className="font-mono">{topic.id}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selection.topicId && (
-                  <div className="p-2 rounded-md bg-muted/50 border text-sm">
-                    {topics.find(t => t.id === selection.topicId)?.name}
-                  </div>
-                )}
-              </div>
-
-              {/* Learning Outcome */}
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  LO ID
-                </Label>
-                <Select
-                  value={selection.loId}
-                  onValueChange={(value) => updateSelection('loId', value)}
-                  disabled={!selection.topicId}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select LO ID" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {los.map(lo => (
-                      <SelectItem key={lo.id} value={lo.id}>
-                        <span className="font-mono">{lo.id}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selection.loId && (
-                  <div className="p-2 rounded-md bg-muted/50 border text-sm max-h-24 overflow-y-auto">
-                    {los.find(l => l.id === selection.loId)?.description}
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        {selection.loId && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Subtopic */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <BookMarked className="w-4 h-4" />
-                Subtopic ID
-              </Label>
-              <Select
-                value={selection.subtopicId}
-                onValueChange={(value) => updateSelection('subtopicId', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Subtopic ID" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subtopics.map(subtopic => (
-                    <SelectItem key={subtopic.id} value={subtopic.id}>
-                      <span className="font-mono">{subtopic.id}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selection.subtopicId && (
-                <div className="p-2 rounded-md bg-muted/50 border text-sm">
-                  {subtopics.find(s => s.id === selection.subtopicId)?.name}
-                </div>
-              )}
-            </div>
-
-            {/* Skill */}
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Lightbulb className="w-4 h-4" />
-                Skill ID
-              </Label>
-              <Select
-                value={selection.skillId}
-                onValueChange={(value) => updateSelection('skillId', value)}
-                disabled={!selection.subtopicId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Skill ID" />
-                </SelectTrigger>
-                <SelectContent>
-                  {skills.map(skill => (
-                    <SelectItem key={skill.id} value={skill.id}>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono">{skill.id}</span>
-                        <Badge className={`text-xs ${getCognitiveLevelColor(skill.cognitiveLevel)}`}>
-                          {skill.cognitiveLevel}
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selection.skillId && (
-                <div className="p-2 rounded-md bg-muted/50 border text-sm">
-                  {skills.find(s => s.id === selection.skillId)?.name}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Selected Skill Summary */}
+        {/* Selected Skill Details */}
         {selectedSkill && (
           <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-4">
+            <CardContent className="p-4 space-y-4">
               <div className="flex items-start gap-3">
                 <Brain className="w-5 h-5 text-primary mt-0.5" />
                 <div className="space-y-2 flex-1">
@@ -373,6 +239,45 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">{selectedSkill.name}</p>
+                </div>
+              </div>
+
+              {/* Hierarchy Details */}
+              <div className="grid grid-cols-2 gap-3 text-sm border-t pt-4">
+                <div>
+                  <span className="text-muted-foreground">Grade:</span>
+                  <span className="ml-2 font-medium">{selectedSkill.gradeName}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Subject:</span>
+                  <span className="ml-2 font-medium">{selectedSkill.subjectName}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Strand:</span>
+                  <span className="ml-2 font-medium">{selectedSkill.strandName}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Topic:</span>
+                  <span className="ml-2 font-medium font-mono text-xs">{selectedSkill.topicId}</span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">Topic Name:</span>
+                  <span className="ml-2 font-medium">{selectedSkill.topicName}</span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">LO:</span>
+                  <span className="ml-2 font-mono text-xs">{selectedSkill.loId}</span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">LO Description:</span>
+                  <p className="mt-1 text-muted-foreground bg-muted/50 p-2 rounded text-xs">
+                    {selectedSkill.loDescription}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">Subtopic:</span>
+                  <span className="ml-2 font-medium">{selectedSkill.subtopicName}</span>
+                  <span className="ml-2 font-mono text-xs text-muted-foreground">({selectedSkill.subtopicId})</span>
                 </div>
               </div>
             </CardContent>
