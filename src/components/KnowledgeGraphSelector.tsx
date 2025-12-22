@@ -3,31 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Brain, Search, CheckCircle, AlertCircle, Info } from 'lucide-react';
-import {
-  AVAILABLE_KNOWLEDGE_GRAPHS,
-  Skill
-} from '@/data/cgiKnowledgeGraph';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { AVAILABLE_KNOWLEDGE_GRAPHS, Skill } from '@/data/cgiKnowledgeGraph';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-
 export interface KGSelection {
   knowledgeGraphId: string;
   gradeId: string;
@@ -39,7 +19,6 @@ export interface KGSelection {
   skillId: string;
   skill?: Skill;
 }
-
 interface SkillWithContext extends Skill {
   knowledgeGraphId: string;
   gradeId: string;
@@ -55,12 +34,10 @@ interface SkillWithContext extends Skill {
   subtopicId: string;
   subtopicName: string;
 }
-
 interface KnowledgeGraphSelectorProps {
   onSelectionChange: (selection: KGSelection) => void;
   selection?: Partial<KGSelection>;
 }
-
 const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
   onSelectionChange,
   selection: initialSelection
@@ -72,7 +49,6 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
   // Build a flat list of all skills with their context
   const allSkills = useMemo<SkillWithContext[]>(() => {
     const skills: SkillWithContext[] = [];
-    
     for (const kg of AVAILABLE_KNOWLEDGE_GRAPHS) {
       for (const grade of kg.grades) {
         for (const subject of grade.subjects) {
@@ -95,7 +71,7 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
                       loId: lo.id,
                       loDescription: lo.description,
                       subtopicId: subtopic.id,
-                      subtopicName: subtopic.name,
+                      subtopicName: subtopic.name
                     });
                   }
                 }
@@ -105,7 +81,6 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
         }
       }
     }
-    
     return skills;
   }, []);
 
@@ -135,45 +110,64 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
         skill: {
           id: selectedSkill.id,
           name: selectedSkill.name,
-          cognitiveLevel: selectedSkill.cognitiveLevel,
-        },
+          cognitiveLevel: selectedSkill.cognitiveLevel
+        }
       });
     }
   }, [selectedSkill, onSelectionChange]);
-
   const getCognitiveLevelColor = (level: string) => {
     switch (level) {
-      case 'Knowing': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'Applying': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'Reasoning': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      default: return 'bg-muted text-muted-foreground';
+      case 'Knowing':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'Applying':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'Reasoning':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      default:
+        return 'bg-muted text-muted-foreground';
     }
   };
-
   const handleSelectSkill = (skill: SkillWithContext) => {
     setSelectedSkill(skill);
     setSearchValue(skill.id);
     setOpen(false);
   };
-
-  const filteredSkills = allSkills.filter(skill =>
-    skill.id.toLowerCase().includes(searchValue.toLowerCase())
-  );
-
-  const codeBreakdown = [
-    { code: 'HI', label: 'Subject Code', example: 'HI = Hindi, MA = Mathematics' },
-    { code: 'KG', label: 'Grade', example: 'KG = Kindergarten, 8 = Grade 8' },
-    { code: 'A01', label: 'Strand Code', example: 'A01, VO = Vocabulary, GR = Grammar' },
-    { code: 'L01', label: 'LO Code', example: 'L01 = Learning Outcome 1' },
-    { code: 'S01', label: 'Skill Code', example: 'S01 = Skill 1, S02 = Skill 2' },
-  ];
-
-  const DetailBox = ({ label, value, code, tooltip }: { label: string; value: string; code?: string; tooltip?: string }) => (
-    <div className="p-3 rounded-lg border bg-card">
+  const filteredSkills = allSkills.filter(skill => skill.id.toLowerCase().includes(searchValue.toLowerCase()));
+  const codeBreakdown = [{
+    code: 'HI',
+    label: 'Subject Code',
+    example: 'HI = Hindi, MA = Mathematics'
+  }, {
+    code: 'KG',
+    label: 'Grade',
+    example: 'KG = Kindergarten, 8 = Grade 8'
+  }, {
+    code: 'A01',
+    label: 'Strand Code',
+    example: 'A01, VO = Vocabulary, GR = Grammar'
+  }, {
+    code: 'L01',
+    label: 'LO Code',
+    example: 'L01 = Learning Outcome 1'
+  }, {
+    code: 'S01',
+    label: 'Skill Code',
+    example: 'S01 = Skill 1, S02 = Skill 2'
+  }];
+  const DetailBox = ({
+    label,
+    value,
+    code,
+    tooltip
+  }: {
+    label: string;
+    value: string;
+    code?: string;
+    tooltip?: string;
+  }) => <div className="p-3 rounded-lg border bg-card">
       <div className="flex items-center gap-2 mb-1">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
-        {tooltip && (
-          <TooltipProvider>
+        {tooltip && <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Info className="w-3 h-3 text-muted-foreground cursor-help" />
@@ -182,18 +176,12 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
                 <p className="text-xs">{tooltip}</p>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
-        )}
+          </TooltipProvider>}
       </div>
       <p className="text-sm font-medium">{value}</p>
-      {code && (
-        <span className="text-xs font-mono text-muted-foreground mt-1 inline-block">{code}</span>
-      )}
-    </div>
-  );
-
-  return (
-    <Card>
+      {code && <span className="text-xs font-mono text-muted-foreground mt-1 inline-block">{code}</span>}
+    </div>;
+  return <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BookOpen className="w-5 h-5" />
@@ -206,7 +194,7 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
             </PopoverTrigger>
             <PopoverContent className="w-96" align="end">
               <div className="space-y-4">
-                <h4 className="font-semibold text-sm">Skill Code Nomenclature</h4>
+                <h4 className="font-semibold text-sm">Knowledge Graph Nomenclature</h4>
                 
                 {/* Visual Code Breakdown */}
                 <div className="p-3 rounded-lg bg-muted/50 border">
@@ -222,8 +210,7 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
 
                 {/* Code Breakdown Legend */}
                 <div className="space-y-2">
-                  {codeBreakdown.map((item) => (
-                    <div key={item.code} className="flex items-start gap-2 text-sm">
+                  {codeBreakdown.map(item => <div key={item.code} className="flex items-start gap-2 text-sm">
                       <span className="font-mono font-semibold bg-muted px-1.5 py-0.5 rounded min-w-[40px] text-center">
                         {item.code}
                       </span>
@@ -231,8 +218,7 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
                         <span className="font-medium">{item.label}</span>
                         <p className="text-xs text-muted-foreground">{item.example}</p>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
 
                 <div className="pt-2 border-t">
@@ -254,23 +240,14 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
           </Label>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className="w-full justify-between font-mono"
-              >
+              <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between font-mono">
                 {selectedSkill ? selectedSkill.id : "Search or enter skill code..."}
                 <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0 min-w-[400px]" align="start">
               <Command>
-                <CommandInput 
-                  placeholder="Type skill code (e.g., HI_8_VO_L1_SHN_S1)..." 
-                  value={searchValue}
-                  onValueChange={setSearchValue}
-                />
+                <CommandInput placeholder="Type skill code (e.g., HI_8_VO_L1_SHN_S1)..." value={searchValue} onValueChange={setSearchValue} />
                 <CommandList>
                   <CommandEmpty>
                     <div className="flex items-center gap-2 text-muted-foreground p-2">
@@ -279,13 +256,7 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
                     </div>
                   </CommandEmpty>
                   <CommandGroup heading="Available Skills">
-                    {filteredSkills.slice(0, 20).map((skill) => (
-                      <CommandItem
-                        key={skill.id}
-                        value={skill.id}
-                        onSelect={() => handleSelectSkill(skill)}
-                        className="cursor-pointer"
-                      >
+                    {filteredSkills.slice(0, 20).map(skill => <CommandItem key={skill.id} value={skill.id} onSelect={() => handleSelectSkill(skill)} className="cursor-pointer">
                         <div className="flex items-center gap-2 w-full">
                           <CheckCircle className={`w-4 h-4 ${selectedSkill?.id === skill.id ? 'text-primary' : 'text-transparent'}`} />
                           <span className="font-mono text-sm">{skill.id}</span>
@@ -293,8 +264,7 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
                             {skill.cognitiveLevel}
                           </Badge>
                         </div>
-                      </CommandItem>
-                    ))}
+                      </CommandItem>)}
                   </CommandGroup>
                 </CommandList>
               </Command>
@@ -303,8 +273,7 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
         </div>
 
         {/* Selected Skill Details - Individual Boxes */}
-        {selectedSkill && (
-          <div className="space-y-4">
+        {selectedSkill && <div className="space-y-4">
             {/* Skill Summary */}
             <Card className="bg-primary/5 border-primary/20">
               <CardContent className="p-4">
@@ -326,48 +295,18 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
 
             {/* Hierarchy Details - Individual Boxes */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-              <DetailBox 
-                label="Grade" 
-                value={selectedSkill.gradeName}
-                tooltip="The class/grade level for this content"
-              />
-              <DetailBox 
-                label="Subject" 
-                value={selectedSkill.subjectName}
-                tooltip="The academic subject area"
-              />
-              <DetailBox 
-                label="Strand" 
-                value={selectedSkill.strandName}
-                tooltip="A major thematic area within the subject"
-              />
+              <DetailBox label="Grade" value={selectedSkill.gradeName} tooltip="The class/grade level for this content" />
+              <DetailBox label="Subject" value={selectedSkill.subjectName} tooltip="The academic subject area" />
+              <DetailBox label="Strand" value={selectedSkill.strandName} tooltip="A major thematic area within the subject" />
             </div>
 
-            <DetailBox 
-              label="Topic" 
-              value={selectedSkill.topicName}
-              code={selectedSkill.topicId}
-              tooltip="A specific topic within the strand"
-            />
+            <DetailBox label="Topic" value={selectedSkill.topicName} code={selectedSkill.topicId} tooltip="A specific topic within the strand" />
 
-            <DetailBox 
-              label="Learning Outcome (LO)" 
-              value={selectedSkill.loDescription}
-              code={selectedSkill.loId}
-              tooltip="Expected learning achievement students should demonstrate"
-            />
+            <DetailBox label="Learning Outcome (LO)" value={selectedSkill.loDescription} code={selectedSkill.loId} tooltip="Expected learning achievement students should demonstrate" />
 
-            <DetailBox 
-              label="Subtopic" 
-              value={selectedSkill.subtopicName}
-              code={selectedSkill.subtopicId}
-              tooltip="A focused area within the learning outcome"
-            />
-          </div>
-        )}
+            <DetailBox label="Subtopic" value={selectedSkill.subtopicName} code={selectedSkill.subtopicId} tooltip="A focused area within the learning outcome" />
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default KnowledgeGraphSelector;
