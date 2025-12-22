@@ -160,14 +160,12 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
     skill.id.toLowerCase().includes(searchValue.toLowerCase())
   );
 
-  const nomenclatureInfo = [
-    { term: 'Grade', description: 'The class/grade level (e.g., Grade 8, Grade 9)' },
-    { term: 'Subject', description: 'The academic subject (e.g., Hindi, Mathematics)' },
-    { term: 'Strand', description: 'A major thematic area within a subject (e.g., Vocabulary, Grammar, Algebra)' },
-    { term: 'Topic', description: 'A specific topic within a strand, identified by a unique code' },
-    { term: 'Learning Outcome (LO)', description: 'Expected learning achievement that students should demonstrate' },
-    { term: 'Subtopic', description: 'A focused area within a learning outcome' },
-    { term: 'Skill', description: 'A specific skill to be assessed, categorized by cognitive level (Knowing, Applying, Reasoning)' },
+  const codeBreakdown = [
+    { code: 'HI', label: 'Subject Code', example: 'HI = Hindi, MA = Mathematics' },
+    { code: 'KG', label: 'Grade', example: 'KG = Kindergarten, 8 = Grade 8' },
+    { code: 'A01', label: 'Strand Code', example: 'A01, VO = Vocabulary, GR = Grammar' },
+    { code: 'L01', label: 'LO Code', example: 'L01 = Learning Outcome 1' },
+    { code: 'S01', label: 'Skill Code', example: 'S01 = Skill 1, S02 = Skill 2' },
   ];
 
   const DetailBox = ({ label, value, code, tooltip }: { label: string; value: string; code?: string; tooltip?: string }) => (
@@ -206,22 +204,40 @@ const KnowledgeGraphSelector: React.FC<KnowledgeGraphSelectorProps> = ({
                 <Info className="h-4 w-4" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80" align="end">
-              <div className="space-y-3">
-                <h4 className="font-semibold text-sm">Knowledge Graph Terminology</h4>
+            <PopoverContent className="w-96" align="end">
+              <div className="space-y-4">
+                <h4 className="font-semibold text-sm">Skill Code Nomenclature</h4>
+                
+                {/* Visual Code Breakdown */}
+                <div className="p-3 rounded-lg bg-muted/50 border">
+                  <p className="text-xs text-muted-foreground mb-2">Example Skill Code:</p>
+                  <div className="font-mono text-sm font-medium flex flex-wrap gap-0.5">
+                    <span className="bg-blue-100 dark:bg-blue-900 px-1.5 py-0.5 rounded-l">HI</span>
+                    <span className="bg-green-100 dark:bg-green-900 px-1.5 py-0.5">KG</span>
+                    <span className="bg-yellow-100 dark:bg-yellow-900 px-1.5 py-0.5">A01</span>
+                    <span className="bg-orange-100 dark:bg-orange-900 px-1.5 py-0.5">_L01</span>
+                    <span className="bg-purple-100 dark:bg-purple-900 px-1.5 py-0.5 rounded-r">_S01</span>
+                  </div>
+                </div>
+
+                {/* Code Breakdown Legend */}
                 <div className="space-y-2">
-                  {nomenclatureInfo.map((item) => (
-                    <div key={item.term} className="text-sm">
-                      <span className="font-medium">{item.term}:</span>
-                      <span className="text-muted-foreground ml-1">{item.description}</span>
+                  {codeBreakdown.map((item) => (
+                    <div key={item.code} className="flex items-start gap-2 text-sm">
+                      <span className="font-mono font-semibold bg-muted px-1.5 py-0.5 rounded min-w-[40px] text-center">
+                        {item.code}
+                      </span>
+                      <div>
+                        <span className="font-medium">{item.label}</span>
+                        <p className="text-xs text-muted-foreground">{item.example}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
+
                 <div className="pt-2 border-t">
                   <p className="text-xs text-muted-foreground">
-                    <strong>Skill Code Format:</strong> Subject_Grade_Strand_LO_Subtopic_Skill
-                    <br />
-                    <span className="font-mono">Example: HI_8_VO_L1_SHN_S1</span>
+                    Full code: <span className="font-mono font-medium">HIKGA01_L01_S01</span>
                   </p>
                 </div>
               </div>
