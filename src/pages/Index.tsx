@@ -19,13 +19,16 @@ import ManageAssessments from '@/components/ManageAssessments';
 import Settings from '@/components/Settings';
 import DebugCenter from '@/components/DebugCenter';
 import MasterDataManagement from '@/components/MasterDataManagement';
+import TermsConsentOverlay from '@/components/TermsConsentOverlay';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, FileText, Upload, Download, CheckCircle, TrendingUp, Clock, Shield, Layout } from 'lucide-react';
 import { UserProvider, useUser } from '@/contexts/UserContext';
+import { useTermsConsent } from '@/hooks/useTermsConsent';
 
 const IndexContent = () => {
   const [activeSection, setActiveSection] = useState('question-library');
   const { user } = useUser();
+  const { needsConsent, isLoading, acceptTerms } = useTermsConsent();
   
   console.log('IndexContent rendering, user:', user, 'activeSection:', activeSection);
 
@@ -93,19 +96,33 @@ const IndexContent = () => {
 
   console.log('About to render IndexContent layout');
 
-  return (
-    <div className="min-h-screen bg-background flex">
-      <Sidebar 
-        activeSection={activeSection} 
-        onSectionChange={setActiveSection}
-      />
-      <div className="flex-1 flex flex-col">
-        <Header userRole={user?.role || 'Unknown'} userName={user?.name || 'Unknown User'} />
-        <main className="flex-1 overflow-auto">
-          {renderContent()}
-        </main>
+  // Show loading state while checking consent
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <>
+      {/* T&C Consent Overlay - blocks access until accepted */}
+      {needsConsent && <TermsConsentOverlay onAccept={acceptTerms} />}
+      
+      <div className="min-h-screen bg-background flex">
+        <Sidebar 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection}
+        />
+        <div className="flex-1 flex flex-col">
+          <Header userRole={user?.role || 'Unknown'} userName={user?.name || 'Unknown User'} />
+          <main className="flex-1 overflow-auto">
+            {renderContent()}
+          </main>
+        </div>
+      </div>
+    </>
   );
 };
 
