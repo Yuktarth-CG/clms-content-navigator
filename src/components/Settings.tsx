@@ -8,10 +8,11 @@ import {
   Bell, 
   Shield, 
   Database,
-  History
+  Scale
 } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import BrandingManagement from '@/components/BrandingManagement';
+import ReleaseManagement from '@/components/ReleaseManagement';
 
 const Settings = () => {
   const { user } = useUser();
@@ -30,7 +31,7 @@ const Settings = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7">
           <TabsTrigger value="general" className="flex items-center space-x-2">
             <SettingsIcon className="w-4 h-4" />
             <span>General</span>
@@ -50,6 +51,13 @@ const Settings = () => {
             <TabsTrigger value="branding" className="flex items-center space-x-2">
               <Palette className="w-4 h-4" />
               <span>Branding</span>
+            </TabsTrigger>
+          )}
+
+          {isSuperAdmin && (
+            <TabsTrigger value="legal" className="flex items-center space-x-2">
+              <Scale className="w-4 h-4" />
+              <span>Legal & Releases</span>
             </TabsTrigger>
           )}
           
@@ -79,6 +87,12 @@ const Settings = () => {
         {isSuperAdmin && (
           <TabsContent value="branding" className="mt-6">
             <BrandingManagement />
+          </TabsContent>
+        )}
+
+        {isSuperAdmin && (
+          <TabsContent value="legal" className="mt-6">
+            <ReleaseManagement />
           </TabsContent>
         )}
 
