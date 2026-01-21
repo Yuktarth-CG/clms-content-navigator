@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import QuestionLibrary from '@/components/QuestionLibrary';
-import BulkImport from '@/components/BulkImport';
+import BulkUserUpload from '@/components/BulkUserUpload';
 import BulkExport from '@/components/BulkExport';
 import ContentValidation from '@/components/ContentValidation';
 import AuditLogs from '@/components/AuditLogs';
@@ -44,7 +44,7 @@ const IndexContent = () => {
         case 'question-paper-creation':
           return <QuestionPaperCreation />;
         case 'bulk-import':
-          return <BulkImport />;
+          return <BulkUserUpload onClose={() => setActiveSection('question-library')} />;
         case 'bulk-export':
           return <BulkExport />;
         case 'ocr-test-paper':
