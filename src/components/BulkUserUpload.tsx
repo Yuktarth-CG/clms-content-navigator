@@ -9,15 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Upload, Download, CheckCircle, XCircle, AlertTriangle, 
-  FileText, Users, Clock, RotateCcw, Edit2, UserX, Mail, Info
-} from 'lucide-react';
+import { Upload, Download, CheckCircle, XCircle, AlertTriangle, FileText, Users, Clock, RotateCcw, Edit2, UserX, Mail, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // PRD: Predefined CLMS roles only - no custom roles allowed
 const PREDEFINED_ROLES = ['Admin', 'Creator', 'Reviewer', 'Translator', 'SuperAdmin'];
-
 interface BulkUserData {
   id: string;
   rowNumber: number;
@@ -33,13 +29,11 @@ interface BulkUserData {
   statusReason: string;
   isEditing?: boolean;
 }
-
 interface ValidationError {
   row: number;
   field: string;
   message: string;
 }
-
 interface ImportStatus {
   id: string;
   fileName: string;
@@ -55,8 +49,11 @@ interface ImportStatus {
   rollbackDeadline?: string;
   importedBy: string;
 }
-
-const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
+const BulkUserUpload = ({
+  onClose
+}: {
+  onClose: () => void;
+}) => {
   const [currentStep, setCurrentStep] = useState<'upload' | 'preview' | 'processing' | 'complete'>('upload');
   const [uploadedData, setUploadedData] = useState<BulkUserData[]>([]);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
@@ -70,16 +67,16 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
   const MAX_FILE_SIZE_MB = 2; // 3.1: Maximum 2 MB per file
 
   // Simulated existing users database
-  const existingUsers = [
-    { email: 'existing@example.com' },
-    { email: 'admin@company.com' },
-    { email: 'test@example.com' }
-  ];
-
+  const existingUsers = [{
+    email: 'existing@example.com'
+  }, {
+    email: 'admin@company.com'
+  }, {
+    email: 'test@example.com'
+  }];
   const isExistingUser = (email: string): boolean => {
     return existingUsers.some(u => u.email.toLowerCase() === email.toLowerCase());
   };
-
   const validateDateOfBirth = (dob: string): boolean => {
     if (!dob) return true; // Optional field
     // Support DD-MM-YYYY or YYYY-MM-DD formats
@@ -87,7 +84,6 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
     const yyyymmdd = /^\d{4}-\d{2}-\d{2}$/;
     return ddmmyyyy.test(dob) || yyyymmdd.test(dob);
   };
-
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -111,20 +107,18 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
       });
       return;
     }
-
     setFileName(file.name);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       const text = e.target?.result as string;
       parseCSVData(text, file.name);
     };
     reader.readAsText(file);
   };
-
   const parseCSVData = (csvText: string, fileName: string) => {
     const lines = csvText.split('\n').filter(line => line.trim());
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g, ''));
-    
+
     // PRD TR-1: Batch Limit - Maximum 100 users per import
     if (lines.length - 1 > MAX_USERS_PER_IMPORT) {
       toast({
@@ -134,25 +128,20 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
       });
       return;
     }
-
     const data: BulkUserData[] = [];
     const errors: ValidationError[] = [];
     const emailTracker = new Map<string, number>();
-
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
-      
       const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
       const rowData: Record<string, string> = {};
-      
       headers.forEach((header, index) => {
         rowData[header] = values[index] || '';
       });
-
       const rowErrors: string[] = [];
       let validationStatus: BulkUserData['validationStatus'] = 'success';
       let statusReason = 'New user to be created';
-      
+
       // PRD 3.1: Mandatory Fields - Name, Email
       const name = rowData.name || '';
       const email = rowData.email || '';
@@ -266,7 +255,6 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
           message: 'Invalid phone number format'
         });
       }
-
       const user: BulkUserData = {
         id: `bulk-${i}`,
         rowNumber: i,
@@ -282,10 +270,8 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
         statusReason,
         isEditing: false
       };
-
       data.push(user);
     }
-
     setUploadedData(data);
     setValidationErrors(errors);
     setBatchId(`batch-${Date.now()}`);
@@ -295,100 +281,83 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
     const successCount = data.filter(u => u.validationStatus === 'success').length;
     const ignoreCount = data.filter(u => u.validationStatus === 'ignore').length;
     const errorCount = data.filter(u => u.validationStatus === 'error').length;
-    
     toast({
       title: "File Validated",
       description: `Success: ${successCount} | Ignored: ${ignoreCount} | Errors: ${errorCount}`
     });
   };
-
   const toggleUserSelection = (userId: string) => {
-    setUploadedData(prev => 
-      prev.map(user => 
-        user.id === userId && user.validationStatus === 'success'
-          ? { ...user, isSelected: !user.isSelected }
-          : user
-      )
-    );
+    setUploadedData(prev => prev.map(user => user.id === userId && user.validationStatus === 'success' ? {
+      ...user,
+      isSelected: !user.isSelected
+    } : user));
   };
-
   const selectAllValid = () => {
-    setUploadedData(prev => 
-      prev.map(user => 
-        user.validationStatus === 'success'
-          ? { ...user, isSelected: true }
-          : user
-      )
-    );
+    setUploadedData(prev => prev.map(user => user.validationStatus === 'success' ? {
+      ...user,
+      isSelected: true
+    } : user));
   };
-
   const startEditingUser = (userId: string) => {
-    setUploadedData(prev => 
-      prev.map(user => 
-        user.id === userId ? { ...user, isEditing: true } : user
-      )
-    );
+    setUploadedData(prev => prev.map(user => user.id === userId ? {
+      ...user,
+      isEditing: true
+    } : user));
   };
-
   const saveUserEdit = (userId: string, updatedData: Partial<BulkUserData>) => {
-    setUploadedData(prev => 
-      prev.map(user => {
-        if (user.id === userId) {
-          const newData = { ...user, ...updatedData };
-          const errors: string[] = [];
-          let validationStatus: BulkUserData['validationStatus'] = 'success';
-          let statusReason = 'New user to be created';
+    setUploadedData(prev => prev.map(user => {
+      if (user.id === userId) {
+        const newData = {
+          ...user,
+          ...updatedData
+        };
+        const errors: string[] = [];
+        let validationStatus: BulkUserData['validationStatus'] = 'success';
+        let statusReason = 'New user to be created';
 
-          // Re-validate after edit
-          if (!newData.name || newData.name.length < 2) {
-            errors.push('Name is required');
-            validationStatus = 'error';
-            statusReason = 'Missing required field: Name';
-          }
-
-          if (!newData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newData.email)) {
-            errors.push('Valid email is required');
-            validationStatus = 'error';
-            statusReason = 'Invalid email';
-          } else if (isExistingUser(newData.email)) {
-            errors.push(`User with email ${newData.email} already exists`);
-            validationStatus = 'ignore';
-            statusReason = 'User already exists';
-          }
-
-          if (!newData.role || !PREDEFINED_ROLES.includes(newData.role)) {
-            errors.push(`Role '${newData.role}' not found. Please use a predefined CLMS role.`);
-            validationStatus = 'error';
-            statusReason = 'Invalid role';
-          }
-
-          return {
-            ...newData,
-            isValid: errors.length === 0,
-            errors,
-            validationStatus,
-            statusReason,
-            isEditing: false,
-            isSelected: validationStatus === 'success'
-          };
+        // Re-validate after edit
+        if (!newData.name || newData.name.length < 2) {
+          errors.push('Name is required');
+          validationStatus = 'error';
+          statusReason = 'Missing required field: Name';
         }
-        return user;
-      })
-    );
+        if (!newData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newData.email)) {
+          errors.push('Valid email is required');
+          validationStatus = 'error';
+          statusReason = 'Invalid email';
+        } else if (isExistingUser(newData.email)) {
+          errors.push(`User with email ${newData.email} already exists`);
+          validationStatus = 'ignore';
+          statusReason = 'User already exists';
+        }
+        if (!newData.role || !PREDEFINED_ROLES.includes(newData.role)) {
+          errors.push(`Role '${newData.role}' not found. Please use a predefined CLMS role.`);
+          validationStatus = 'error';
+          statusReason = 'Invalid role';
+        }
+        return {
+          ...newData,
+          isValid: errors.length === 0,
+          errors,
+          validationStatus,
+          statusReason,
+          isEditing: false,
+          isSelected: validationStatus === 'success'
+        };
+      }
+      return user;
+    }));
   };
-
   const cancelUserEdit = (userId: string) => {
-    setUploadedData(prev => 
-      prev.map(user => 
-        user.id === userId ? { ...user, isEditing: false } : user
-      )
-    );
+    setUploadedData(prev => prev.map(user => user.id === userId ? {
+      ...user,
+      isEditing: false
+    } : user));
   };
 
   // PRD 3.3: The Import Workflow - Confirm step
   const processImport = async () => {
     const selectedUsers = uploadedData.filter(user => user.isSelected);
-    
     if (selectedUsers.length === 0) {
       toast({
         title: "No Users Selected",
@@ -397,7 +366,6 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
       });
       return;
     }
-
     const status: ImportStatus = {
       id: batchId,
       fileName,
@@ -413,7 +381,6 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
       rollbackDeadline: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
       importedBy: 'Yuktarth Nagar' // Mock current user
     };
-
     setImportStatus(status);
     setIsProcessing(true);
     setCurrentStep('processing');
@@ -421,11 +388,10 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
     // PRD TR-2: Server-Side Continuity - Simulate server processing
     for (let i = 0; i < selectedUsers.length; i++) {
       await new Promise(resolve => setTimeout(resolve, 150));
-      
       setImportStatus(prev => prev ? {
         ...prev,
         processedRows: i + 1,
-        progress: Math.round(((i + 1) / selectedUsers.length) * 100),
+        progress: Math.round((i + 1) / selectedUsers.length * 100),
         successCount: i + 1
       } : null);
     }
@@ -437,7 +403,6 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
       progress: 100,
       canRollback: true
     } : null);
-    
     setIsProcessing(false);
     setCurrentStep('complete');
 
@@ -451,18 +416,18 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
   // PRD 7: Rollback button - delete only users from this batch
   const handleRollback = async () => {
     if (!importStatus?.canRollback) return;
-
     setIsProcessing(true);
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setImportStatus(prev => prev ? { ...prev, canRollback: false } : null);
+    setImportStatus(prev => prev ? {
+      ...prev,
+      canRollback: false
+    } : null);
     setIsProcessing(false);
-    
     toast({
       title: "Rollback Successful",
       description: `All ${importStatus.successCount} users from batch ${batchId} have been removed.`
     });
-    
+
     // Reset to start
     setCurrentStep('upload');
     setUploadedData([]);
@@ -476,8 +441,9 @@ const BulkUserUpload = ({ onClose }: { onClose: () => void }) => {
 John Doe,john.doe@example.com,+91-9876543210,15-03-1990,Creator
 Jane Smith,jane.smith@example.com,+91-9876543211,1985-06-22,Reviewer
 Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
-    
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], {
+      type: 'text/csv'
+    });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -490,15 +456,10 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
   const downloadErrorLog = () => {
     const errorUsers = uploadedData.filter(u => u.validationStatus === 'error');
     if (errorUsers.length === 0) return;
-
-    const csvContent = [
-      'Row,Name,Email,Role,Error Reason',
-      ...errorUsers.map(user => 
-        `${user.rowNumber},"${user.name}","${user.email}","${user.role}","${user.errors.join('; ')}"`
-      )
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const csvContent = ['Row,Name,Email,Role,Error Reason', ...errorUsers.map(user => `${user.rowNumber},"${user.name}","${user.email}","${user.role}","${user.errors.join('; ')}"`)].join('\n');
+    const blob = new Blob([csvContent], {
+      type: 'text/csv'
+    });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -506,7 +467,6 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
-
   const getStatusBadge = (status: BulkUserData['validationStatus']) => {
     switch (status) {
       case 'success':
@@ -517,7 +477,6 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
         return <Badge className="bg-red-100 text-red-800">Error</Badge>;
     }
   };
-
   const getStatusIcon = (status: BulkUserData['validationStatus']) => {
     switch (status) {
       case 'success':
@@ -534,9 +493,7 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
   const ignoreCount = uploadedData.filter(u => u.validationStatus === 'ignore').length;
   const errorCount = uploadedData.filter(u => u.validationStatus === 'error').length;
   const selectedCount = uploadedData.filter(u => u.isSelected).length;
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -587,13 +544,7 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
                     or drag and drop your file here
                   </p>
                 </Label>
-                <Input
-                  id="csvFile"
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
+                <Input id="csvFile" type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
               </div>
 
               {/* CSV Format Info */}
@@ -647,12 +598,10 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
                   <Button variant="outline" size="sm" onClick={selectAllValid}>
                     Select All Valid
                   </Button>
-                  {errorCount > 0 && (
-                    <Button variant="outline" size="sm" onClick={downloadErrorLog}>
+                  {errorCount > 0 && <Button variant="outline" size="sm" onClick={downloadErrorLog}>
                       <Download className="w-4 h-4 mr-2" />
                       Download Error Log
-                    </Button>
-                  )}
+                    </Button>}
                 </div>
               </div>
             </CardHeader>
@@ -699,21 +648,9 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {uploadedData.map((user) => (
-                      <TableRow 
-                        key={user.id} 
-                        className={
-                          user.isEditing ? 'bg-blue-50' : 
-                          user.validationStatus === 'error' ? 'bg-red-50/50' :
-                          user.validationStatus === 'ignore' ? 'bg-yellow-50/50' : ''
-                        }
-                      >
+                    {uploadedData.map(user => <TableRow key={user.id} className={user.isEditing ? 'bg-blue-50' : user.validationStatus === 'error' ? 'bg-red-50/50' : user.validationStatus === 'ignore' ? 'bg-yellow-50/50' : ''}>
                         <TableCell>
-                          <Checkbox
-                            checked={user.isSelected}
-                            onCheckedChange={() => toggleUserSelection(user.id)}
-                            disabled={user.validationStatus !== 'success'}
-                          />
+                          <Checkbox checked={user.isSelected} onCheckedChange={() => toggleUserSelection(user.id)} disabled={user.validationStatus !== 'success'} />
                         </TableCell>
                         <TableCell className="font-mono text-sm">{user.rowNumber}</TableCell>
                         <TableCell>
@@ -723,26 +660,14 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
                           </div>
                         </TableCell>
                         <TableCell>
-                          {user.isEditing ? (
-                            <Input
-                              defaultValue={user.name}
-                              className="w-32 h-8"
-                              onBlur={(e) => saveUserEdit(user.id, { name: e.target.value })}
-                            />
-                          ) : (
-                            <span className="font-medium">{user.name || '-'}</span>
-                          )}
+                          {user.isEditing ? <Input defaultValue={user.name} className="w-32 h-8" onBlur={e => saveUserEdit(user.id, {
+                        name: e.target.value
+                      })} /> : <span className="font-medium">{user.name || '-'}</span>}
                         </TableCell>
                         <TableCell>
-                          {user.isEditing ? (
-                            <Input
-                              defaultValue={user.email}
-                              className="w-48 h-8"
-                              onBlur={(e) => saveUserEdit(user.id, { email: e.target.value })}
-                            />
-                          ) : (
-                            <span className="text-sm">{user.email || '-'}</span>
-                          )}
+                          {user.isEditing ? <Input defaultValue={user.email} className="w-48 h-8" onBlur={e => saveUserEdit(user.id, {
+                        email: e.target.value
+                      })} /> : <span className="text-sm">{user.email || '-'}</span>}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {user.phone || '-'}
@@ -751,54 +676,33 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
                           {user.dateOfBirth || '-'}
                         </TableCell>
                         <TableCell>
-                          {user.isEditing ? (
-                            <select
-                              defaultValue={user.role}
-                              className="h-8 px-2 border rounded text-sm"
-                              onChange={(e) => saveUserEdit(user.id, { role: e.target.value })}
-                            >
+                          {user.isEditing ? <select defaultValue={user.role} className="h-8 px-2 border rounded text-sm" onChange={e => saveUserEdit(user.id, {
+                        role: e.target.value
+                      })}>
                               <option value="">Select Role</option>
-                              {PREDEFINED_ROLES.map(role => (
-                                <option key={role} value={role}>{role}</option>
-                              ))}
-                            </select>
-                          ) : (
-                            user.role ? (
-                              <Badge variant="secondary">{user.role}</Badge>
-                            ) : (
-                              <span className="text-red-500 text-sm">Missing</span>
-                            )
-                          )}
+                              {PREDEFINED_ROLES.map(role => <option key={role} value={role}>{role}</option>)}
+                            </select> : user.role ? <Badge variant="secondary">{user.role}</Badge> : <span className="text-red-500 text-sm">Missing</span>}
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-1">
-                            {user.isEditing ? (
-                              <>
+                            {user.isEditing ? <>
                                 <Button size="sm" variant="ghost" onClick={() => saveUserEdit(user.id, {})}>
                                   <CheckCircle className="w-4 h-4 text-green-500" />
                                 </Button>
                                 <Button size="sm" variant="ghost" onClick={() => cancelUserEdit(user.id)}>
                                   <XCircle className="w-4 h-4 text-red-500" />
                                 </Button>
-                              </>
-                            ) : (
-                              <Button size="sm" variant="ghost" onClick={() => startEditingUser(user.id)}>
+                              </> : <Button size="sm" variant="ghost" onClick={() => startEditingUser(user.id)}>
                                 <Edit2 className="w-4 h-4" />
-                              </Button>
-                            )}
+                              </Button>}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className={`text-sm ${
-                            user.validationStatus === 'error' ? 'text-red-600' :
-                            user.validationStatus === 'ignore' ? 'text-yellow-600' :
-                            'text-green-600'
-                          }`}>
+                          <span className={`text-sm ${user.validationStatus === 'error' ? 'text-red-600' : user.validationStatus === 'ignore' ? 'text-yellow-600' : 'text-green-600'}`}>
                             {user.statusReason}
                           </span>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
               </div>
@@ -806,17 +710,13 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
               {/* Actions */}
               <div className="flex justify-between pt-4">
                 <Button variant="outline" onClick={() => {
-                  setCurrentStep('upload');
-                  setUploadedData([]);
-                  setFileName('');
-                }}>
+                setCurrentStep('upload');
+                setUploadedData([]);
+                setFileName('');
+              }}>
                   Upload Different File
                 </Button>
-                <Button 
-                  onClick={processImport}
-                  disabled={selectedCount === 0}
-                  className="min-w-[200px]"
-                >
+                <Button onClick={processImport} disabled={selectedCount === 0} className="min-w-[200px]">
                   <Users className="w-4 h-4 mr-2" />
                   Import Now ({selectedCount} users)
                 </Button>
@@ -835,8 +735,7 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {importStatus && (
-                <>
+              {importStatus && <>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Processing Row {importStatus.processedRows} of {importStatus.totalRows}</span>
@@ -866,8 +765,7 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
                       Server-side processing ensures completion even if you lose connection.
                     </AlertDescription>
                   </Alert>
-                </>
-              )}
+                </>}
             </CardContent>
           </Card>
         </TabsContent>
@@ -882,8 +780,7 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {importStatus && (
-                <>
+              {importStatus && <>
                   {/* Summary */}
                   <div className="grid grid-cols-3 gap-4">
                     <div className="p-6 bg-green-50 rounded-lg text-center border border-green-200">
@@ -930,53 +827,25 @@ Mike Johnson,mike.johnson@example.com,,25-12-1992,Admin`;
                   </div>
 
                   {/* Rollback Option - PRD 7 */}
-                  {importStatus.canRollback && (
-                    <Alert className="bg-orange-50 border-orange-200">
-                      <RotateCcw className="h-4 w-4 text-orange-500" />
-                      <AlertDescription>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-orange-800">Rollback Available</p>
-                            <p className="text-sm text-orange-600">
-                              Until {importStatus.rollbackDeadline ? new Date(importStatus.rollbackDeadline).toLocaleTimeString() : 'N/A'}
-                            </p>
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            onClick={handleRollback}
-                            disabled={isProcessing}
-                            className="border-orange-300 text-orange-700 hover:bg-orange-100"
-                          >
-                            <RotateCcw className="w-4 h-4 mr-2" />
-                            Rollback This Batch
-                          </Button>
-                        </div>
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                  {importStatus.canRollback}
 
                   {/* Actions */}
                   <div className="flex justify-between pt-4">
                     <div className="space-x-2">
-                      {errorCount > 0 && (
-                        <Button variant="outline" onClick={downloadErrorLog}>
+                      {errorCount > 0 && <Button variant="outline" onClick={downloadErrorLog}>
                           <Download className="w-4 h-4 mr-2" />
                           Download Error Log
-                        </Button>
-                      )}
+                        </Button>}
                     </div>
                     <Button onClick={onClose}>
                       Close
                     </Button>
                   </div>
-                </>
-              )}
+                </>}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default BulkUserUpload;
