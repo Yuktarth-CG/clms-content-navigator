@@ -748,9 +748,7 @@ const AICreditDashboard = () => {
                   }} />
                     <span className="font-medium">Critical (10%)</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Urgent email + dashboard banner notification
-                  </p>
+                  <p className="text-sm text-muted-foreground">Email sent to Super Admin, Admin, and Account Manager</p>
                 </div>
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
