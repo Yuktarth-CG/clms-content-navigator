@@ -19,6 +19,7 @@ import ManageAssessments from '@/components/ManageAssessments';
 import Settings from '@/components/Settings';
 import DebugCenter from '@/components/DebugCenter';
 import MasterDataManagement from '@/components/MasterDataManagement';
+import AICreditDashboard from '@/components/AICreditDashboard';
 import TermsConsentOverlay from '@/components/TermsConsentOverlay';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, FileText, Upload, Download, CheckCircle, TrendingUp, Clock, Shield, Layout } from 'lucide-react';
@@ -77,6 +78,8 @@ const IndexContent = () => {
           return <DebugCenter />;
         case 'master-data':
           return <MasterDataManagement />;
+        case 'ai-credits':
+          return <AICreditDashboard />;
         default:
           return <QuestionLibrary />;
       }

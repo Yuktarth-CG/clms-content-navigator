@@ -20,7 +20,8 @@ import {
   Bug,
   Brain,
   Lightbulb,
-  Database
+  Database,
+  CreditCard
 } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -157,6 +158,17 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
       icon: Database, 
       requiresPermission: null,
       tooltip: 'Manage curriculum framework and content taxonomy with flexible data management tools'
+    });
+  }
+
+  // Add AI Credits Dashboard for admins and above
+  if (user?.role === 'Admin' || user?.role === 'SuperAdmin') {
+    menuItems.push({ 
+      id: 'ai-credits', 
+      label: 'AI Credits', 
+      icon: CreditCard, 
+      requiresPermission: null,
+      tooltip: 'Monitor AI credit usage, consumption trends, and request additional credits'
     });
   }
 
