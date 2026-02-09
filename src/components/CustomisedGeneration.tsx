@@ -173,20 +173,20 @@ const CustomisedGeneration = () => {
         },
         {
           id: 'sample-3',
-          name: 'Less questions on CLMS test',
-          total_questions: 15,
-          total_marks: 30,
+          name: 'Question Shortage Test Blueprint',
+          total_questions: 20,
+          total_marks: 40,
           duration: 45,
-          allowed_question_types: ['MCQ', 'FITB'] as QuestionType[],
+          allowed_question_types: ['MCQ', 'FITB', 'Match'] as QuestionType[],
           difficulty_l1: 6,
           difficulty_l2: 5,
           difficulty_l3: 3,
           difficulty_l4: 1,
           difficulty_l5: 0,
-          bloom_l1: 0,
-          bloom_l2: 0,
-          bloom_l3: 0,
-          bloom_l4: 0,
+          bloom_l1: 8,
+          bloom_l2: 6,
+          bloom_l3: 4,
+          bloom_l4: 2,
           bloom_l5: 0,
           bloom_l6: 0,
           mode: 'FA' as AssessmentMode,
@@ -403,11 +403,12 @@ const CustomisedGeneration = () => {
     console.log('🔍 [CustomisedGeneration] Blueprint total questions:', blueprint.total_questions);
     console.log('🔍 [CustomisedGeneration] Blueprint allowed types:', blueprint.allowed_question_types);
     
-    const availableQuestions = blueprint.name === 'Less questions on CLMS test' ? {
-      'MCQ': 8,
-      'FITB': 5,
-      'Match': 2,
-      'Arrange': 3
+    // Simulate limited CLMS availability for the test blueprint
+    const availableQuestions: Record<string, number> = blueprint.name === 'Question Shortage Test Blueprint' ? {
+      'MCQ': 4,  // Only 4 MCQs available, but need 7
+      'FITB': 3, // Only 3 FITBs available, but need 7
+      'Match': 2, // Only 2 Match available, but need 6
+      'Arrange': 5
     } : {
       'MCQ': 25,
       'FITB': 15,
@@ -416,9 +417,9 @@ const CustomisedGeneration = () => {
     };
 
     const shortages: QuestionShortage[] = [];
-    console.log('🔍 [CustomisedGeneration] Available questions for blueprint:', availableQuestions);
+    console.log('🔍 [CustomisedGeneration] Available questions in CLMS:', availableQuestions);
     
-    // Check shortage based on blueprint requirements, not current sections
+    // Check shortage based on blueprint requirements
     blueprint.allowed_question_types.forEach(type => {
       const required = Math.ceil(blueprint.total_questions / blueprint.allowed_question_types.length);
       const available = availableQuestions[type] || 0;
