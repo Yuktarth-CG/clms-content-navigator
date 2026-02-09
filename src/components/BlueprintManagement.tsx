@@ -735,127 +735,6 @@ const BlueprintManagement = () => {
         </Dialog>
       </div>
 
-      {/* Taxonomy Reference Card */}
-      <Card className="border-purple-200 bg-purple-50/50 dark:bg-purple-950/20 dark:border-purple-800">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-purple-800 dark:text-purple-400">
-            <BookTemplate className="w-5 h-5" />
-            <span>Blueprint Taxonomy Reference</span>
-            <Badge variant="outline" className="text-xs">Guide</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Bloom's Taxonomy */}
-            <div className="space-y-3">
-              <h4 className="font-semibold text-purple-900 dark:text-purple-300">Bloom's Taxonomy Levels</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">L1</Badge>
-                  <div>
-                    <span className="font-medium">Remember</span>
-                    <p className="text-muted-foreground text-xs">Recall facts, terms, basic concepts, and answers</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">L2</Badge>
-                  <div>
-                    <span className="font-medium">Understand</span>
-                    <p className="text-muted-foreground text-xs">Demonstrate understanding of facts and ideas</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">L3</Badge>
-                  <div>
-                    <span className="font-medium">Apply</span>
-                    <p className="text-muted-foreground text-xs">Use knowledge in new situations</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">L4</Badge>
-                  <div>
-                    <span className="font-medium">Analyze</span>
-                    <p className="text-muted-foreground text-xs">Break information into parts, identify motives/causes</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">L5</Badge>
-                  <div>
-                    <span className="font-medium">Evaluate</span>
-                    <p className="text-muted-foreground text-xs">Present and defend opinions by making judgments</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">L6</Badge>
-                  <div>
-                    <span className="font-medium">Create</span>
-                    <p className="text-muted-foreground text-xs">Compile information in a new way, propose alternatives</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Difficulty Levels */}
-            <div className="space-y-3">
-              <h4 className="font-semibold text-purple-900 dark:text-purple-300">Difficulty Levels</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">L1</Badge>
-                  <div>
-                    <span className="font-medium">Very Easy</span>
-                    <p className="text-muted-foreground text-xs">Basic recall, simple identification</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300">L2</Badge>
-                  <div>
-                    <span className="font-medium">Easy</span>
-                    <p className="text-muted-foreground text-xs">Straightforward application of concepts</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">L3</Badge>
-                  <div>
-                    <span className="font-medium">Medium</span>
-                    <p className="text-muted-foreground text-xs">Requires understanding and some analysis</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-300">L4</Badge>
-                  <div>
-                    <span className="font-medium">Hard</span>
-                    <p className="text-muted-foreground text-xs">Complex problem-solving, multi-step reasoning</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Badge variant="outline" className="shrink-0 bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900 dark:text-fuchsia-300">L5</Badge>
-                  <div>
-                    <span className="font-medium">Very Hard</span>
-                    <p className="text-muted-foreground text-xs">Advanced synthesis, creative problem-solving</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Question Type Reference */}
-              <div className="mt-4 pt-4 border-t border-purple-200 dark:border-purple-700">
-                <h4 className="font-semibold text-purple-900 dark:text-purple-300 mb-2">Question Types</h4>
-                <div className="flex flex-wrap gap-1">
-                  <Badge variant="secondary" className="text-xs">MCQ - Multiple Choice</Badge>
-                  <Badge variant="secondary" className="text-xs">FITB - Fill in the Blank</Badge>
-                  <Badge variant="secondary" className="text-xs">Match - Match the Column</Badge>
-                  <Badge variant="secondary" className="text-xs">Arrange - Sequence Order</Badge>
-                  <Badge variant="secondary" className="text-xs">VSA - Very Short Answer</Badge>
-                  <Badge variant="secondary" className="text-xs">SA - Short Answer</Badge>
-                  <Badge variant="secondary" className="text-xs">ETA - Essay Type</Badge>
-                  <Badge variant="secondary" className="text-xs">TF - True/False</Badge>
-                  <Badge variant="secondary" className="text-xs">RC - Reading Comprehension</Badge>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Blueprints Table */}
       <Card>
         <CardHeader>
@@ -881,7 +760,6 @@ const BlueprintManagement = () => {
                   <TableHead>Name & Details</TableHead>
                   <TableHead>Question Types</TableHead>
                   <TableHead>Bloom's Distribution</TableHead>
-                  <TableHead>Difficulty Distribution</TableHead>
                   <TableHead>Mode</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -913,24 +791,12 @@ const BlueprintManagement = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {blueprint.bloom_l1 > 0 && <Badge variant="outline" className="text-xs bg-green-50 dark:bg-green-900/20">L1: {blueprint.bloom_l1}</Badge>}
-                        {blueprint.bloom_l2 > 0 && <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20">L2: {blueprint.bloom_l2}</Badge>}
-                        {blueprint.bloom_l3 > 0 && <Badge variant="outline" className="text-xs bg-yellow-50 dark:bg-yellow-900/20">L3: {blueprint.bloom_l3}</Badge>}
-                        {blueprint.bloom_l4 > 0 && <Badge variant="outline" className="text-xs bg-orange-50 dark:bg-orange-900/20">L4: {blueprint.bloom_l4}</Badge>}
-                        {blueprint.bloom_l5 > 0 && <Badge variant="outline" className="text-xs bg-red-50 dark:bg-red-900/20">L5: {blueprint.bloom_l5}</Badge>}
-                        {blueprint.bloom_l6 > 0 && <Badge variant="outline" className="text-xs bg-purple-50 dark:bg-purple-900/20">L6: {blueprint.bloom_l6}</Badge>}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {(blueprint.difficulty_l1 ?? 0) > 0 && <Badge variant="outline" className="text-xs bg-emerald-50 dark:bg-emerald-900/20">D1: {blueprint.difficulty_l1}</Badge>}
-                        {(blueprint.difficulty_l2 ?? 0) > 0 && <Badge variant="outline" className="text-xs bg-teal-50 dark:bg-teal-900/20">D2: {blueprint.difficulty_l2}</Badge>}
-                        {(blueprint.difficulty_l3 ?? 0) > 0 && <Badge variant="outline" className="text-xs bg-amber-50 dark:bg-amber-900/20">D3: {blueprint.difficulty_l3}</Badge>}
-                        {(blueprint.difficulty_l4 ?? 0) > 0 && <Badge variant="outline" className="text-xs bg-rose-50 dark:bg-rose-900/20">D4: {blueprint.difficulty_l4}</Badge>}
-                        {(blueprint.difficulty_l5 ?? 0) > 0 && <Badge variant="outline" className="text-xs bg-fuchsia-50 dark:bg-fuchsia-900/20">D5: {blueprint.difficulty_l5}</Badge>}
-                        {!(blueprint.difficulty_l1 || blueprint.difficulty_l2 || blueprint.difficulty_l3 || blueprint.difficulty_l4 || blueprint.difficulty_l5) && (
-                          <span className="text-xs text-muted-foreground">Not defined</span>
-                        )}
+                        {blueprint.bloom_l1 > 0 && <Badge variant="outline" className="text-xs">L1: {blueprint.bloom_l1}</Badge>}
+                        {blueprint.bloom_l2 > 0 && <Badge variant="outline" className="text-xs">L2: {blueprint.bloom_l2}</Badge>}
+                        {blueprint.bloom_l3 > 0 && <Badge variant="outline" className="text-xs">L3: {blueprint.bloom_l3}</Badge>}
+                        {blueprint.bloom_l4 > 0 && <Badge variant="outline" className="text-xs">L4: {blueprint.bloom_l4}</Badge>}
+                        {blueprint.bloom_l5 > 0 && <Badge variant="outline" className="text-xs">L5: {blueprint.bloom_l5}</Badge>}
+                        {blueprint.bloom_l6 > 0 && <Badge variant="outline" className="text-xs">L6: {blueprint.bloom_l6}</Badge>}
                       </div>
                     </TableCell>
                     <TableCell>

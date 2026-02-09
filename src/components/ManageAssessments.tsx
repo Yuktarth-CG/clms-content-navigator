@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Search, Download, Eye, Archive, Filter, Calendar as CalendarIcon, FileText, RotateCcw, AlertTriangle } from 'lucide-react';
+import { Search, Download, Eye, Archive, Filter, Calendar as CalendarIcon, User, FileText, RotateCcw, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Assessment } from '@/types/assessment';
@@ -417,33 +417,6 @@ const ManageAssessments = () => {
           Browse, filter, and manage all your generated assessment papers and worksheets
         </p>
       </div>
-
-      {/* Auto-Purge Policy Disclaimer */}
-      <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
-        <FileText className="h-4 w-4 text-blue-600" />
-        <AlertTitle className="text-blue-800 dark:text-blue-400 flex items-center gap-2">
-          Automatic Cleanup Policy
-          <Badge variant="outline" className="text-xs font-normal">System Policy</Badge>
-        </AlertTitle>
-        <AlertDescription className="text-blue-700 dark:text-blue-300 space-y-2 mt-2">
-          <p>
-            <strong>Important:</strong> To optimize storage, assessments that have not been <strong>viewed</strong> or <strong>downloaded</strong> for 
-            <strong> 365 days (12 months)</strong> will be automatically deleted from the system.
-          </p>
-          <div className="bg-white/50 dark:bg-blue-900/30 rounded-md p-3 mt-2 text-sm">
-            <p className="font-medium mb-1">How it works:</p>
-            <ul className="list-disc list-inside space-y-1 text-blue-600 dark:text-blue-400">
-              <li>A nightly background job scans all saved assessments</li>
-              <li>Any assessment inactive for over 365 days is flagged for deletion</li>
-              <li>Deleted assessments are permanently removed and don't count toward your 100-paper limit</li>
-              <li>Simply view or download an assessment to reset its inactivity timer</li>
-            </ul>
-          </div>
-          <p className="text-xs text-blue-500 dark:text-blue-500 mt-2">
-            Last activity is tracked based on the most recent View or Download action for each assessment.
-          </p>
-        </AlertDescription>
-      </Alert>
 
       {/* My Quota */}
       <Card>
