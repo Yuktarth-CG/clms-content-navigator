@@ -128,7 +128,7 @@ const FEATURE_CATEGORIES = [{
   id: 'videoQs',
   name: 'Video Qs',
   icon: Video,
-  color: 'hsl(220 70% 50%)'
+  color: 'hsl(var(--chart-6))'
 }];
 
 // Monthly consumption data
@@ -363,7 +363,7 @@ const chartConfig = {
   },
   videoQs: {
     label: 'Video Qs',
-    color: 'hsl(220 70% 50%)'
+    color: 'hsl(var(--chart-6))'
   }
 };
 const AICreditDashboard = () => {
